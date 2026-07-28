@@ -1,26 +1,48 @@
 @import "tailwindcss";
 
+/* Semantic tokens make the visual system easy to rebrand without changing components. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --fr-canvas: #f8fafc;
+  --fr-surface: #ffffff;
+  --fr-muted-surface: #f1f5f9;
+  --fr-ink: #172033;
+  --fr-muted: #5c687d;
+  --fr-border: #dbe2ea;
+  --fr-brand: #155eef;
+  --fr-brand-strong: #004eea;
+  --fr-brand-light: #74a7ff;
+  --fr-brand-soft: #e7efff;
+  --fr-brand-foreground: #ffffff;
+  --fr-shadow: rgb(23 32 51 / 12%);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-canvas: var(--fr-canvas);
+  --color-surface: var(--fr-surface);
+  --color-muted-surface: var(--fr-muted-surface);
+  --color-ink: var(--fr-ink);
+  --color-muted: var(--fr-muted);
+  --color-border: var(--fr-border);
+  --color-brand: var(--fr-brand);
+  --color-brand-strong: var(--fr-brand-strong);
+  --color-brand-light: var(--fr-brand-light);
+  --color-brand-soft: var(--fr-brand-soft);
+  --color-brand-foreground: var(--fr-brand-foreground);
+  --shadow-color: var(--fr-shadow);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+* { border-color: var(--fr-border); }
+
+html { scroll-behavior: smooth; }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--fr-canvas);
+  color: var(--fr-ink);
+}
+
+::selection {
+  background: var(--fr-brand-soft);
+  color: var(--fr-ink);
 }
