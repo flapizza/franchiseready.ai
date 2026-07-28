@@ -1,0 +1,1 @@
+export default function Home(){return <main><h1>FranchiseReady AI</h1></main>}

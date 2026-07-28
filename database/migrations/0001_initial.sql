@@ -1,0 +1,1 @@
+CREATE TABLE users(id uuid primary key,email text);

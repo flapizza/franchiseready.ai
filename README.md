@@ -1,3 +1,2 @@
-# franchiseready.ai
-Franchise lead system
-# franchiseready.ai
+# FranchiseReady AI
+Production foundation.
