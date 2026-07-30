@@ -46,47 +46,75 @@ export class AssessmentRuntime {
       questionIndex: 0,
     };
   }
-public initialize(): void {
-  this.lifecycle = RuntimeLifecycle.Ready;
 
-  // We'll replace these placeholders once the assessment
-  // model is connected to real sections and questions.
-  this.location = {
-    sectionId: "",
-    questionId: "",
-    sectionIndex: 0,
-    questionIndex: 0,
-  };
+  public initialize(): void {
+    const firstSection = this.assessment.sections[0];
 
-  this.updateProgress();
-}
+    if (!firstSection) {
+      throw new Error("Assessment contains no sections.");
+    }
 
-public start(): void {
-  this.lifecycle = RuntimeLifecycle.InProgress;
-}
+    const firstQuestionId = firstSection.questionIds[0];
 
-public complete(): void {
-  this.lifecycle = RuntimeLifecycle.Completed;
-}
+    if (!firstQuestionId) {
+      throw new Error("First section contains no questions.");
+    }
 
-private updateProgress(): void {
-  const answeredQuestions = this.responses.size;
-  const totalQuestions = this.progress.totalQuestions;
+    this.location = {
+      sectionId: firstSection.id,
+      questionId: firstQuestionId,
+      sectionIndex: 0,
+      questionIndex: 0,
+    };
 
-  const completionPercentage =
-    totalQuestions === 0
-      ? 0
-      : Math.round((answeredQuestions / totalQuestions) * 100);
+    this.lifecycle = RuntimeLifecycle.Ready;
 
-  this.progress = {
-    answeredQuestions,
-    totalQuestions,
-    completionPercentage,
-    isComplete:
-      totalQuestions > 0 &&
-      answeredQuestions === totalQuestions,
-  };
-}
+    this.updateProgress();
+  }
+
+  public currentQuestion() {
+    return this.getQuestionById(this.location.questionId);
+  }
+
+  public start(): void {
+    this.lifecycle = RuntimeLifecycle.InProgress;
+  }
+
+  public complete(): void {
+    this.lifecycle = RuntimeLifecycle.Completed;
+  }
+
+  public recordResponse(response: Response): void {
+    this.responses.set(response.assessmentQuestionId, response);
+
+    this.updateProgress();
+  }
+
+  private updateProgress(): void {
+    const answeredQuestions = this.responses.size;
+    const totalQuestions = this.assessment.questions.length;
+
+    const completionPercentage =
+      totalQuestions === 0
+        ? 0
+        : Math.round((answeredQuestions / totalQuestions) * 100);
+
+    this.progress = {
+      answeredQuestions,
+      totalQuestions,
+      completionPercentage,
+      isComplete:
+        totalQuestions > 0 &&
+        answeredQuestions === totalQuestions,
+    };
+  }
+
+  private getQuestionById(questionId: string) {
+    return this.assessment.questions.find(
+      (question) => question.id === questionId,
+    );
+  }
+
   public snapshot(): RuntimeSnapshot {
     return {
       lifecycle: this.lifecycle,
