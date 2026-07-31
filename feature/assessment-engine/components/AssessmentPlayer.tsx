@@ -1,6 +1,8 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+
+import type { Response } from "../types/domain";
 
 import { ProgressBar } from "./ProgressBar";
 import { QuestionCard } from "./QuestionCard";
@@ -12,18 +14,19 @@ type Props = {
   assessmentId: string;
 };
 
-export function AssessmentPlayer({
-  assessmentId,
-}: Props) {
-  const repository = useMemo(
-    () => new SeedAssessmentRepository(),
-    [],
-  );
+export function AssessmentPlayer({ assessmentId }: Props) {
+  const repository = useMemo(() => new SeedAssessmentRepository(), []);
 
-  const { runtime, loading } = useAssessmentRuntime(
-    repository,
-    assessmentId,
-  );
+  const {
+    runtime,
+    loading,
+    answerCurrentQuestion,
+    next,
+    previous,
+  } = useAssessmentRuntime(repository, assessmentId);
+
+  const [selectedValue, setSelectedValue] =
+    useState<Response["value"] | null>(null);
 
   if (loading) {
     return (
@@ -71,11 +74,36 @@ export function AssessmentPlayer({
         total={snapshot.progress.totalQuestions}
       />
 
-      <QuestionCard question={question} />
+      <QuestionCard
+        question={question}
+        selectedValue={selectedValue}
+        onSelect={setSelectedValue}
+      />
 
-      <div className="flex justify-end">
+      <div className="flex justify-between">
         <button
-          disabled
+          type="button"
+          onClick={previous}
+          disabled={!runtime.canGoPrevious()}
+          className="rounded-md border px-6 py-2 disabled:opacity-50"
+        >
+          Previous
+        </button>
+
+        <button
+          type="button"
+          disabled={selectedValue === null}
+          onClick={() => {
+            if (selectedValue === null) {
+              return;
+            }
+
+            answerCurrentQuestion(selectedValue);
+
+            next();
+
+            setSelectedValue(null);
+          }}
           className="rounded-md bg-blue-600 px-6 py-2 font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
         >
           Next

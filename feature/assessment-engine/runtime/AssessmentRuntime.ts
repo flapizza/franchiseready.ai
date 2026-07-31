@@ -72,10 +72,6 @@ export class AssessmentRuntime {
     this.updateProgress();
   }
 
-  public currentQuestion() {
-    return this.getQuestionById(this.location.questionId);
-  }
-
   public start(): void {
     this.lifecycle = RuntimeLifecycle.InProgress;
   }
@@ -84,10 +80,109 @@ export class AssessmentRuntime {
     this.lifecycle = RuntimeLifecycle.Completed;
   }
 
-  public recordResponse(response: Response): void {
-    this.responses.set(response.assessmentQuestionId, response);
+  public currentQuestion() {
+    return this.getQuestionById(this.location.questionId);
+  }
+
+  public currentAnswer(): Response["value"] | null {
+    const response = this.responses.get(this.location.questionId);
+
+    if (!response) {
+      return null;
+    }
+
+    return response.value;
+  }
+
+  public answerCurrentQuestion(value: Response["value"]): void {
+    const question = this.currentQuestion();
+
+    if (!question) {
+      return;
+    }
+
+    const existing = this.responses.get(question.id);
+
+    if (existing) {
+      existing.value = value;
+      existing.answeredAt = new Date().toISOString();
+
+      this.responses.set(question.id, existing);
+    } else {
+      const response: Response = {
+        id: crypto.randomUUID(),
+        assessmentSessionId: this.session.id,
+        assessmentQuestionId: question.id,
+        value,
+        answeredAt: new Date().toISOString(),
+      };
+
+      this.responses.set(question.id, response);
+    }
 
     this.updateProgress();
+  }
+
+  public canGoNext(): boolean {
+    const section =
+      this.assessment.sections[this.location.sectionIndex];
+
+    if (!section) {
+      return false;
+    }
+
+    return (
+      this.location.questionIndex <
+      section.questionIds.length - 1
+    );
+  }
+
+  public canGoPrevious(): boolean {
+    return this.location.questionIndex > 0;
+  }
+
+  public next(): void {
+    if (!this.canGoNext()) {
+      return;
+    }
+
+    const section =
+      this.assessment.sections[this.location.sectionIndex];
+
+    if (!section) {
+      return;
+    }
+
+    const questionIndex =
+      this.location.questionIndex + 1;
+
+    this.location = {
+      ...this.location,
+      questionIndex,
+      questionId: section.questionIds[questionIndex],
+    };
+  }
+
+  public previous(): void {
+    if (!this.canGoPrevious()) {
+      return;
+    }
+
+    const section =
+      this.assessment.sections[this.location.sectionIndex];
+
+    if (!section) {
+      return;
+    }
+
+    const questionIndex =
+      this.location.questionIndex - 1;
+
+    this.location = {
+      ...this.location,
+      questionIndex,
+      questionId: section.questionIds[questionIndex],
+    };
   }
 
   private updateProgress(): void {
@@ -97,7 +192,9 @@ export class AssessmentRuntime {
     const completionPercentage =
       totalQuestions === 0
         ? 0
-        : Math.round((answeredQuestions / totalQuestions) * 100);
+        : Math.round(
+            (answeredQuestions / totalQuestions) * 100,
+          );
 
     this.progress = {
       answeredQuestions,
