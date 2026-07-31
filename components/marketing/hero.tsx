@@ -40,7 +40,10 @@ export function Hero({
   eyebrow = "A clearer path to franchise ownership",
   title = "Discover the Right Franchise Before You Invest.",
   description = "AI-powered franchise readiness assessments, intelligent franchise matching, and expert guidance that help entrepreneurs confidently choose the right franchise.",
-  primaryCta = { label: "Start Your Free Assessment", href: "#assessment" },
+  primaryCta = {
+  label: "Start Your Free Assessment",
+  href: "/assessment/demo",
+},
   secondaryCta = { label: "For Consultants", href: "#consultants" },
 }: HeroProps) {
   return <section className="overflow-hidden bg-canvas py-16 sm:py-20 lg:py-28"><Container><div className="grid items-center gap-14 lg:grid-cols-[.96fr_1.04fr] lg:gap-16"><div className="max-w-2xl"><p className="inline-flex items-center gap-2 rounded-full border border-brand/15 bg-brand-soft px-3 py-1.5 text-xs font-semibold text-brand"><Sparkles aria-hidden="true" className="size-3.5" />{eyebrow}</p><h1 className="mt-6 text-4xl font-semibold tracking-[-0.045em] text-ink sm:text-5xl sm:leading-[1.08] lg:text-6xl">{title}</h1><p className="mt-6 max-w-xl text-base leading-7 text-muted sm:text-lg sm:leading-8">{description}</p><div className="mt-8 flex flex-col gap-3 sm:flex-row"><Link href={primaryCta.href} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-brand px-5 text-sm font-semibold text-brand-foreground shadow-sm transition-colors hover:bg-brand-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-4 focus-visible:ring-offset-canvas">{primaryCta.label}<ArrowRight aria-hidden="true" className="size-4" /></Link><Link href={secondaryCta.href} className="inline-flex min-h-12 items-center justify-center rounded-lg border border-border bg-surface px-5 text-sm font-semibold text-ink transition-colors hover:bg-muted-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-4 focus-visible:ring-offset-canvas">{secondaryCta.label}</Link></div><p className="mt-5 text-xs text-muted">No obligation. Start with a clear view of your readiness.</p></div><DashboardPreview /></div></Container></section>;

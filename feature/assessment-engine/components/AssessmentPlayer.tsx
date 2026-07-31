@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import type { Response } from "../types/domain";
 
@@ -15,7 +16,12 @@ type Props = {
 };
 
 export function AssessmentPlayer({ assessmentId }: Props) {
-  const repository = useMemo(() => new SeedAssessmentRepository(), []);
+  const router = useRouter();
+
+  const repository = useMemo(
+    () => new SeedAssessmentRepository(),
+    [],
+  );
 
   const {
     runtime,
@@ -55,6 +61,27 @@ export function AssessmentPlayer({ assessmentId }: Props) {
     );
   }
 
+  const isLastQuestion =
+    snapshot.progress.answeredQuestions >=
+    snapshot.progress.totalQuestions - 1;
+
+  const handleNext = () => {
+    if (selectedValue === null) {
+      return;
+    }
+
+    answerCurrentQuestion(selectedValue);
+
+    setSelectedValue(null);
+
+    if (isLastQuestion) {
+      router.push(`/assessment/${assessmentId}/results`);
+      return;
+    }
+
+    next();
+  };
+
   return (
     <div className="space-y-8">
       <header>
@@ -93,20 +120,10 @@ export function AssessmentPlayer({ assessmentId }: Props) {
         <button
           type="button"
           disabled={selectedValue === null}
-          onClick={() => {
-            if (selectedValue === null) {
-              return;
-            }
-
-            answerCurrentQuestion(selectedValue);
-
-            next();
-
-            setSelectedValue(null);
-          }}
+          onClick={handleNext}
           className="rounded-md bg-blue-600 px-6 py-2 font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
         >
-          Next
+          {isLastQuestion ? "Finish Assessment" : "Next"}
         </button>
       </div>
     </div>

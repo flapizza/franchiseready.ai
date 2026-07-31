@@ -218,7 +218,7 @@ export class AssessmentRuntime {
       assessment: this.assessment,
       session: this.session,
       location: this.location,
-      responses: this.responses,
+      responses: Array.from(this.responses.values()),
       progress: this.progress,
     };
   }

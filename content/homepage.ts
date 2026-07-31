@@ -5,8 +5,14 @@ export const heroContent = {
   title: "Discover the Right Franchise Before You Invest.",
   description:
     "AI-powered franchise readiness assessments, intelligent franchise matching, and expert guidance that help entrepreneurs confidently choose the right franchise.",
-  primaryCta: { label: "Start Your Free Assessment", href: "#assessment" },
-  secondaryCta: { label: "For Consultants", href: "#consultants" },
+  primaryCta: {
+    label: "Start Your Free Assessment",
+    href: "/assessment/demo",
+  },
+  secondaryCta: {
+    label: "For Consultants",
+    href: "#consultants",
+  },
 };
 
 export const featuresContent = {
@@ -73,6 +79,6 @@ export const ctaContent = {
   title: "Ready to Find Your Ideal Franchise?",
   description:
     "Begin with the insights that make every next step more intentional.",
-  href: "#assessment",
+  href: "/assessment/demo",
   label: "Start Your Free Assessment",
 };
