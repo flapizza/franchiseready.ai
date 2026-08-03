@@ -85,11 +85,25 @@ export type OverallScore = {
   confidence?: number;
 };
 
+export type RecommendationTopic =
+  | "brand"
+  | "financial"
+  | "behavioral"
+  | "timing"
+  | "general";
+
 export type Recommendation = {
   id: string;
+
   category: RecommendationCategory;
+
+  topic: RecommendationTopic;
+
   title: string;
+
   summary: string;
+
   dimensionId?: string;
+
   priority?: number;
 };
