@@ -2,11 +2,16 @@ import { notFound } from "next/navigation";
 
 import { SeedCandidateRepository } from "@/feature/crm/repositories/SeedCandidateRepository";
 
-import { CandidateHeader } from "@/feature/crm/components/CandidateHeader";
-import { MetricCard } from "@/feature/crm/components/MetricCard";
-import { SectionCard } from "@/feature/crm/components/SectionCard";
+import {
+  Card,
+  PageHeader,
+  ReadinessGauge,
+  Stat,
+  TwoColumn,
+  WorkspaceLayout,
+} from "@/feature/ui";
 
-import { NextBestActionPanel } from "@/feature/crm/components/NextBestActionPanel";
+import { AIMeetingCoach } from "@/feature/crm/components/AIMeetingCoach";
 import { IntelligenceProfileCard } from "@/feature/crm/components/IntelligenceProfileCard";
 import { BrandMatchMatrix } from "@/feature/crm/components/BrandMatchMatrix";
 import { DiscoveryGuidePanel } from "@/feature/crm/components/DiscoveryGuidePanel";
@@ -33,64 +38,77 @@ export default async function CandidateWorkspacePage({
   }
 
   return (
-    <main className="mx-auto max-w-7xl space-y-8 p-8">
+    <WorkspaceLayout>
 
-      <CandidateHeader
-        candidate={candidate}
-      />
+      <PageHeader
+  eyebrow="Candidate Intelligence Workspace"
+  title={`${candidate.firstName} ${candidate.lastName}`}
+  description={candidate.intelligence.executiveSummary}
+  actions={
+    <ReadinessGauge
+      score={candidate.intelligence.overallReadiness}
+      size={150}
+    />
+  }
+/>
 
       <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
 
-        <MetricCard
-          title="Overall Readiness"
-          value={candidate.intelligence.overallReadiness.toString()}
-          subtitle="Franchise ownership readiness"
-          trend="up"
-        />
+  <Stat
+    label="Readiness"
+    value={candidate.intelligence.overallReadiness}
+    description="Overall franchise readiness"
+    trend="up"
+  />
 
-        <MetricCard
-          title="Health Score"
-          value={candidate.healthScore.toString()}
-          subtitle="Current opportunity health"
-          trend="up"
-        />
+  <Stat
+    label="Health"
+    value={candidate.healthScore}
+    description="Current opportunity health"
+    trend="up"
+  />
 
-        <MetricCard
-          title="Decision Timeline"
-          value={candidate.intelligence.timing.decisionWindow}
-          subtitle="Expected buying window"
-          trend="neutral"
-        />
+  <Stat
+    label="Timeline"
+    value={candidate.intelligence.timing.decisionWindow}
+    description="Expected buying window"
+  />
 
-        <MetricCard
-          title="Investment"
-          value={candidate.intelligence.financial.investmentRange}
-          subtitle="Estimated qualification"
-          trend="up"
-        />
+  <Stat
+    label="Investment"
+    value={candidate.intelligence.financial.investmentRange}
+    description="Qualified investment range"
+    trend="up"
+  />
 
-      </section>
+</section>
 
       <section className="grid gap-6 xl:grid-cols-2">
 
-        <SectionCard
-          title="Executive Summary"
-          subtitle="AI-generated candidate overview"
+        <Card
+  title="Executive Summary"
+  subtitle="AI-generated candidate overview"
         >
 
           <p className="leading-8 text-slate-700">
             {candidate.intelligence.executiveSummary}
           </p>
 
-        </SectionCard>
+        </Card>
 
-        <NextBestActionPanel
-          title="Schedule Discovery Meeting"
-          description="Candidate demonstrates excellent financial readiness, strong coachability, and high franchise ownership potential. Moving into discovery is the recommended next step."
-          confidence={96}
-          impact={94}
-          dueInDays={2}
-        />
+        <AIMeetingCoach
+  objective="Confirm executive leadership fit and validate ownership timeline."
+  strategy="Lead with ownership vision before discussing brands. Focus on leadership philosophy, desired lifestyle, and long-term business goals."
+  questions={[
+    "What motivated you to explore franchise ownership now?",
+    "Describe the largest team you've managed.",
+    "What role do you hope to play in the business day-to-day?",
+  ]}
+  concern="Leaving a successful executive career."
+  response="Discuss transition planning, proven franchise systems, and how executive experience accelerates business ownership success."
+  nextAction="Schedule Discovery Meeting"
+  confidence={96}
+/>
 
       </section>
 
@@ -196,6 +214,6 @@ export default async function CandidateWorkspacePage({
         ]}
       />
 
-    </main>
+    </WorkspaceLayout>
   );
 }
