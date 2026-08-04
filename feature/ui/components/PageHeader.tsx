@@ -14,31 +14,39 @@ export function PageHeader({
   actions,
 }: Props) {
   return (
-    <header className="flex flex-col gap-6 rounded-3xl bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-600 p-8 text-white lg:flex-row lg:items-center lg:justify-between">
+    <header className="overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 shadow-xl">
 
-      <div>
+      <div className="grid gap-10 p-8 lg:grid-cols-[1fr_320px] lg:items-center">
 
-        {eyebrow && (
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-100">
-            {eyebrow}
+        <div className="max-w-4xl">
+
+          {eyebrow && (
+            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-blue-200">
+              {eyebrow}
+            </p>
+          )}
+
+          <h1 className="mt-3 text-5xl font-bold tracking-tight text-white">
+            {title}
+          </h1>
+
+          <p className="mt-5 max-w-3xl text-lg leading-8 text-slate-300">
+            {description}
           </p>
+
+        </div>
+
+        {actions && (
+          <div className="flex justify-center lg:justify-end">
+
+            <div className="rounded-[32px] border border-white/20 bg-white p-5 shadow-2xl">
+              {actions}
+            </div>
+
+          </div>
         )}
 
-        <h1 className="mt-3 text-5xl font-bold tracking-tight">
-          {title}
-        </h1>
-
-        <p className="mt-4 max-w-3xl text-lg text-blue-100">
-          {description}
-        </p>
-
       </div>
-
-      {actions && (
-        <div>
-          {actions}
-        </div>
-      )}
 
     </header>
   );

@@ -1,4 +1,4 @@
-import { ProgressMetric } from "./ProgressMetric";
+import { Card } from "@/feature/ui";
 
 type Props = {
   leadership: number;
@@ -16,45 +16,92 @@ export function IntelligenceProfileCard({
   financial,
 }: Props) {
   return (
-    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <Card
+      title="Candidate DNA Profile"
+      subtitle="Core competencies identified by the FranchiseReady Intelligence Engine."
+    >
+      <div className="space-y-10">
 
-      <header className="border-b border-slate-100 px-6 py-5">
-
-        <p className="text-xs font-semibold uppercase tracking-widest text-indigo-600">
-          Candidate Intelligence
-        </p>
-
-        <h2 className="mt-2 text-2xl font-bold">
-          Intelligence Profile
-        </h2>
-
-      </header>
-
-      <div className="space-y-6 p-6">
-
-        <ProgressMetric
-          label="Leadership"
-          value={leadership}
+        <DNAAttribute
+          title="Executive Leadership"
+          score={leadership}
+          description="Ability to lead people, make decisions, and build organizations."
         />
 
-        <ProgressMetric
-          label="Sales"
-          value={sales}
+        <DNAAttribute
+          title="Sales & Business Development"
+          score={sales}
+          description="Natural ability to generate revenue and build relationships."
         />
 
-        <ProgressMetric
-          label="Operations"
-          value={operations}
+        <DNAAttribute
+          title="Operational Excellence"
+          score={operations}
+          description="Comfort managing systems, processes, and execution."
         />
 
-        <ProgressMetric
-          label="Coachability"
-          value={coachability}
+        <DNAAttribute
+          title="Coachability"
+          score={coachability}
+          description="Willingness to follow proven systems and receive guidance."
         />
 
-        <ProgressMetric
-          label="Financial Readiness"
-          value={financial}
+        <DNAAttribute
+          title="Financial Capacity"
+          score={financial}
+          description="Overall financial readiness for franchise ownership."
+        />
+
+      </div>
+    </Card>
+  );
+}
+
+type DNAAttributeProps = {
+  title: string;
+  score: number;
+  description: string;
+};
+
+function DNAAttribute({
+  title,
+  score,
+  description,
+}: DNAAttributeProps) {
+  return (
+    <section className="space-y-4">
+
+      <div className="flex items-start justify-between gap-6">
+
+        <div className="flex-1">
+
+          <h3 className="text-lg font-semibold tracking-tight text-slate-900">
+            {title}
+          </h3>
+
+          <p className="mt-2 text-sm leading-6 text-slate-500">
+            {description}
+          </p>
+
+        </div>
+
+        <div className="shrink-0 text-right">
+
+          <div className="text-4xl font-bold tracking-tight text-blue-600">
+            {score}
+          </div>
+
+        </div>
+
+      </div>
+
+      <div className="h-3 overflow-hidden rounded-full bg-slate-200">
+
+        <div
+          className="h-full rounded-full bg-blue-600 transition-all duration-700"
+          style={{
+            width: `${score}%`,
+          }}
         />
 
       </div>

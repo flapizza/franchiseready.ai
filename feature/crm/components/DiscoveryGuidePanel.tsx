@@ -1,3 +1,5 @@
+import { Card } from "@/feature/ui";
+
 type Props = {
   strengths: string[];
   concerns: string[];
@@ -10,88 +12,121 @@ export function DiscoveryGuidePanel({
   questions,
 }: Props) {
   return (
-    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-
-      <header className="border-b border-slate-100 px-6 py-5">
-
-        <p className="text-xs font-semibold uppercase tracking-widest text-blue-600">
-          Discovery Guide
-        </p>
-
-        <h2 className="mt-2 text-2xl font-bold">
-          Conversation Preparation
-        </h2>
-
-      </header>
-
-      <div className="space-y-8 p-6">
+    <Card
+      title="AI Discovery Guide"
+      subtitle="Preparation guidance generated from the FranchiseReady Intelligence Engine."
+    >
+      <div className="space-y-10">
 
         <GuideSection
           title="Candidate Strengths"
+          subtitle="Topics you should reinforce during the meeting."
+          color="emerald"
           icon="✓"
           items={strengths}
-          color="text-green-600"
         />
 
         <GuideSection
-          title="Areas to Validate"
+          title="Discovery Priorities"
+          subtitle="Areas requiring additional validation."
+          color="amber"
           icon="!"
           items={concerns}
-          color="text-amber-600"
         />
 
         <GuideSection
-          title="Recommended Questions"
+          title="Suggested Discovery Questions"
+          subtitle="Questions recommended by the Intelligence Engine."
+          color="blue"
           icon="?"
           items={questions}
-          color="text-blue-600"
         />
 
       </div>
-
-    </section>
+    </Card>
   );
 }
 
 type GuideSectionProps = {
   title: string;
+  subtitle: string;
   items: string[];
   icon: string;
-  color: string;
+  color: "emerald" | "amber" | "blue";
 };
 
 function GuideSection({
   title,
+  subtitle,
   items,
   icon,
   color,
 }: GuideSectionProps) {
+  const styles = {
+    emerald: {
+      badge: "bg-emerald-100 text-emerald-700",
+      border: "border-emerald-200",
+      background: "bg-emerald-50",
+      heading: "text-emerald-700",
+    },
+    amber: {
+      badge: "bg-amber-100 text-amber-700",
+      border: "border-amber-200",
+      background: "bg-amber-50",
+      heading: "text-amber-700",
+    },
+    blue: {
+      badge: "bg-blue-100 text-blue-700",
+      border: "border-blue-200",
+      background: "bg-blue-50",
+      heading: "text-blue-700",
+    },
+  } as const;
+
+  const style = styles[color];
+
   return (
-    <div>
+    <section>
 
-      <h3 className="mb-4 flex items-center gap-3 text-lg font-semibold">
+      <div className="flex items-center gap-4">
 
-        <span className={color}>
+        <div
+          className={`flex h-10 w-10 items-center justify-center rounded-full font-bold ${style.badge}`}
+        >
           {icon}
-        </span>
+        </div>
 
-        {title}
+        <div>
 
-      </h3>
+          <h3
+            className={`text-xl font-semibold ${style.heading}`}
+          >
+            {title}
+          </h3>
 
-      <ul className="space-y-3">
+          <p className="text-sm text-slate-500">
+            {subtitle}
+          </p>
+
+        </div>
+
+      </div>
+
+      <div className="mt-6 space-y-4">
 
         {items.map((item) => (
-          <li
+          <div
             key={item}
-            className="rounded-lg bg-slate-50 p-3 text-slate-700"
+            className={`rounded-2xl border p-5 ${style.border} ${style.background}`}
           >
-            {item}
-          </li>
+            <p className="leading-7 text-slate-700">
+              {item}
+            </p>
+          </div>
         ))}
 
-      </ul>
+      </div>
 
-    </div>
+    </section>
   );
 }

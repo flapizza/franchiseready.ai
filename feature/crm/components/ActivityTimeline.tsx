@@ -1,3 +1,5 @@
+import { Card } from "@/feature/ui";
+
 export type ActivityItem = {
   id: string;
   title: string;
@@ -13,54 +15,68 @@ export function ActivityTimeline({
   activities,
 }: Props) {
   return (
-    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <Card
+      title="Activity Timeline"
+      subtitle="Chronological history generated throughout the candidate journey."
+    >
+      <div className="relative ml-4 border-l-2 border-slate-200">
 
-      <header className="border-b border-slate-100 px-6 py-5">
-
-        <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">
-          Activity
-        </p>
-
-        <h2 className="mt-2 text-2xl font-bold">
-          Candidate Timeline
-        </h2>
-
-      </header>
-
-      <div className="space-y-6 p-6">
-
-        {activities.map((activity) => (
-          <div
+        {activities.map((activity, index) => (
+          <TimelineEvent
             key={activity.id}
-            className="flex gap-4"
-          >
-            <div className="mt-2 h-3 w-3 rounded-full bg-blue-600" />
-
-            <div className="flex-1">
-
-              <div className="flex items-center justify-between">
-
-                <h3 className="font-semibold">
-                  {activity.title}
-                </h3>
-
-                <span className="text-sm text-slate-500">
-                  {activity.date}
-                </span>
-
-              </div>
-
-              <p className="mt-2 text-slate-600">
-                {activity.description}
-              </p>
-
-            </div>
-
-          </div>
+            activity={activity}
+            isLast={index === activities.length - 1}
+          />
         ))}
 
       </div>
+    </Card>
+  );
+}
 
-    </section>
+type TimelineEventProps = {
+  activity: ActivityItem;
+  isLast: boolean;
+};
+
+function TimelineEvent({
+  activity,
+  isLast,
+}: TimelineEventProps) {
+  return (
+    <div
+      className={`relative pl-10 ${
+        isLast ? "" : "pb-10"
+      }`}
+    >
+      <div className="absolute -left-[13px] top-1 flex h-6 w-6 items-center justify-center rounded-full border-4 border-white bg-blue-600 shadow">
+        <div className="h-2 w-2 rounded-full bg-white" />
+      </div>
+
+      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+
+        <div className="flex items-start justify-between gap-4">
+
+          <div>
+
+            <h3 className="text-lg font-semibold text-slate-900">
+              {activity.title}
+            </h3>
+
+            <p className="mt-3 leading-7 text-slate-600">
+              {activity.description}
+            </p>
+
+          </div>
+
+          <div className="shrink-0 rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-600">
+            {activity.date}
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
   );
 }

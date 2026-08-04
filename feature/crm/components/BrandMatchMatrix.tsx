@@ -1,11 +1,16 @@
+import { Card } from "@/feature/ui";
+
 type BrandMatch = {
   id: string;
   name: string;
+
   overallFit: number;
+
   leadership: number;
   sales: number;
   operations: number;
   financial: number;
+
   reasons: string[];
 };
 
@@ -17,32 +22,19 @@ export function BrandMatchMatrix({
   brands,
 }: Props) {
   return (
-    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-
-      <header className="border-b border-slate-100 px-6 py-5">
-
-        <p className="text-xs font-semibold uppercase tracking-widest text-blue-600">
-          Franchise Intelligence
-        </p>
-
-        <h2 className="mt-2 text-2xl font-bold text-slate-900">
-          Recommended Brand Matches
-        </h2>
-
-      </header>
-
-      <div className="divide-y divide-slate-100">
-
+    <Card
+      title="Brand Compatibility"
+      subtitle="AI-ranked franchise opportunities based on the candidate's complete intelligence profile."
+    >
+      <div className="space-y-8">
         {brands.map((brand) => (
           <BrandCard
             key={brand.id}
             brand={brand}
           />
         ))}
-
       </div>
-
-    </section>
+    </Card>
   );
 }
 
@@ -54,17 +46,17 @@ function BrandCard({
   brand,
 }: BrandCardProps) {
   return (
-    <div className="space-y-6 p-6">
+    <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
 
-      <div className="flex items-center justify-between">
+      <div className="flex items-start justify-between">
 
         <div>
 
-          <h3 className="text-xl font-bold">
+          <h3 className="text-2xl font-bold tracking-tight text-slate-900">
             {brand.name}
           </h3>
 
-          <p className="text-sm text-slate-500">
+          <p className="mt-2 text-sm text-slate-500">
             Overall Compatibility
           </p>
 
@@ -72,96 +64,104 @@ function BrandCard({
 
         <div className="text-right">
 
-          <p className="text-4xl font-bold text-blue-600">
+          <div className="text-5xl font-bold text-blue-600">
             {brand.overallFit}%
+          </div>
+
+          <p className="text-sm text-slate-500">
+            AI Match
           </p>
 
         </div>
 
       </div>
 
-      <ScoreBar
-        label="Leadership"
-        value={brand.leadership}
-      />
+      <div className="mt-8 space-y-5">
 
-      <ScoreBar
-        label="Sales"
-        value={brand.sales}
-      />
+        <ScoreBar
+          label="Leadership"
+          score={brand.leadership}
+        />
 
-      <ScoreBar
-        label="Operations"
-        value={brand.operations}
-      />
+        <ScoreBar
+          label="Sales"
+          score={brand.sales}
+        />
 
-      <ScoreBar
-        label="Financial"
-        value={brand.financial}
-      />
+        <ScoreBar
+          label="Operations"
+          score={brand.operations}
+        />
 
-      <div>
-
-        <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">
-          Why this brand fits
-        </p>
-
-        <ul className="space-y-2">
-
-          {brand.reasons.map((reason) => (
-            <li
-              key={reason}
-              className="flex items-start gap-3"
-            >
-              <span className="mt-1 text-green-600">
-                ✓
-              </span>
-
-              <span className="text-slate-700">
-                {reason}
-              </span>
-
-            </li>
-          ))}
-
-        </ul>
+        <ScoreBar
+          label="Financial"
+          score={brand.financial}
+        />
 
       </div>
 
-    </div>
+      <div className="mt-8 rounded-2xl bg-slate-50 p-5">
+
+        <h4 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+          Why This Brand Fits
+        </h4>
+
+        <div className="mt-4 space-y-3">
+
+          {brand.reasons.map((reason) => (
+            <div
+              key={reason}
+              className="flex items-start gap-3"
+            >
+              <span className="mt-1 text-emerald-600">
+                ✓
+              </span>
+
+              <span className="leading-7 text-slate-700">
+                {reason}
+              </span>
+
+            </div>
+          ))}
+
+        </div>
+
+      </div>
+
+    </section>
   );
 }
 
 type ScoreBarProps = {
   label: string;
-  value: number;
+  score: number;
 };
 
 function ScoreBar({
   label,
-  value,
+  score,
 }: ScoreBarProps) {
   return (
     <div>
 
       <div className="mb-2 flex items-center justify-between">
 
-        <span className="text-sm font-medium text-slate-600">
+        <span className="font-medium text-slate-700">
           {label}
         </span>
 
-        <span className="text-sm font-semibold">
-          {value}
+        <span className="font-semibold text-slate-900">
+          {score}%
         </span>
 
       </div>
 
-      <div className="h-2 rounded-full bg-slate-200">
+      <div className="h-3 overflow-hidden rounded-full bg-slate-200">
 
         <div
-          className="h-2 rounded-full bg-blue-600 transition-all"
+          className="h-full rounded-full bg-blue-600 transition-all duration-700"
           style={{
-            width: `${value}%`,
+            width: `${score}%`,
           }}
         />
 
