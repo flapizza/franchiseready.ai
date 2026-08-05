@@ -1,6 +1,11 @@
 import { notFound } from "next/navigation";
 
 import { SeedCandidateRepository } from "@/feature/crm/repositories/SeedCandidateRepository";
+import { ExecutiveRecommendationPanel } from "@/feature/crm/components/ExecutiveRecommendationPanel";
+
+import type {
+  ExecutiveRecommendation,
+} from "@/feature/intelligence/models/ExecutiveRecommendation";
 
 import {
   TwoColumn,
@@ -83,6 +88,82 @@ Seeking validation before making a final decision.`,
   const discovery =
     runtime.evaluate(context);
 
+    const recommendation: ExecutiveRecommendation = {
+  status: "ready",
+
+  confidence: 96,
+
+  summary:
+    "Candidate demonstrates exceptional executive leadership, strong financial readiness, and a genuine willingness to follow proven systems. Based on the Discovery conversation, the AI believes this candidate is well positioned to move into Brand Matching. The only remaining concern is validating family alignment before introducing specific franchise opportunities.",
+
+  recommendation:
+    "Advance the candidate to Brand Matching and schedule a Top 3 Brand Presentation within the next seven days.",
+
+  evidence: [
+    {
+      id: "1",
+      title: "Executive Leadership",
+
+      description:
+        "Candidate has extensive leadership experience leading teams and managing organizational growth.",
+
+      score: 96,
+    },
+    {
+      id: "2",
+      title: "Financial Capacity",
+
+      description:
+        "Financial readiness indicates the candidate is capable of pursuing franchise ownership.",
+
+      score: 91,
+    },
+    {
+      id: "3",
+      title: "Buying Motivation",
+
+      description:
+        "Candidate repeatedly asked about implementation timeline and ownership process.",
+
+      score: 94,
+    },
+    {
+      id: "4",
+      title: "Systems Orientation",
+
+      description:
+        "Responses indicate a willingness to follow proven business systems and coaching.",
+
+      score: 93,
+    },
+  ],
+
+  risks: [
+    {
+      id: "1",
+
+      title: "Family Alignment",
+
+      description:
+        "Confirm spouse or family support before moving into validation and award discussions.",
+
+      severity: "medium",
+    },
+    {
+      id: "2",
+
+      title: "Corporate Transition",
+
+      description:
+        "Continue discussing the emotional transition from corporate employment to business ownership.",
+
+      severity: "low",
+    },
+  ],
+
+  nextActions: [],
+};
+
   return (
     <WorkspaceLayout>
 
@@ -164,88 +245,11 @@ Seeking validation before making a final decision.`,
       />
 
       <MeetingActionsBar />
-            <section className="rounded-3xl border border-slate-200 bg-white shadow-sm">
-
-        <div className="border-b border-slate-100 px-8 py-6">
-
-          <p className="text-xs font-semibold uppercase tracking-[0.20em] text-blue-600">
-            AI Session Summary
-          </p>
-
-          <h2 className="mt-3 text-3xl font-bold tracking-tight text-slate-900">
-            Discovery Progress
-          </h2>
-
-        </div>
-
-        <div className="grid gap-8 p-8 xl:grid-cols-3">
-
-          <SummaryCard
-            title="Buying Signals"
-            items={
-              discovery.meetingSummary.buyingSignals
-            }
-          />
-
-          <SummaryCard
-            title="Remaining Concerns"
-            items={
-              discovery.meetingSummary.concerns
-            }
-          />
-
-          <SummaryCard
-            title="AI Recommendation"
-            items={[
-              discovery.meetingSummary
-                .consultantRecommendation,
-              discovery.meetingSummary
-                .recommendedNextStep,
-            ]}
-          />
-
-        </div>
-
-      </section>
+            <ExecutiveRecommendationPanel
+  recommendation={recommendation}
+/>
 
     </WorkspaceLayout>
   );
 }
 
-type SummaryCardProps = {
-  title: string;
-  items: string[];
-};
-
-function SummaryCard({
-  title,
-  items,
-}: SummaryCardProps) {
-  return (
-    <section className="rounded-2xl border border-slate-200 bg-slate-50 p-6">
-
-      <h3 className="text-lg font-semibold tracking-tight text-slate-900">
-        {title}
-      </h3>
-
-      <div className="mt-5 space-y-4">
-
-        {items.map((item) => (
-          <div
-            key={item}
-            className="flex items-start gap-3"
-          >
-            <div className="mt-2 h-2.5 w-2.5 shrink-0 rounded-full bg-blue-600" />
-
-            <p className="leading-7 text-slate-700">
-              {item}
-            </p>
-
-          </div>
-        ))}
-
-      </div>
-
-    </section>
-  );
-}
