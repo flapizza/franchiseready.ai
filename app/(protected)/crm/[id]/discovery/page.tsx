@@ -181,73 +181,71 @@ Seeking validation before making a final decision.`,
             .financingLikelihood
         }
       />
-            <TwoColumn
-        left={
-          <SessionObjectivesCard
-            objectives={[
-              {
-                id: "1",
-                title:
-                  "Validate ownership motivation",
-                completed: true,
-                priority: "high",
-              },
-              {
-                id: "2",
-                title:
-                  "Confirm family alignment",
-                completed: false,
-                priority: "high",
-              },
-              {
-                id: "3",
-                title:
-                  "Discuss investment expectations",
-                completed: false,
-                priority: "medium",
-              },
-              {
-                id: "4",
-                title:
-                  "Establish buying timeline",
-                completed: false,
-                priority: "medium",
-              },
-            ]}
-          />
-        }
-        right={
-          <AIInsightsPanel
-            insights={discovery.insights}
-          />
-        }
-      />
-
-      <TwoColumn
-        left={
-          <LiveNotesPanel
-            notes={context.notes}
-          />
-        }
-        right={
-          <SuggestedQuestionCard
-            question={
-              discovery.suggestedQuestion.question
-            }
-            reason={
-              discovery.suggestedQuestion.reason
-            }
-            confidence={
-              discovery.suggestedQuestion.confidence
-            }
-          />
-        }
-      />
-
-      <MeetingActionsBar />
-            <ExecutiveRecommendationPanel
+      <ExecutiveRecommendationPanel
   recommendation={recommendation}
 />
+            <TwoColumn
+  left={
+    <LiveNotesPanel
+      notes={context.notes}
+    />
+  }
+  right={
+    <AIInsightsPanel
+      insights={discovery.insights}
+    />
+  }
+/>
+       
+
+      <TwoColumn
+  left={
+    <SuggestedQuestionCard
+      question={
+        discovery.suggestedQuestion.question
+      }
+      reason={
+        discovery.suggestedQuestion.reason
+      }
+      confidence={
+        discovery.suggestedQuestion.confidence
+      }
+    />
+  }
+  right={
+    <SessionObjectivesCard
+      objectives={[
+        {
+          id: "1",
+          title: "Validate ownership motivation",
+          completed: true,
+          priority: "high",
+        },
+        {
+          id: "2",
+          title: "Confirm family alignment",
+          completed: false,
+          priority: "high",
+        },
+        {
+          id: "3",
+          title: "Discuss investment expectations",
+          completed: false,
+          priority: "medium",
+        },
+        {
+          id: "4",
+          title: "Establish buying timeline",
+          completed: false,
+          priority: "medium",
+        },
+      ]}
+    />
+  }
+/>
+
+      <MeetingActionsBar />
+  
 
     </WorkspaceLayout>
   );

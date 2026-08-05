@@ -1,8 +1,6 @@
-import type { ReactNode } from "react";
-
 type Props = {
-  left: ReactNode;
-  right: ReactNode;
+  left: React.ReactNode;
+  right: React.ReactNode;
 };
 
 export function TwoColumn({
@@ -10,13 +8,13 @@ export function TwoColumn({
   right,
 }: Props) {
   return (
-    <section className="grid gap-6 xl:grid-cols-2">
+    <section className="grid grid-cols-12 gap-8">
 
-      <div>
+      <div className="col-span-12 xl:col-span-7">
         {left}
       </div>
 
-      <div>
+      <div className="col-span-12 xl:col-span-5">
         {right}
       </div>
 
