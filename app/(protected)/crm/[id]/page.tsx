@@ -4,11 +4,11 @@ import { SeedCandidateRepository } from "@/feature/crm/repositories/SeedCandidat
 
 import {
   PageHeader,
-  Stat,
   TwoColumn,
   WorkspaceLayout,
 } from "@/feature/ui";
 
+import { KPIRibbon } from "@/feature/ui/components/KPIRibbon";
 import { ReadinessGauge } from "@/feature/ui/components/ReadinessGauge";
 
 import { ExecutiveIntelligencePanel } from "@/feature/crm/components/ExecutiveIntelligencePanel";
@@ -59,45 +59,30 @@ export default async function CandidateWorkspacePage({
   }
 />
 
-      <section className="grid gap-4 lg:grid-cols-4">
-
-        <Stat
-          label="Readiness"
-          value={
-            candidate.intelligence
-              .overallReadiness
-          }
-          description="Overall franchise readiness"
-          trend="up"
-        />
-
-        <Stat
-          label="Health"
-          value={candidate.healthScore}
-          description="Current opportunity health"
-          trend="up"
-        />
-
-        <Stat
-          label="Timeline"
-          value={
-            candidate.intelligence.timing
-              .decisionWindow
-          }
-          description="Expected buying window"
-        />
-
-        <Stat
-          label="Investment"
-          value={
-            candidate.intelligence.financial
-              .investmentRange
-          }
-          description="Qualified investment range"
-          trend="up"
-        />
-
-      </section>
+      <KPIRibbon
+  items={[
+    {
+      label: "Readiness",
+      value: candidate.intelligence.overallReadiness,
+      description: "Overall franchise readiness",
+    },
+    {
+      label: "Health",
+      value: candidate.healthScore,
+      description: "Opportunity health",
+    },
+    {
+      label: "Decision Window",
+      value: candidate.intelligence.timing.decisionWindow,
+      description: "Expected buying timeline",
+    },
+    {
+      label: "Investment",
+      value: candidate.intelligence.financial.investmentRange,
+      description: "Qualified investment",
+    },
+  ]}
+/>
 
       <ExecutiveIntelligencePanel
         summary={
