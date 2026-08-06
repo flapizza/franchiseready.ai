@@ -9,7 +9,7 @@ type WorkspaceTab =
 
 type Props = {
   active: WorkspaceTab;
-  onChange: (tab: WorkspaceTab) => void;
+  onChangeAction: (tab: WorkspaceTab) => void;
 };
 
 const tabs: {
@@ -40,18 +40,16 @@ const tabs: {
 
 export function CandidateWorkspaceTabs({
   active,
-  onChange,
+  onChangeAction,
 }: Props) {
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-2 shadow-sm">
-
       <div className="flex flex-wrap gap-2">
-
         {tabs.map((tab) => (
           <button
             key={tab.id}
             type="button"
-            onClick={() => onChange(tab.id)}
+            onClick={() => onChangeAction(tab.id)}
             className={
               active === tab.id
                 ? "rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white"
@@ -61,9 +59,7 @@ export function CandidateWorkspaceTabs({
             {tab.label}
           </button>
         ))}
-
       </div>
-
     </div>
   );
 }

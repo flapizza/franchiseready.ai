@@ -95,9 +95,6 @@ export default async function CandidateWorkspacePage({
   recommendation="AI recommends proceeding into Discovery. Leadership, financial readiness, and coachability indicate a high probability of successful franchise ownership."
   estimatedDuration="35 Minutes"
   preparedAt="Just Now"
-  onStart={() => {
-    window.location.href = `/crm/${candidate.id}/discovery`;
-  }}
 />
       
       <ExecutiveIntelligencePanel

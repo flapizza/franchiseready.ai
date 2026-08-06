@@ -1,5 +1,8 @@
 import { notFound } from "next/navigation";
 
+import { DiscoveryCopilot } from "@/feature/crm/components/DiscoveryCopilot";
+import { DiscoveryCopilotEngine } from "@/feature/discovery/runtime/DiscoveryCopilotEngine";
+
 import { SeedCandidateRepository } from "@/feature/crm/repositories/SeedCandidateRepository";
 import { ExecutiveRecommendationPanel } from "@/feature/crm/components/ExecutiveRecommendationPanel";
 
@@ -90,7 +93,7 @@ Seeking validation before making a final decision.`,
   const runtime =
     new DiscoveryRuntime();
 
-  const discovery =
+  const workspace =
     runtime.evaluate(context);
 
     const recommendation: ExecutiveRecommendation = {
@@ -173,24 +176,16 @@ Seeking validation before making a final decision.`,
     <WorkspaceLayout>
 
       <DiscoveryHeader
-        candidateName={`${candidate.firstName} ${candidate.lastName}`}
-        startedAt="11:02 AM"
-        duration="08:14"
-        score={
-          candidate.intelligence
-            .overallReadiness
-        }
-        confidence={
-          candidate.intelligence
-            .financial
-            .financingLikelihood
-        }
-      />
+  candidateName={`${candidate.firstName} ${candidate.lastName}`}
+  startedAt="11:02 AM"
+  duration="08:14"
+  intelligence={workspace.intelligence}
+/>
       <ExecutiveBrief
   recommendation={recommendation}
 />
             <AIDiscoveryTimeline
-  events={discovery.liveInsights.map((insight) => ({
+  events={workspace.liveInsights.map((insight) => ({
     id: insight.id,
     time: insight.timestamp,
     title: insight.title,
@@ -205,9 +200,9 @@ Seeking validation before making a final decision.`,
     />
   }
   right={
-    <AIInsightsPanel
-      insights={discovery.insights}
-    />
+   <DiscoveryCopilot
+  copilot={workspace.copilot}
+/>
   }
 />
        
@@ -216,13 +211,13 @@ Seeking validation before making a final decision.`,
   left={
     <SuggestedQuestionCard
       question={
-        discovery.suggestedQuestion.question
+        workspace.suggestedQuestion.question
       }
       reason={
-        discovery.suggestedQuestion.reason
+        workspace.suggestedQuestion.reason
       }
       confidence={
-        discovery.suggestedQuestion.confidence
+        workspace.suggestedQuestion.confidence
       }
     />
   }

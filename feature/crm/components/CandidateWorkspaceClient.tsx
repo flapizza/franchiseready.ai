@@ -31,9 +31,9 @@ export function CandidateWorkspaceClient({
   return (
     <div className="space-y-8">
       <CandidateWorkspaceTabs
-        active={tab}
-        onChange={setTab}
-      />
+  active={tab}
+  onChangeAction={setTab}
+/>
 
       {tab === "overview" && overview}
 

@@ -1,11 +1,11 @@
+import type { CandidateIntelligenceState } from "@/feature/intelligence/runtime/CandidateIntelligenceEngine";
+
 type Props = {
-  score: number;
-  confidence: number;
+  intelligence: CandidateIntelligenceState;
 };
 
 export function CandidateIntelligencePanel({
-  score,
-  confidence,
+  intelligence,
 }: Props) {
   return (
     <section className="rounded-3xl bg-white/10 p-7 backdrop-blur">
@@ -18,38 +18,40 @@ export function CandidateIntelligencePanel({
 
         <Metric
           label="Overall Readiness"
-          value={`${score}`}
+          value={`${intelligence.readiness}`}
         />
 
         <Metric
           label="AI Confidence"
-          value={`${confidence}%`}
+          value={`${intelligence.confidence}%`}
         />
 
         <Metric
-          label="Award Probability"
-          value="91%"
+          label="Buying Signals"
+          value={`${intelligence.buyingSignals.length}`}
         />
 
         <Metric
-          label="Net Worth"
-          value="$2.3M"
+          label="Potential Risks"
+          value={`${intelligence.risks.length}`}
         />
 
         <Metric
-          label="Liquid Capital"
-          value="$650,000"
+          label="Executive Summary"
+          value="AI Generated"
         />
 
-        <Metric
-          label="Investment Range"
-          value="$500K – $1M"
-        />
+      </div>
 
-        <Metric
-          label="Decision Window"
-          value="3–6 Months"
-        />
+      <div className="mt-8 rounded-xl bg-white/5 p-4">
+
+        <h3 className="text-sm font-semibold text-white">
+          Executive Summary
+        </h3>
+
+        <p className="mt-2 text-sm leading-6 text-blue-100">
+          {intelligence.executiveSummary}
+        </p>
 
       </div>
 
@@ -73,7 +75,7 @@ function Metric({
         {label}
       </span>
 
-      <span className="text-xl font-semibold tabular-nums text-white whitespace-nowrap">
+      <span className="text-xl font-semibold whitespace-nowrap tabular-nums text-white">
         {value}
       </span>
 

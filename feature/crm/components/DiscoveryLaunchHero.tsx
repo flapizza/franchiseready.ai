@@ -7,7 +7,6 @@ type Props = {
   recommendation: string;
   estimatedDuration: string;
   preparedAt: string;
-  onStart?: () => void;
 };
 
 export function DiscoveryLaunchHero({
@@ -17,7 +16,6 @@ export function DiscoveryLaunchHero({
   recommendation,
   estimatedDuration,
   preparedAt,
-  onStart,
 }: Props) {
   return (
     <Card>
@@ -69,7 +67,7 @@ export function DiscoveryLaunchHero({
 
         <div className="mt-10 flex flex-wrap items-center gap-4">
 
-          <Button onClick={onStart}>
+          <Button>
   Start Discovery Meeting
 </Button>
 
