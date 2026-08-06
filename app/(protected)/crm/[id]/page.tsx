@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 
 import { SeedCandidateRepository } from "@/feature/crm/repositories/SeedCandidateRepository";
 
+import { DiscoveryLaunchHero } from "@/feature/crm/components/DiscoveryLaunchHero";
+
 import {
   PageHeader,
   TwoColumn,
@@ -84,6 +86,20 @@ export default async function CandidateWorkspacePage({
   ]}
 />
 
+      <DiscoveryLaunchHero
+  candidateName={`${candidate.firstName} ${candidate.lastName}`}
+  readiness={candidate.intelligence.overallReadiness}
+  confidence={
+    candidate.intelligence.financial.financingLikelihood
+  }
+  recommendation="AI recommends proceeding into Discovery. Leadership, financial readiness, and coachability indicate a high probability of successful franchise ownership."
+  estimatedDuration="35 Minutes"
+  preparedAt="Just Now"
+  onStart={() => {
+    window.location.href = `/crm/${candidate.id}/discovery`;
+  }}
+/>
+      
       <ExecutiveIntelligencePanel
         summary={
           candidate.intelligence

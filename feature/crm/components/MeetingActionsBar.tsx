@@ -83,9 +83,7 @@ function ActionButton({
       </p>
 
       <div className="mt-5">
-        <Button>
-  Open
-</Button>
+        
       </div>
 
     </button>

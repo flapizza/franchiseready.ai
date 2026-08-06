@@ -1,15 +1,17 @@
-import type { CandidateRecord } from "@/feature/crm/models/CandidateRecord";
-
 import type { AIInsight } from "../models/AIInsight";
 import type { DiscoveryContext } from "../models/DiscoveryContext";
 import type { DiscoveryQuestion } from "../models/DiscoveryQuestion";
 import type { MeetingSummary } from "../models/MeetingSummary";
 import type { NextBestAction } from "../models/NextBestAction";
 
+import type { LiveInsight } from "@/feature/intelligence/models/LiveInsight";
+
 import { InsightEngine } from "./InsightEngine";
 import { QuestionEngine } from "./QuestionEngine";
 import { SummaryEngine } from "./SummaryEngine";
 import { ActionEngine } from "./ActionEngine";
+
+import { LiveInsightEngine } from "@/feature/intelligence/runtime/LiveInsightEngine";
 
 export interface DiscoveryState {
   insights: AIInsight[];
@@ -19,9 +21,14 @@ export interface DiscoveryState {
   meetingSummary: MeetingSummary;
 
   nextActions: NextBestAction[];
+
+  liveInsights: LiveInsight[];
 }
 
 export class DiscoveryRuntime {
+  private readonly liveInsightEngine =
+    new LiveInsightEngine();
+
   constructor(
     private readonly insightEngine = new InsightEngine(),
     private readonly questionEngine = new QuestionEngine(),
@@ -53,11 +60,17 @@ export class DiscoveryRuntime {
         insights,
       );
 
+    const liveInsights =
+      this.liveInsightEngine.evaluate(
+        context,
+      );
+
     return {
       insights,
       suggestedQuestion,
       meetingSummary,
       nextActions,
+      liveInsights,
     };
   }
 }

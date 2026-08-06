@@ -7,26 +7,32 @@ type Props = {
 
 const navigation = [
   {
+    id: "dashboard",
     label: "Dashboard",
     href: "/crm",
   },
   {
+    id: "candidates",
     label: "Candidates",
     href: "/crm",
   },
   {
+    id: "pipeline",
     label: "Pipeline",
     href: "/crm/pipeline",
   },
   {
+    id: "tasks",
     label: "Tasks",
     href: "/crm/tasks",
   },
   {
+    id: "brands",
     label: "Brands",
     href: "/crm/brands",
   },
   {
+    id: "reports",
     label: "Reports",
     href: "/crm/reports",
   },
@@ -52,7 +58,7 @@ export default function CrmLayout({
           <nav className="p-4">
             <ul className="space-y-2">
               {navigation.map((item) => (
-                <li key={item.href}>
+                <li key={item.id}>
                   <Link
                     href={item.href}
                     className="block rounded-lg px-4 py-3 text-sm font-medium text-gray-700 transition hover:bg-blue-50 hover:text-blue-700"
@@ -65,9 +71,9 @@ export default function CrmLayout({
           </nav>
         </aside>
 
-        <section className="flex-1">
+        <main className="flex-1">
           {children}
-        </section>
+        </main>
       </div>
     </div>
   );

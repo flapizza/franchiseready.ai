@@ -8,10 +8,15 @@ import type {
 } from "@/feature/intelligence/models/ExecutiveRecommendation";
 
 import {
+  AIDiscoveryTimeline,
+} from "@/feature/crm/components/AIDiscoveryTimeline";
+
+import {
   TwoColumn,
   WorkspaceLayout,
 } from "@/feature/ui";
 
+import { ExecutiveBrief } from "@/feature/crm/components/ExecutiveBrief";
 import { DiscoveryHeader } from "@/feature/crm/components/DiscoveryHeader";
 import { SessionObjectivesCard } from "@/feature/crm/components/SessionObjectivesCard";
 import { AIInsightsPanel } from "@/feature/crm/components/AIInsightsPanel";
@@ -181,8 +186,17 @@ Seeking validation before making a final decision.`,
             .financingLikelihood
         }
       />
-      <ExecutiveRecommendationPanel
+      <ExecutiveBrief
   recommendation={recommendation}
+/>
+            <AIDiscoveryTimeline
+  events={discovery.liveInsights.map((insight) => ({
+    id: insight.id,
+    time: insight.timestamp,
+    title: insight.title,
+    description: insight.description,
+    type: insight.severity,
+  }))}
 />
             <TwoColumn
   left={
