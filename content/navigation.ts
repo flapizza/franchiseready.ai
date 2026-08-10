@@ -1,7 +1,18 @@
 export const primaryNavigation = [
-  { label: "Candidates", href: "#candidates" },
-  { label: "Consultants", href: "#consultants" },
-  { label: "Franchisors", href: "#franchisors" },
-  { label: "Resources", href: "#resources" },
-  { label: "About", href: "#about" },
+  {
+    label: "Platform",
+    href: "#platform",
+  },
+  {
+    label: "Workflow",
+    href: "#workflow",
+  },
+  {
+    label: "Features",
+    href: "#features",
+  },
+  {
+    label: "Company",
+    href: "#company",
+  },
 ];

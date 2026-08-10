@@ -2,17 +2,43 @@ export const footerNavigation = [
   {
     title: "Platform",
     links: [
-      { label: "For Candidates", href: "#candidates" },
-      { label: "For Consultants", href: "#consultants" },
-      { label: "For Franchisors", href: "#franchisors" },
+      {
+        label: "Mission Control",
+        href: "#platform",
+      },
+      {
+        label: "Discovery Copilot",
+        href: "#features",
+      },
+      {
+        label: "Candidate 360",
+        href: "#features",
+      },
+      {
+        label: "Brand Strategy",
+        href: "#features",
+      },
+      {
+        label: "Referral Packages",
+        href: "#features",
+      },
     ],
   },
   {
     title: "Company",
     links: [
-      { label: "About", href: "#about" },
-      { label: "Resources", href: "#resources" },
-      { label: "Contact", href: "mailto:hello@franchiseready.ai" },
+      {
+        label: "About",
+        href: "#company",
+      },
+      {
+        label: "Resources",
+        href: "#resources",
+      },
+      {
+        label: "Contact",
+        href: "mailto:hello@franchiseready.ai",
+      },
     ],
   },
 ];

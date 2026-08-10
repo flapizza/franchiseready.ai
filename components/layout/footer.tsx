@@ -1,72 +1,121 @@
 import Link from "next/link";
+
 import { Container } from "@/components/ui/container";
-import type { NavigationItem } from "@/components/layout/navbar";
+
+type FooterLink = {
+  label: string;
+  href: string;
+};
 
 type FooterGroup = {
   title: string;
-  links: NavigationItem[];
+  links: FooterLink[];
 };
 
 type FooterProps = {
-  brand?: string;
-  groups?: FooterGroup[];
+  groups: FooterGroup[];
 };
 
-const defaultGroups: FooterGroup[] = [
-  {
-    title: "Platform",
-    links: [
-      { label: "For Candidates", href: "#candidates" },
-      { label: "For Consultants", href: "#consultants" },
-      { label: "For Franchisors", href: "#franchisors" },
-    ],
-  },
-  {
-    title: "Company",
-    links: [
-      { label: "About", href: "#about" },
-      { label: "Resources", href: "#resources" },
-      { label: "Contact", href: "mailto:hello@franchiseready.ai" },
-    ],
-  },
-];
-
-export function Footer({ brand = "FranchiseReady AI", groups = defaultGroups }: FooterProps) {
+export function Footer({
+  groups,
+}: FooterProps) {
   return (
-    <footer className="border-t border-border bg-ink text-white">
-      <Container className="py-12 sm:py-16">
-        <div className="grid gap-10 sm:grid-cols-[1.4fr_1fr_1fr]">
-          <div className="max-w-xs">
-            <Link href="/" className="inline-flex items-center gap-2.5 text-base font-semibold tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">
-              <span className="grid size-8 place-items-center rounded-lg bg-brand text-sm font-bold text-brand-foreground">F</span>
-              {brand}
-            </Link>
-            <p className="mt-4 text-sm leading-6 text-white/65">
-              The intelligent starting point for every franchise journey.
+    <footer
+      id="company"
+      className="border-t border-border bg-slate-950 text-white"
+    >
+      <Container className="py-16">
+
+        <div className="grid gap-12 lg:grid-cols-[1.6fr_1fr_1fr]">
+
+          <div>
+
+            <div className="flex items-center gap-3">
+
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand text-lg font-bold text-brand-foreground">
+                F
+              </div>
+
+              <div>
+
+                <h3 className="text-xl font-bold">
+                  FranchiseReady AI
+                </h3>
+
+                <p className="text-sm text-slate-400">
+                  AI Operating System for Franchise Consultants
+                </p>
+
+              </div>
+
+            </div>
+
+            <p className="mt-8 max-w-md leading-8 text-slate-400">
+              FranchiseReady AI helps professional franchise consultants
+              understand candidates faster, conduct better Discovery meetings,
+              generate transparent brand recommendations, and deliver stronger
+              candidates to franchisors.
             </p>
+
+            <p className="mt-8 text-sm text-slate-500">
+              Built exclusively for franchise consultants.
+            </p>
+
           </div>
+
           {groups.map((group) => (
             <div key={group.title}>
-              <h2 className="text-sm font-semibold text-white">{group.title}</h2>
-              <ul className="mt-4 space-y-3">
+
+              <h4 className="text-lg font-semibold">
+                {group.title}
+              </h4>
+
+              <ul className="mt-6 space-y-4">
+
                 {group.links.map((link) => (
-                  <li key={link.href}>
-                    <Link href={link.href} className="text-sm text-white/65 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">
+                  <li key={link.label}>
+                    <Link
+                      href={link.href}
+                      className="text-slate-400 transition-colors hover:text-white"
+                    >
                       {link.label}
                     </Link>
                   </li>
                 ))}
+
               </ul>
+
             </div>
           ))}
+
         </div>
-        <div className="mt-12 flex flex-col gap-3 border-t border-white/15 pt-6 text-xs text-white/55 sm:flex-row sm:items-center sm:justify-between">
-          <p>© {new Date().getFullYear()} {brand}. All rights reserved.</p>
-          <div className="flex gap-5">
-            <Link href="#privacy" className="hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">Privacy</Link>
-            <Link href="#terms" className="hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">Terms</Link>
+
+        <div className="mt-14 flex flex-col items-center justify-between gap-4 border-t border-slate-800 pt-8 text-sm text-slate-500 md:flex-row">
+
+          <p>
+            © 2026 FranchiseReady AI. All rights reserved.
+          </p>
+
+          <div className="flex items-center gap-6">
+
+            <Link
+              href="/privacy"
+              className="transition-colors hover:text-white"
+            >
+              Privacy
+            </Link>
+
+            <Link
+              href="/terms"
+              className="transition-colors hover:text-white"
+            >
+              Terms
+            </Link>
+
           </div>
+
         </div>
+
       </Container>
     </footer>
   );

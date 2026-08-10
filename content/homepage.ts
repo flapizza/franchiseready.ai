@@ -1,84 +1,136 @@
-import { BrainCircuit, Handshake, Radar, TrendingUp } from "lucide-react";
+import {
+  BrainCircuit,
+  Briefcase,
+  LayoutDashboard,
+  Network,
+  Presentation,
+  Users,
+} from "lucide-react";
 
 export const heroContent = {
-  eyebrow: "A clearer path to franchise ownership",
-  title: "Discover the Right Franchise Before You Invest.",
+  eyebrow: "Built Exclusively for Franchise Consultants",
+
+  title: "The AI Operating System for Franchise Consultants.",
+
   description:
-    "AI-powered franchise readiness assessments, intelligent franchise matching, and expert guidance that help entrepreneurs confidently choose the right franchise.",
+    "FranchiseReady AI helps consultants prepare for Discovery meetings, understand candidates faster, generate transparent brand recommendations, and deliver higher-quality candidates—all from one intelligent platform.",
+
   primaryCta: {
-    label: "Start Your Free Assessment",
-    href: "/assessment/demo",
+    label: "See the Platform",
+    href: "#platform",
   },
+
   secondaryCta: {
-    label: "For Consultants",
-    href: "#consultants",
+    label: "Request a Demo",
+    href: "#demo",
   },
 };
 
 export const featuresContent = {
-  eyebrow: "Intelligence for every decision",
-  title: "Move forward with more certainty.",
+  eyebrow: "Everything You Need. One Platform.",
+
+  title: "Purpose-built for modern franchise consulting.",
+
   description:
-    "A connected platform designed to make franchise discovery more focused, personal, and informed.",
+    "Every stage of the franchise development process is connected through one intelligent platform designed specifically for professional franchise consultants.",
+
   items: [
     {
-      title: "AI Readiness™",
+      title: "Mission Control",
+
       description:
-        "Measure your franchise ownership readiness with a clearer, more complete profile.",
+        "Start every day knowing which candidates require your attention, where every opportunity stands, and what AI recommends next.",
+
+      icon: LayoutDashboard,
+    },
+
+    {
+      title: "Discovery Copilot",
+
+      description:
+        "Receive real-time guidance during Discovery meetings including buying signals, suggested questions, risks, and AI insights.",
+
+      icon: Presentation,
+    },
+
+    {
+      title: "Candidate 360",
+
+      description:
+        "Review every candidate through a single executive-level intelligence dashboard built from assessments and Discovery conversations.",
+
+      icon: Users,
+    },
+
+    {
+      title: "AI Brand Strategy",
+
+      description:
+        "Generate transparent, evidence-backed franchise recommendations that explain exactly why each brand fits the candidate.",
+
       icon: BrainCircuit,
     },
+
     {
-      title: "Smart Matching™",
+      title: "Candidate Intelligence Graph",
+
       description:
-        "Find franchise brands that align with your financial, lifestyle, and leadership goals.",
-      icon: Radar,
+        "Every assessment, meeting, and recommendation contributes to a living intelligence model that grows throughout the candidate journey.",
+
+      icon: Network,
     },
+
     {
-      title: "Consultant Network™",
+      title: "Referral Packages",
+
       description:
-        "Connect with experienced franchise consultants when expert context matters most.",
-      icon: Handshake,
-    },
-    {
-      title: "Predictive Insights™",
-      description:
-        "Understand strengths, risks, and opportunities before making a significant investment.",
-      icon: TrendingUp,
+        "Automatically create professional candidate summaries for franchisors with supporting evidence and executive insights.",
+
+      icon: Briefcase,
     },
   ],
 };
 
 export const howItWorksContent = {
-  eyebrow: "A guided experience",
-  title: "From first question to next step.",
+  eyebrow: "One Platform. Every Stage.",
+
+  title: "The complete franchise consulting workflow.",
+
   steps: [
     {
-      title: "Assess",
+      title: "Candidate Intelligence Assessment",
+
       description:
-        "Share the goals, experience, and priorities that shape your ideal opportunity.",
+        "Candidates complete a consultant-branded assessment that captures financial readiness, leadership experience, business goals, and ownership motivations.",
     },
+
     {
-      title: "Analyze",
+      title: "Consultant Briefing",
+
       description:
-        "See a thoughtful readiness profile that reveals what matters most.",
+        "Before Discovery, AI prepares the consultant with meeting objectives, buying signals, discussion priorities, and potential risks.",
     },
+
     {
-      title: "Match",
+      title: "AI Discovery Copilot",
+
       description:
-        "Explore franchise opportunities aligned to your specific profile.",
+        "During Discovery, AI analyzes the conversation in real time, surfaces opportunities, and continuously updates candidate intelligence.",
     },
+
     {
-      title: "Launch",
+      title: "AI Brand Strategy",
+
       description:
-        "Move ahead with an expert-informed plan and greater confidence.",
+        "Generate transparent recommendations supported by evidence and automatically produce professional referral packages for franchisors.",
     },
   ],
 };
 
 export const ctaContent = {
-  title: "Ready to Find Your Ideal Franchise?",
+  title: "Ready to Transform Your Franchise Consulting Business?",
   description:
-    "Begin with the insights that make every next step more intentional.",
-  href: "/assessment/demo",
-  label: "Start Your Free Assessment",
+    "Schedule a personalized demonstration and see how FranchiseReady AI can transform every stage of your franchise consulting process.",
+  href: "/request-demo",
+  label: "Request a Demo",
 };

@@ -1,50 +1,217 @@
 import Link from "next/link";
-import { ArrowRight, CheckCircle2, Sparkles } from "lucide-react";
+import { ArrowRight, Calendar, ShieldCheck, Sparkles } from "lucide-react";
+
 import { Container } from "@/components/ui/container";
 
 type HeroProps = {
   eyebrow?: string;
   title?: string;
   description?: string;
-  primaryCta?: { label: string; href: string };
-  secondaryCta?: { label: string; href: string };
+  primaryCta?: {
+    label: string;
+    href: string;
+  };
+  secondaryCta?: {
+    label: string;
+    href: string;
+  };
 };
 
-function DashboardPreview() {
+function MissionControlPreview() {
   return (
-    <div aria-label="Assessment dashboard preview" className="relative mx-auto w-full max-w-xl" role="img">
-      <div className="absolute -inset-4 -z-10 rounded-[2.25rem] bg-brand-soft/70 blur-2xl" />
-      <div className="overflow-hidden rounded-2xl border border-border bg-surface p-3 shadow-[0_24px_70px_var(--shadow-color)] sm:p-5">
-        <div className="flex items-center justify-between border-b border-border pb-4">
-          <div className="flex items-center gap-2"><span className="size-2 rounded-full bg-brand" /><span className="text-xs font-semibold text-ink">Your readiness overview</span></div>
-          <span className="rounded-full bg-brand-soft px-2.5 py-1 text-[10px] font-bold tracking-wide text-brand">IN PROGRESS</span>
-        </div>
-        <div className="grid gap-3 pt-4 sm:grid-cols-[1.12fr_.88fr]">
-          <div className="rounded-xl border border-border bg-muted-surface p-4">
-            <p className="text-xs font-medium text-muted">Franchise readiness</p>
-            <div className="mt-4 flex items-end justify-between"><div><p className="text-4xl font-semibold tracking-tight text-ink">82<span className="text-lg text-muted">/100</span></p><p className="mt-1 text-xs font-medium text-brand">Strong fit signal</p></div><div className="grid size-15 place-items-center rounded-full border-[6px] border-brand border-r-brand-soft"><span className="text-xs font-bold text-ink">82%</span></div></div>
+    <div className="relative mx-auto w-full max-w-2xl">
+      <div className="absolute -inset-6 -z-10 rounded-[2rem] bg-brand/20 blur-3xl" />
+
+      <div className="overflow-hidden rounded-3xl border border-border bg-surface shadow-2xl">
+
+        <div className="flex items-center justify-between border-b border-border px-6 py-5">
+
+          <div>
+            <p className="text-xs uppercase tracking-[0.25em] text-brand">
+              Mission Control
+            </p>
+
+            <h3 className="mt-1 text-xl font-bold text-ink">
+              Good Afternoon, Jim
+            </h3>
           </div>
-          <div className="rounded-xl border border-border bg-surface p-4">
-            <p className="text-xs font-medium text-muted">Next best step</p>
-            <div className="mt-4 rounded-lg bg-brand-soft p-3"><Sparkles aria-hidden="true" className="size-4 text-brand" /><p className="mt-2 text-xs font-semibold leading-5 text-ink">Compare your top three franchise matches.</p></div>
+
+          <div className="rounded-full bg-emerald-100 px-4 py-2 text-sm font-semibold text-emerald-700">
+            18 Active Candidates
           </div>
+
         </div>
-        <div className="mt-3 rounded-xl border border-border bg-surface p-4"><div className="flex items-center justify-between"><p className="text-xs font-semibold text-ink">Profile strengths</p><p className="text-xs text-muted">3 of 4 complete</p></div><div className="mt-3 space-y-2">{["Financial readiness", "Leadership experience", "Lifestyle alignment"].map((item, index) => <div key={item} className="flex items-center gap-2 text-xs text-muted"><CheckCircle2 aria-hidden="true" className="size-3.5 text-brand" /><span>{item}</span><span className={`ml-auto h-1.5 rounded-full bg-brand ${index === 1 ? "w-14" : "w-20"}`} /></div>)}</div></div>
+
+        <div className="space-y-4 p-6">
+
+          <div className="rounded-2xl border border-border p-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-semibold text-ink">
+                  Sarah Williams
+                </p>
+
+                <p className="mt-1 text-sm text-muted">
+                  Ready for Brand Strategy
+                </p>
+              </div>
+
+              <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-700">
+                READY
+              </span>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-border p-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-semibold text-ink">
+                  John Smith
+                </p>
+
+                <p className="mt-1 text-sm text-muted">
+                  Buying confidence dropped 8%
+                </p>
+              </div>
+
+              <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-700">
+                FOLLOW UP
+              </span>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-border p-5">
+            <div className="flex items-center gap-3">
+              <Calendar className="h-5 w-5 text-brand" />
+
+              <div>
+                <p className="font-semibold text-ink">
+                  Discovery Meeting
+                </p>
+
+                <p className="text-sm text-muted">
+                  Chris Martin • 2:00 PM
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-2xl bg-brand-soft p-5">
+
+            <div className="flex items-center gap-2">
+
+              <Sparkles className="h-5 w-5 text-brand" />
+
+              <p className="font-semibold text-brand">
+                AI Recommendation
+              </p>
+
+            </div>
+
+            <p className="mt-3 text-sm leading-7 text-ink">
+              Schedule a follow-up with John Smith today. Family alignment
+              remains the only obstacle before presenting brand recommendations.
+            </p>
+
+          </div>
+
+        </div>
+
       </div>
-      <div className="absolute -bottom-5 -left-5 hidden rounded-xl border border-border bg-surface px-4 py-3 shadow-lg sm:block"><p className="text-[10px] font-semibold uppercase tracking-[.12em] text-muted">Top match</p><p className="mt-1 text-sm font-semibold text-ink">Aligned opportunities</p></div>
     </div>
   );
 }
 
 export function Hero({
-  eyebrow = "A clearer path to franchise ownership",
-  title = "Discover the Right Franchise Before You Invest.",
-  description = "AI-powered franchise readiness assessments, intelligent franchise matching, and expert guidance that help entrepreneurs confidently choose the right franchise.",
+  eyebrow = "Built Exclusively for Franchise Consultants",
+  title = "The AI Operating System for Franchise Consultants.",
+  description = "FranchiseReady AI helps franchise consultants prepare for Discovery meetings, understand candidates faster, generate transparent brand recommendations, and deliver higher-quality candidates—all from one intelligent platform.",
   primaryCta = {
-  label: "Start Your Free Assessment",
-  href: "/assessment/demo",
-},
-  secondaryCta = { label: "For Consultants", href: "#consultants" },
+    label: "See the Platform",
+    href: "#platform",
+  },
+  secondaryCta = {
+    label: "Request a Demo",
+    href: "#demo",
+  },
 }: HeroProps) {
-  return <section className="overflow-hidden bg-canvas py-16 sm:py-20 lg:py-28"><Container><div className="grid items-center gap-14 lg:grid-cols-[.96fr_1.04fr] lg:gap-16"><div className="max-w-2xl"><p className="inline-flex items-center gap-2 rounded-full border border-brand/15 bg-brand-soft px-3 py-1.5 text-xs font-semibold text-brand"><Sparkles aria-hidden="true" className="size-3.5" />{eyebrow}</p><h1 className="mt-6 text-4xl font-semibold tracking-[-0.045em] text-ink sm:text-5xl sm:leading-[1.08] lg:text-6xl">{title}</h1><p className="mt-6 max-w-xl text-base leading-7 text-muted sm:text-lg sm:leading-8">{description}</p><div className="mt-8 flex flex-col gap-3 sm:flex-row"><Link href={primaryCta.href} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-brand px-5 text-sm font-semibold text-brand-foreground shadow-sm transition-colors hover:bg-brand-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-4 focus-visible:ring-offset-canvas">{primaryCta.label}<ArrowRight aria-hidden="true" className="size-4" /></Link><Link href={secondaryCta.href} className="inline-flex min-h-12 items-center justify-center rounded-lg border border-border bg-surface px-5 text-sm font-semibold text-ink transition-colors hover:bg-muted-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-4 focus-visible:ring-offset-canvas">{secondaryCta.label}</Link></div><p className="mt-5 text-xs text-muted">No obligation. Start with a clear view of your readiness.</p></div><DashboardPreview /></div></Container></section>;
+  return (
+    <section className="overflow-hidden bg-canvas py-16 lg:py-24">
+
+      <Container>
+
+        <div className="grid items-center gap-20 lg:grid-cols-[1fr_1.05fr]">
+
+          <div>
+
+            <div className="inline-flex items-center gap-2 rounded-full border border-brand/20 bg-brand-soft px-4 py-2">
+
+              <ShieldCheck className="h-4 w-4 text-brand" />
+
+              <span className="text-sm font-semibold text-brand">
+                {eyebrow}
+              </span>
+
+            </div>
+
+            <h1 className="mt-8 max-w-4xl text-5xl font-black tracking-tight text-ink lg:text-7xl">
+              {title}
+            </h1>
+
+            <p className="mt-8 max-w-2xl text-xl leading-9 text-muted">
+              {description}
+            </p>
+
+            <div className="mt-10 flex flex-col gap-4 sm:flex-row">
+
+              <Link
+                href={primaryCta.href}
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-brand px-8 py-4 font-semibold text-brand-foreground transition hover:bg-brand-strong"
+              >
+                {primaryCta.label}
+
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+
+              <Link
+                href={secondaryCta.href}
+                className="inline-flex items-center justify-center rounded-xl border border-border bg-surface px-8 py-4 font-semibold text-ink transition hover:bg-muted-surface"
+              >
+                {secondaryCta.label}
+              </Link>
+
+            </div>
+
+            <div className="mt-10 rounded-2xl border border-border bg-surface p-6">
+
+              <div className="flex items-center gap-3">
+
+                <ShieldCheck className="h-5 w-5 text-brand" />
+
+                <h3 className="font-bold text-ink">
+                  Independent Intelligence
+                </h3>
+
+              </div>
+
+              <p className="mt-4 leading-8 text-muted">
+                FranchiseReady AI is available exclusively to franchise
+                consultants. Our recommendation engine is intentionally not
+                licensed to franchisors, ensuring every recommendation is based
+                solely on candidate fit—not sponsorships, paid placement, or
+                commercial influence.
+              </p>
+
+            </div>
+
+          </div>
+
+          <MissionControlPreview />
+
+        </div>
+
+      </Container>
+
+    </section>
+  );
 }
