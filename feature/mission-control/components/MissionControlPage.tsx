@@ -1,3 +1,4 @@
+import { DailyBriefEngine } from "../runtime/DailyBriefEngine";
 import type { MissionControlState } from "../models/MissionControlState";
 
 import { AICommandCenter } from "./AICommandCenter";
@@ -10,131 +11,325 @@ type Props = {
 export function MissionControlPage({
   state,
 }: Props) {
+    const dailyBrief = new DailyBriefEngine().generate(state);
   return (
     <div className="space-y-8">
 
-      {/* HERO */}
+      {/* ===========================================================
+          HERO
+      ============================================================ */}
 
-      <section className="overflow-hidden rounded-3xl bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 p-10 text-white shadow-2xl">
+      <section className="overflow-hidden rounded-3xl bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 shadow-2xl">
 
-        <div className="flex flex-wrap items-start justify-between gap-8">
+        <div className="p-10">
 
-          <div>
+          <div className="flex flex-wrap items-start justify-between gap-10">
+
+            <div className="max-w-3xl">
+
+              <div className="inline-flex items-center gap-3 rounded-full border border-emerald-400/20 bg-emerald-500/10 px-4 py-2">
+
+                <div className="h-3 w-3 rounded-full bg-emerald-400 animate-pulse" />
+
+                <span className="text-xs font-bold uppercase tracking-[0.35em] text-emerald-300">
+                  AI ONLINE
+                </span>
+
+              </div>
+
+              <h1 className="mt-8 text-5xl font-black tracking-tight text-white xl:text-6xl">
+                {state.greeting}, {state.consultant}
+              </h1>
+
+              <p className="mt-5 text-xl leading-9 text-slate-300">
+                Here's what deserves your attention today.
+              </p>
+
+            </div>
+
+            <div className="min-w-[280px] rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur">
+
+              <p className="text-sm font-semibold uppercase tracking-[0.30em] text-slate-400">
+                Overall Pipeline Health
+              </p>
+
+              <div className="mt-5 flex items-end gap-3">
+
+                <span className="text-6xl font-black text-emerald-400">
+                  92
+                </span>
+
+                <span className="pb-2 text-lg font-semibold text-emerald-300">
+                  Excellent
+                </span>
+
+              </div>
+
+              <div className="mt-6 h-3 overflow-hidden rounded-full bg-slate-700">
+
+                <div className="h-full w-[92%] rounded-full bg-gradient-to-r from-emerald-400 to-blue-400" />
+
+              </div>
+
+              <p className="mt-4 text-sm text-slate-400">
+                Up 4% from last week
+              </p>
+
+            </div>
+
+          </div>
+
+          {/* =======================================================
+              AI DAILY BRIEF
+          ======================================================== */}
+
+          <div className="mt-10 rounded-3xl border border-blue-400/20 bg-blue-500/10 p-8">
 
             <div className="flex items-center gap-3">
 
-              <div className="h-3 w-3 rounded-full bg-emerald-400 animate-pulse" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500 text-lg font-bold text-white">
+                AI
+              </div>
 
-              <span className="text-xs font-bold uppercase tracking-[0.3em] text-emerald-300">
-                AI ONLINE
-              </span>
+              <div>
 
-            </div>
+                <h2 className="text-xl font-bold text-white">
+  AI Daily Brief
+</h2>
 
-            <h1 className="mt-6 text-5xl font-black tracking-tight">
-              {state.greeting}, {state.consultant}
-            </h1>
+<p className="text-sm text-blue-200">
+  Generated automatically from today's pipeline
+</p>
+  </div>
 
-            <p className="mt-4 max-w-2xl text-xl text-slate-300">
-              FranchiseReady AI is monitoring your pipeline,
-              identifying buying signals, and prioritizing your next
-              best actions.
-            </p>
+</div>
+
+<p className="mt-6 max-w-4xl text-lg leading-9 text-slate-200">
+  {dailyBrief.summary}
+</p>
+
+<div className="mt-8 space-y-3">
+
+  {dailyBrief.priorities.map((priority) => (
+
+    <div
+      key={priority}
+      className="flex items-center gap-3 rounded-xl bg-white/5 px-4 py-3"
+    >
+      <div className="h-2.5 w-2.5 rounded-full bg-emerald-400" />
+
+      <span className="text-slate-200">
+        {priority}
+      </span>
+
+    </div>
+
+  ))}
+
+</div>
+
+<div className="mt-8 rounded-2xl border border-emerald-400/20 bg-emerald-500/10 p-5">
+
+  <div className="text-sm font-semibold uppercase tracking-wider text-emerald-300">
+    AI Recommendation
+  </div>
+
+  <p className="mt-3 text-lg text-white">
+    {dailyBrief.recommendation}
+  </p>
+
+</div>
+
+         </div>
+          {/* =======================================================
+              KPI RIBBON
+          ======================================================== */}
+
+          <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+
+            <Metric
+              value={state.activeCandidates.toString()}
+              label="Active Candidates"
+            />
+
+            <Metric
+              value={state.discoveryToday.length.toString()}
+              label="Discovery Meetings"
+            />
+
+            <Metric
+              value="3"
+              label="Ready for Brand Strategy"
+            />
+
+            <Metric
+              value="5"
+              label="AI Priority Actions"
+            />
 
           </div>
-
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur">
-
-            <p className="text-sm uppercase tracking-widest text-slate-400">
-              Portfolio Health
-            </p>
-
-            <div className="mt-3 text-5xl font-black text-emerald-400">
-              92%
-            </div>
-
-            <p className="mt-2 text-sm text-slate-300">
-              +4% this week
-            </p>
-
-          </div>
-
-        </div>
-
-        <div className="mt-10 grid gap-4 md:grid-cols-4">
-
-          <Metric
-            value={state.activeCandidates.toString()}
-            label="Active Candidates"
-          />
-
-          <Metric
-            value="3"
-            label="Ready Today"
-          />
-
-          <Metric
-            value={state.discoveryToday.length.toString()}
-            label="Meetings"
-          />
-
-          <Metric
-            value="5"
-            label="AI Opportunities"
-          />
 
         </div>
 
       </section>
 
+            {/* ===========================================================
+          AI COMMAND CENTER
+      ============================================================ */}
+
       <AICommandCenter />
+
+      {/* ===========================================================
+          CANDIDATE SPOTLIGHT
+      ============================================================ */}
 
       <CandidateSpotlight />
 
-      {/* MAIN GRID */}
+      {/* ===========================================================
+          MAIN WORKSPACE
+      ============================================================ */}
 
-      <div className="grid gap-8 xl:grid-cols-3">
+      <div className="grid gap-8 xl:grid-cols-[1.7fr_1fr]">
 
-        {/* LEFT */}
+        {/* =======================================================
+            LEFT COLUMN
+        ======================================================== */}
 
-        <div className="space-y-6 xl:col-span-2">
+        <div className="space-y-8">
 
           <Card
-            title="🔥 AI Priority Queue"
-            subtitle="Highest priority opportunities"
+            title="Today's Highest Priority Candidates"
+            subtitle="AI ranked by urgency and business impact"
           >
 
             {state.priorities.map((priority) => (
 
               <div
                 key={priority.id}
-                className="rounded-xl border border-slate-200 bg-slate-50 p-5"
+                className="rounded-2xl border border-slate-200 bg-gradient-to-r from-white to-slate-50 p-6 transition-all hover:-translate-y-1 hover:shadow-lg"
               >
 
-                <div className="flex items-start justify-between gap-4">
+                <div className="flex flex-wrap items-start justify-between gap-6">
 
-                  <div>
+                  <div className="flex-1">
 
-                    <h3 className="text-lg font-bold">
+                    <div className="flex items-center gap-3">
+
+                      <Badge value={priority.priority} />
+
+                      <span className="text-sm font-semibold uppercase tracking-wider text-slate-500">
+                        AI Priority
+                      </span>
+
+                    </div>
+
+                    <h3 className="mt-4 text-2xl font-bold text-slate-900">
                       {priority.title}
                     </h3>
 
-                    <p className="mt-2 text-slate-600">
+                    <p className="mt-4 leading-7 text-slate-600">
                       {priority.description}
                     </p>
 
                   </div>
 
-                  <Badge
-                    value={priority.priority}
-                  />
+                  <div className="w-full max-w-xs rounded-2xl bg-slate-100 p-5">
+
+                    <p className="text-xs font-bold uppercase tracking-widest text-slate-500">
+                      Recommended Action
+                    </p>
+
+                    <p className="mt-3 text-sm leading-6 text-slate-700">
+                      {priority.action}
+                    </p>
+
+                    <button className="mt-5 w-full rounded-xl bg-blue-600 px-4 py-3 font-semibold text-white transition hover:bg-blue-700">
+                      Open Candidate
+                    </button>
+
+                  </div>
 
                 </div>
 
-                <button
-                  className="mt-5 rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white transition hover:bg-blue-700"
-                >
-                  {priority.action}
+              </div>
+
+            ))}
+
+          </Card>
+
+          <Card
+            title="Live Intelligence Feed"
+            subtitle="Everything AI has learned since your last login"
+          >
+
+            <FeedItem
+              time="9:42 AM"
+              title="Buying confidence decreased"
+              detail="John Smith delayed selecting a Discovery Day. Follow-up recommended before noon."
+            />
+
+            <FeedItem
+              time="9:18 AM"
+              title="Candidate promoted"
+              detail="Sarah Williams reached 97% readiness and is ready for Brand Strategy."
+            />
+
+            <FeedItem
+              time="8:56 AM"
+              title="Recommendation updated"
+              detail="ERA Group moved into the #1 position after leadership scoring increased."
+            />
+
+            <FeedItem
+              time="8:31 AM"
+              title="Discovery intelligence saved"
+              detail="Executive leadership validation completed and candidate profile updated."
+            />
+
+          </Card>
+
+        </div>
+
+        {/* =======================================================
+            RIGHT COLUMN
+        ======================================================== */}
+
+        <div className="space-y-8">
+
+          <Card
+            title="Today's Agenda"
+            subtitle="AI prepared every meeting"
+          >
+
+            {state.discoveryToday.map((meeting) => (
+
+              <div
+                key={meeting.id}
+                className="rounded-2xl border border-slate-200 bg-white p-5"
+              >
+
+                <div className="flex items-center justify-between">
+
+                  <span className="text-lg font-bold">
+                    {meeting.time}
+                  </span>
+
+                  <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-bold uppercase text-blue-700">
+                    Ready
+                  </span>
+
+                </div>
+
+                <h3 className="mt-3 text-xl font-semibold">
+                  {meeting.candidate}
+                </h3>
+
+                <p className="mt-2 text-sm leading-6 text-slate-600">
+                  {meeting.focus}
+                </p>
+
+                <button className="mt-5 w-full rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 font-semibold text-blue-700 transition hover:bg-blue-100">
+                  Prepare Briefing
                 </button>
 
               </div>
@@ -144,91 +339,36 @@ export function MissionControlPage({
           </Card>
 
           <Card
-            title="🤖 AI Activity Feed"
-            subtitle="Latest intelligence"
-          >
-
-            <FeedItem
-              title="Buying signal detected"
-              detail="John Smith asked about funding timelines."
-            />
-
-            <FeedItem
-              title="Confidence increased"
-              detail="Sarah Williams moved from 91% to 97%."
-            />
-
-            <FeedItem
-              title="Brand ranking updated"
-              detail="ERA Group moved to the #1 recommendation."
-            />
-
-            <FeedItem
-              title="Discovery completed"
-              detail="Executive leadership validated."
-            />
-
-          </Card>
-
-        </div>
-
-        {/* RIGHT */}
-
-        <div className="space-y-6">
-
-          <Card
-            title="📅 Today's Meetings"
-            subtitle="Discovery schedule"
-          >
-
-            {state.discoveryToday.map((meeting) => (
-
-              <div
-                key={meeting.id}
-                className="rounded-xl border border-slate-200 p-4"
-              >
-
-                <div className="font-bold">
-                  {meeting.time}
-                </div>
-
-                <div className="mt-1 text-lg font-semibold">
-                  {meeting.candidate}
-                </div>
-
-                <p className="mt-2 text-sm text-slate-600">
-                  {meeting.focus}
-                </p>
-
-              </div>
-
-            ))}
-
-          </Card>
-
-          <Card
-            title="⭐ Ready for Introduction"
+            title="Ready for Introduction"
             subtitle="Highest confidence candidate"
           >
 
-            <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-5">
+            <div className="rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-white p-6">
 
-              <div className="text-lg font-bold">
+              <h3 className="text-2xl font-bold">
                 Sarah Williams
-              </div>
+              </h3>
 
-              <div className="mt-2 text-sm text-slate-600">
+              <p className="mt-2 text-slate-600">
                 ERA Group
-              </div>
+              </p>
 
-              <div className="mt-5 flex items-center justify-between">
+              <div className="mt-8 flex items-center justify-between">
 
-                <span className="text-4xl font-black text-emerald-600">
-                  97%
-                </span>
+                <div>
 
-                <button className="rounded-xl bg-emerald-600 px-4 py-2 font-semibold text-white">
-                  Generate Package
+                  <div className="text-5xl font-black text-emerald-600">
+                    97%
+                  </div>
+
+                  <div className="text-sm text-slate-500">
+                    Recommendation Confidence
+                  </div>
+
+                </div>
+
+                <button className="rounded-xl bg-emerald-600 px-5 py-3 font-semibold text-white transition hover:bg-emerald-700">
+                  Generate Referral
                 </button>
 
               </div>
@@ -240,12 +380,11 @@ export function MissionControlPage({
         </div>
 
       </div>
+          </div>
 
-    </div>
   );
 }
-
-function Metric({
+      function Metric({
   value,
   label,
 }: {
@@ -253,13 +392,13 @@ function Metric({
   label: string;
 }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
+    <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur">
 
-      <div className="text-4xl font-black">
+      <div className="text-5xl font-black text-white">
         {value}
       </div>
 
-      <div className="mt-2 text-sm text-slate-300">
+      <div className="mt-3 text-sm font-medium uppercase tracking-wide text-slate-300">
         {label}
       </div>
 
@@ -276,17 +415,21 @@ function Card({
   subtitle: string;
 }>) {
   return (
-    <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+    <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
 
-      <h2 className="text-2xl font-bold">
-        {title}
-      </h2>
+      <div className="border-b border-slate-200 bg-slate-50 px-8 py-6">
 
-      <p className="mt-1 text-sm text-slate-500">
-        {subtitle}
-      </p>
+        <h2 className="text-2xl font-bold tracking-tight text-slate-900">
+          {title}
+        </h2>
 
-      <div className="mt-6 space-y-4">
+        <p className="mt-2 text-sm text-slate-500">
+          {subtitle}
+        </p>
+
+      </div>
+
+      <div className="space-y-5 p-8">
         {children}
       </div>
 
@@ -299,34 +442,64 @@ function Badge({
 }: {
   value: string;
 }) {
+  const styles = {
+    High:
+      "bg-red-100 text-red-700 border-red-200",
+    Medium:
+      "bg-amber-100 text-amber-700 border-amber-200",
+    Low:
+      "bg-emerald-100 text-emerald-700 border-emerald-200",
+  };
+
   return (
-    <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-bold uppercase text-red-700">
+    <span
+      className={`rounded-full border px-3 py-1 text-xs font-bold uppercase ${
+        styles[value as keyof typeof styles] ??
+        "bg-slate-100 text-slate-700 border-slate-200"
+      }`}
+    >
       {value}
     </span>
   );
 }
 
 function FeedItem({
+  time,
   title,
   detail,
 }: {
+  time: string;
   title: string;
   detail: string;
 }) {
   return (
-    <div className="flex gap-4">
+    <div className="flex gap-5">
 
-      <div className="mt-2 h-3 w-3 rounded-full bg-emerald-500" />
+      <div className="flex flex-col items-center">
 
-      <div>
+        <div className="h-3 w-3 rounded-full bg-emerald-500" />
 
-        <div className="font-semibold">
-          {title}
+        <div className="mt-1 h-full w-px bg-slate-200" />
+
+      </div>
+
+      <div className="flex-1 pb-5">
+
+        <div className="flex items-center justify-between">
+
+          <h3 className="font-semibold text-slate-900">
+            {title}
+          </h3>
+
+          <span className="text-xs font-medium uppercase tracking-wide text-slate-400">
+            {time}
+          </span>
+
         </div>
 
-        <div className="text-sm text-slate-600">
+        <p className="mt-2 leading-7 text-slate-600">
           {detail}
-        </div>
+        </p>
 
       </div>
 
