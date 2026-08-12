@@ -2,7 +2,9 @@ import { notFound } from "next/navigation";
 
 import { SeedCandidateRepository } from "@/feature/crm/repositories/SeedCandidateRepository";
 
-import { DiscoveryLaunchHero } from "@/feature/crm/components/DiscoveryLaunchHero";
+import { CandidateWorkspaceActionRibbon } from "@/feature/candidate-workspace/components/CandidateWorkspaceActionRibbon";
+
+import { CandidateWorkspaceTabs } from "@/feature/candidate-workspace/components/CandidateWorkspaceTabs";
 
 import {
   PageHeader,
@@ -61,6 +63,11 @@ export default async function CandidateWorkspacePage({
   }
 />
 
+<CandidateWorkspaceTabs
+  candidateId={candidate.id}
+  active="Command Center"
+/>
+
       <KPIRibbon
   items={[
     {
@@ -86,15 +93,21 @@ export default async function CandidateWorkspacePage({
   ]}
 />
 
-      <DiscoveryLaunchHero
-  candidateName={`${candidate.firstName} ${candidate.lastName}`}
-  readiness={candidate.intelligence.overallReadiness}
+      <CandidateWorkspaceActionRibbon
+  recommendation="Proceed to Discovery"
   confidence={
     candidate.intelligence.financial.financingLikelihood
   }
-  recommendation="AI recommends proceeding into Discovery. Leadership, financial readiness, and coachability indicate a high probability of successful franchise ownership."
-  estimatedDuration="35 Minutes"
-  preparedAt="Just Now"
+  awardProbability={82}
+  reasons={[
+    "Executive leadership validated",
+    "Financial qualification confirmed",
+    "Excellent coachability",
+    "High ownership motivation",
+  ]}
+  primaryAction="Start Discovery"
+  secondaryAction="Generate Consultant Brief"
+  tertiaryAction="Generate Executive Profile"
 />
       
       <ExecutiveIntelligencePanel
