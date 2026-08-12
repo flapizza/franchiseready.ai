@@ -1,5 +1,11 @@
 import Link from "next/link";
-import { ArrowRight, Calendar, ShieldCheck, Sparkles } from "lucide-react";
+import {
+  ArrowRight,
+  Calendar,
+  ShieldCheck,
+  Sparkles,
+  TrendingUp,
+} from "lucide-react";
 
 import { Container } from "@/components/ui/container";
 
@@ -20,97 +26,119 @@ type HeroProps = {
 function MissionControlPreview() {
   return (
     <div className="relative mx-auto w-full max-w-2xl">
-      <div className="absolute -inset-6 -z-10 rounded-[2rem] bg-brand/20 blur-3xl" />
 
-      <div className="overflow-hidden rounded-3xl border border-border bg-surface shadow-2xl">
+      <div className="absolute -inset-8 -z-10 rounded-[3rem] bg-teal-400/20 blur-3xl" />
 
-        <div className="flex items-center justify-between border-b border-border px-6 py-5">
+      <div className="overflow-hidden rounded-[32px] border border-slate-200 bg-white shadow-[0_40px_120px_rgba(15,23,42,.18)]">
+
+        <div className="flex items-center justify-between border-b border-slate-200 px-8 py-6">
 
           <div>
-            <p className="text-xs uppercase tracking-[0.25em] text-brand">
+
+            <p className="text-xs font-bold uppercase tracking-[0.25em] text-teal-600">
               Mission Control
             </p>
 
-            <h3 className="mt-1 text-xl font-bold text-ink">
-              Good Afternoon, Jim
+            <h3 className="mt-2 text-2xl font-black text-slate-900">
+              Welcome back, Jim.
             </h3>
+
           </div>
 
-          <div className="rounded-full bg-emerald-100 px-4 py-2 text-sm font-semibold text-emerald-700">
-            18 Active Candidates
+          <div className="rounded-full bg-emerald-100 px-5 py-2 text-sm font-bold text-emerald-700">
+            AI Copilot Active
           </div>
 
         </div>
 
-        <div className="space-y-4 p-6">
+        <div className="space-y-5 p-8">
 
-          <div className="rounded-2xl border border-border p-5">
+          <div className="rounded-2xl border border-slate-200 p-5">
+
             <div className="flex items-center justify-between">
+
               <div>
-                <p className="font-semibold text-ink">
+
+                <p className="font-bold text-slate-900">
                   Sarah Williams
                 </p>
 
-                <p className="mt-1 text-sm text-muted">
-                  Ready for Brand Strategy
+                <p className="mt-1 text-sm text-slate-500">
+                  Ready for Introduction
                 </p>
+
               </div>
 
               <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-700">
                 READY
               </span>
+
             </div>
+
           </div>
 
-          <div className="rounded-2xl border border-border p-5">
+          <div className="rounded-2xl border border-slate-200 p-5">
+
             <div className="flex items-center justify-between">
+
               <div>
-                <p className="font-semibold text-ink">
+
+                <p className="font-bold text-slate-900">
                   John Smith
                 </p>
 
-                <p className="mt-1 text-sm text-muted">
-                  Buying confidence dropped 8%
+                <p className="mt-1 text-sm text-slate-500">
+                  Family alignment requires follow-up
                 </p>
+
               </div>
 
               <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-700">
                 FOLLOW UP
               </span>
+
             </div>
+
           </div>
 
-          <div className="rounded-2xl border border-border p-5">
-            <div className="flex items-center gap-3">
-              <Calendar className="h-5 w-5 text-brand" />
+          <div className="rounded-2xl border border-slate-200 p-5">
+
+            <div className="flex items-center gap-4">
+
+              <Calendar className="h-5 w-5 text-teal-500" />
 
               <div>
-                <p className="font-semibold text-ink">
+
+                <p className="font-bold text-slate-900">
                   Discovery Meeting
                 </p>
 
-                <p className="text-sm text-muted">
+                <p className="text-sm text-slate-500">
                   Chris Martin • 2:00 PM
                 </p>
+
               </div>
+
             </div>
+
           </div>
 
-          <div className="rounded-2xl bg-brand-soft p-5">
+          <div className="rounded-2xl bg-gradient-to-r from-slate-900 to-slate-800 p-6 text-white">
 
             <div className="flex items-center gap-2">
 
-              <Sparkles className="h-5 w-5 text-brand" />
+              <Sparkles className="h-5 w-5 text-teal-400" />
 
-              <p className="font-semibold text-brand">
+              <span className="font-bold">
                 AI Recommendation
-              </p>
+              </span>
 
             </div>
 
-            <p className="mt-3 text-sm leading-7 text-ink">
-              Schedule a follow-up with John Smith today. Family alignment
-              remains the only obstacle before presenting brand recommendations.
+            <p className="mt-4 text-sm leading-7 text-slate-300">
+              Schedule a follow-up with John today. Every buying signal
+              remains positive, and family alignment is the final step
+              before generating a referral package.
             </p>
 
           </div>
@@ -118,25 +146,26 @@ function MissionControlPreview() {
         </div>
 
       </div>
+
     </div>
   );
 }
 
 export function Hero({
-  eyebrow = "Built Exclusively for Franchise Consultants",
+  eyebrow = "Introducing a New Category of Franchise Software",
   title = "The AI Operating System for Franchise Consultants.",
-  description = "FranchiseReady AI helps franchise consultants prepare for Discovery meetings, understand candidates faster, generate transparent brand recommendations, and deliver higher-quality candidates—all from one intelligent platform.",
+  description = "FranGroove AI helps franchise consultants acquire better candidates, conduct smarter Discovery meetings, generate transparent brand recommendations, automate referral packages, and win more awards—all from one intelligent platform.",
   primaryCta = {
-    label: "See the Platform",
-    href: "#platform",
+    label: "Book a Live Demo",
+    href: "#demo",
   },
   secondaryCta = {
-    label: "Request a Demo",
-    href: "#demo",
+    label: "Watch 3-Minute Overview",
+    href: "#overview",
   },
 }: HeroProps) {
   return (
-    <section className="overflow-hidden bg-canvas py-16 lg:py-24">
+    <section className="overflow-hidden bg-canvas py-20 lg:py-28">
 
       <Container>
 
@@ -144,21 +173,27 @@ export function Hero({
 
           <div>
 
-            <div className="inline-flex items-center gap-2 rounded-full border border-brand/20 bg-brand-soft px-4 py-2">
+            <div className="inline-flex items-center gap-2 rounded-full border border-teal-200 bg-teal-50 px-5 py-2">
 
-              <ShieldCheck className="h-4 w-4 text-brand" />
+              <TrendingUp className="h-4 w-4 text-teal-600" />
 
-              <span className="text-sm font-semibold text-brand">
+              <span className="text-sm font-bold text-teal-700">
                 {eyebrow}
               </span>
 
             </div>
 
-            <h1 className="mt-8 max-w-4xl text-5xl font-black tracking-tight text-ink lg:text-7xl">
-              {title}
+            <h1 className="mt-8 text-6xl font-black tracking-tight text-slate-900 lg:text-7xl">
+
+              Fran<span className="text-teal-500">Groove</span> AI
+
+              <span className="mt-6 block text-5xl leading-tight lg:text-6xl">
+                {title}
+              </span>
+
             </h1>
 
-            <p className="mt-8 max-w-2xl text-xl leading-9 text-muted">
+            <p className="mt-8 max-w-2xl text-xl leading-9 text-slate-600">
               {description}
             </p>
 
@@ -166,7 +201,7 @@ export function Hero({
 
               <Link
                 href={primaryCta.href}
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-brand px-8 py-4 font-semibold text-brand-foreground transition hover:bg-brand-strong"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-8 py-4 font-semibold text-white transition hover:bg-slate-800"
               >
                 {primaryCta.label}
 
@@ -175,31 +210,30 @@ export function Hero({
 
               <Link
                 href={secondaryCta.href}
-                className="inline-flex items-center justify-center rounded-xl border border-border bg-surface px-8 py-4 font-semibold text-ink transition hover:bg-muted-surface"
+                className="inline-flex items-center justify-center rounded-2xl border border-slate-300 bg-white px-8 py-4 font-semibold text-slate-900 transition hover:bg-slate-50"
               >
                 {secondaryCta.label}
               </Link>
 
             </div>
 
-            <div className="mt-10 rounded-2xl border border-border bg-surface p-6">
+            <div className="mt-12 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
 
               <div className="flex items-center gap-3">
 
-                <ShieldCheck className="h-5 w-5 text-brand" />
+                <ShieldCheck className="h-5 w-5 text-teal-500" />
 
-                <h3 className="font-bold text-ink">
-                  Independent Intelligence
+                <h3 className="font-bold text-slate-900">
+                  Independent AI Intelligence
                 </h3>
 
               </div>
 
-              <p className="mt-4 leading-8 text-muted">
-                FranchiseReady AI is available exclusively to franchise
-                consultants. Our recommendation engine is intentionally not
-                licensed to franchisors, ensuring every recommendation is based
-                solely on candidate fit—not sponsorships, paid placement, or
-                commercial influence.
+              <p className="mt-4 leading-8 text-slate-600">
+                FranGroove AI is built exclusively for franchise consultants.
+                Our recommendation engine is never influenced by paid placement,
+                sponsorships, or franchisor preferences—every recommendation is
+                driven by candidate fit and consultant success.
               </p>
 
             </div>

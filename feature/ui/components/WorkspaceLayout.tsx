@@ -11,27 +11,23 @@ export function WorkspaceLayout({
   children,
 }: Props) {
   return (
-    <div className="min-h-screen bg-slate-100">
+    <div className="flex h-screen overflow-hidden bg-slate-950">
 
-      <div className="flex min-h-screen">
+      <Sidebar />
 
-        <Sidebar />
+      <div className="flex min-w-0 flex-1 flex-col bg-slate-100">
 
-        <div className="flex min-w-0 flex-1 flex-col">
+        <TopBar />
 
-          <TopBar />
+        <main className="min-h-0 flex-1 overflow-auto">
 
-          <main className="flex-1 overflow-y-auto">
+          <div className="mx-auto w-full max-w-[1800px] p-8">
 
-            <div className="mx-auto w-full max-w-7xl p-8">
+            {children}
 
-              {children}
+          </div>
 
-            </div>
-
-          </main>
-
-        </div>
+        </main>
 
       </div>
 

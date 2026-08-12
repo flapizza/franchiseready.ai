@@ -6,9 +6,11 @@ import {
   ClipboardList,
   FileText,
   Home,
-  Settings,
+ Settings,
   Users,
 } from "lucide-react";
+
+import { BrandLockup } from "@/feature/branding/components/BrandLockup";
 
 const navigation = [
   {
@@ -17,12 +19,12 @@ const navigation = [
     icon: Home,
   },
   {
-    label: "Candidates",
+    label: "Candidate Intelligence",
     href: "/crm/candidates",
     icon: Users,
   },
   {
-    label: "Discovery",
+    label: "Discovery Copilot",
     href: "/crm/discovery",
     icon: ClipboardList,
   },
@@ -32,12 +34,12 @@ const navigation = [
     icon: BrainCircuit,
   },
   {
-    label: "Referral Packages",
+    label: "Referral Studio",
     href: "/crm/referrals",
     icon: FileText,
   },
   {
-    label: "Analytics",
+    label: "Insights",
     href: "/crm/analytics",
     icon: BarChart3,
   },
@@ -45,29 +47,11 @@ const navigation = [
 
 export function Sidebar() {
   return (
-    <aside className="hidden w-72 shrink-0 border-r border-slate-200 bg-slate-950 lg:flex lg:flex-col">
+    <aside className="hidden w-72 shrink-0 border-r border-slate-800 bg-slate-950 lg:flex lg:flex-col">
 
       <div className="border-b border-slate-800 px-8 py-8">
 
-        <div className="flex items-center gap-3">
-
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-600 text-lg font-black text-white">
-            F
-          </div>
-
-          <div>
-
-            <div className="text-lg font-bold text-white">
-              FranchiseReady AI
-            </div>
-
-            <div className="text-sm text-slate-400">
-              Consultant Workspace
-            </div>
-
-          </div>
-
-        </div>
+        <BrandLockup theme="dark" />
 
       </div>
 
@@ -82,9 +66,9 @@ export function Sidebar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="group flex items-center gap-4 rounded-2xl px-4 py-3 text-slate-300 transition-all hover:bg-slate-900 hover:text-white"
+                className="group flex items-center gap-4 rounded-2xl px-4 py-3 text-slate-300 transition-all duration-200 hover:bg-slate-900 hover:text-white"
               >
-                <Icon className="h-5 w-5" />
+                <Icon className="h-5 w-5 text-slate-400 transition-colors group-hover:text-teal-400" />
 
                 <span className="font-medium">
                   {item.label}
@@ -99,28 +83,30 @@ export function Sidebar() {
 
       <div className="border-t border-slate-800 p-6">
 
-        <div className="rounded-2xl bg-blue-600/10 p-5">
+        <div className="rounded-2xl border border-teal-500/10 bg-gradient-to-br from-slate-900 to-slate-950 p-5">
 
           <div className="flex items-center gap-3">
 
             <div className="h-3 w-3 rounded-full bg-emerald-400 animate-pulse" />
 
             <span className="text-sm font-semibold text-emerald-300">
-              AI Systems Online
+              AI Copilot Active
             </span>
 
           </div>
 
-          <p className="mt-4 text-sm leading-6 text-slate-400">
-            Mission Control is continuously monitoring candidate
-            activity and updating recommendations.
+          <p className="mt-4 text-sm leading-7 text-slate-400">
+            FranGroove AI is continuously analyzing candidate
+            conversations, buying signals, brand alignment,
+            and next best actions to help you move every
+            opportunity forward.
           </p>
 
         </div>
 
         <button
           type="button"
-          className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl border border-slate-700 px-4 py-3 text-sm font-semibold text-slate-300 transition hover:border-slate-600 hover:bg-slate-900"
+          className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl border border-slate-700 px-4 py-3 text-sm font-semibold text-slate-300 transition hover:border-teal-500/40 hover:bg-slate-900 hover:text-white"
         >
           <Settings className="h-4 w-4" />
 

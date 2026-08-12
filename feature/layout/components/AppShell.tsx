@@ -11,19 +11,23 @@ export function AppShell({
   children,
 }: Props) {
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-100">
+    <div className="flex h-screen overflow-hidden bg-slate-950">
 
       <Sidebar />
 
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col bg-slate-100">
 
         <TopBar />
 
-        <div className="min-h-0 flex-1 overflow-auto">
+        <main className="min-h-0 flex-1 overflow-auto">
 
-          {children}
+          <div className="mx-auto w-full max-w-[1800px] p-8">
 
-        </div>
+            {children}
+
+          </div>
+
+        </main>
 
       </div>
 

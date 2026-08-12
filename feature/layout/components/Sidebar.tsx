@@ -11,6 +11,8 @@ import {
   Users,
 } from "lucide-react";
 
+import { BrandLockup } from "@/feature/branding/components/BrandLockup";
+
 import { NavigationItem } from "./NavigationItem";
 
 export function Sidebar() {
@@ -19,13 +21,7 @@ export function Sidebar() {
 
       <div className="border-b border-slate-800 px-8 py-8">
 
-        <div className="text-3xl font-black tracking-tight">
-          FranchiseReady
-        </div>
-
-        <div className="mt-1 text-sm text-slate-400">
-          AI Consultant OS
-        </div>
+        <BrandLockup theme="dark" />
 
       </div>
 
@@ -39,13 +35,13 @@ export function Sidebar() {
 
         <NavigationItem
           href="/crm"
-          label="Candidates"
+          label="Candidate Intelligence"
           icon={<Users size={20} />}
         />
 
         <NavigationItem
           href="/crm/pipeline"
-          label="Discovery"
+          label="Discovery Copilot"
           icon={<Brain size={20} />}
         />
 
@@ -57,19 +53,19 @@ export function Sidebar() {
 
         <NavigationItem
           href="/crm/reports"
-          label="Introductions"
+          label="Referral Studio"
           icon={<Briefcase size={20} />}
         />
 
         <NavigationItem
           href="/crm/tasks"
-          label="Reports"
+          label="Insights"
           icon={<FileText size={20} />}
         />
 
         <NavigationItem
           href="/workbench"
-          label="AI Workbench"
+          label="AI Studio"
           icon={<BarChart3 size={20} />}
         />
 
@@ -83,19 +79,23 @@ export function Sidebar() {
 
       <div className="border-t border-slate-800 p-6">
 
-        <div className="rounded-2xl bg-slate-900 p-5">
+        <div className="rounded-2xl border border-teal-500/10 bg-gradient-to-br from-slate-900 to-slate-950 p-5">
 
-          <div className="text-xs uppercase tracking-widest text-slate-400">
-            AI Status
+          <div className="flex items-center gap-3">
+
+            <div className="h-3 w-3 rounded-full bg-emerald-400 animate-pulse" />
+
+            <span className="text-sm font-semibold text-emerald-300">
+              AI Copilot Active
+            </span>
+
           </div>
 
-          <div className="mt-3 text-4xl font-black text-emerald-400">
-            96%
-          </div>
-
-          <div className="mt-2 text-sm text-slate-400">
-            All systems synchronized.
-          </div>
+          <p className="mt-4 text-sm leading-7 text-slate-400">
+            FranGroove AI is continuously monitoring candidate
+            conversations, buying signals, brand alignment,
+            and next best actions across your pipeline.
+          </p>
 
         </div>
 
