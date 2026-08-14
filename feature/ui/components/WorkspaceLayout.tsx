@@ -1,8 +1,5 @@
 import type { ReactNode } from "react";
 
-import { Sidebar } from "./Sidebar";
-import { TopBar } from "./TopBar";
-
 type Props = {
   children: ReactNode;
 };
@@ -11,26 +8,14 @@ export function WorkspaceLayout({
   children,
 }: Props) {
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-950">
+    <main className="min-h-0 flex-1 overflow-auto">
 
-      <Sidebar />
+      <div className="mx-auto w-full max-w-[1800px] px-8 pb-8 pt-10">
 
-      <div className="flex min-w-0 flex-1 flex-col bg-slate-100">
-
-        <TopBar />
-
-        <main className="min-h-0 flex-1 overflow-auto">
-
-          <div className="mx-auto w-full max-w-[1800px] p-8">
-
-            {children}
-
-          </div>
-
-        </main>
+        {children}
 
       </div>
 
-    </div>
+    </main>
   );
 }
