@@ -1,4 +1,4 @@
-import type { CandidateIntelligenceState } from "@/feature/intelligence/runtime/CandidateIntelligenceEngine";
+import type { CandidateIntelligenceState } from "@/feature/intelligence/models/CandidateIntelligenceState";
 
 import type {
   BrandRecommendation,

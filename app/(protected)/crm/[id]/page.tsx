@@ -2,18 +2,12 @@ import { notFound } from "next/navigation";
 
 import { SeedCandidateRepository } from "@/feature/crm/repositories/SeedCandidateRepository";
 
-import { CandidateWorkspaceActionRibbon } from "@/feature/candidate-workspace/components/CandidateWorkspaceActionRibbon";
-
-import { CandidateWorkspaceTabs } from "@/feature/candidate-workspace/components/CandidateWorkspaceTabs";
+import { CandidateCommandCenter } from "@/feature/candidate-workspace/components/CandidateCommandCenter";
 
 import {
-  PageHeader,
   TwoColumn,
   WorkspaceLayout,
 } from "@/feature/ui";
-
-import { KPIRibbon } from "@/feature/ui/components/KPIRibbon";
-import { ReadinessGauge } from "@/feature/ui/components/ReadinessGauge";
 
 import { ExecutiveIntelligencePanel } from "@/feature/crm/components/ExecutiveIntelligencePanel";
 import { IntelligenceProfileCard } from "@/feature/crm/components/IntelligenceProfileCard";
@@ -47,69 +41,10 @@ export default async function CandidateWorkspacePage({
   return (
     <WorkspaceLayout>
 
-      <PageHeader
-  eyebrow="Candidate Intelligence Workspace"
-  title={`${candidate.firstName} ${candidate.lastName}`}
-  description={
-    candidate.intelligence.executiveSummary
-  }
-  actions={
-    <ReadinessGauge
-      score={candidate.intelligence.overallReadiness}
-      confidence={
-        candidate.intelligence.financial.financingLikelihood
-      }
-    />
-  }
-/>
+      <CandidateCommandCenter
+        candidate={candidate}
+      />
 
-<CandidateWorkspaceTabs
-  candidateId={candidate.id}
-  active="Command Center"
-/>
-
-      <KPIRibbon
-  items={[
-    {
-      label: "Readiness",
-      value: candidate.intelligence.overallReadiness,
-      description: "Overall franchise readiness",
-    },
-    {
-      label: "Health",
-      value: candidate.healthScore,
-      description: "Opportunity health",
-    },
-    {
-      label: "Decision Window",
-      value: candidate.intelligence.timing.decisionWindow,
-      description: "Expected buying timeline",
-    },
-    {
-      label: "Investment",
-      value: candidate.intelligence.financial.investmentRange,
-      description: "Qualified investment",
-    },
-  ]}
-/>
-
-      <CandidateWorkspaceActionRibbon
-  recommendation="Proceed to Discovery"
-  confidence={
-    candidate.intelligence.financial.financingLikelihood
-  }
-  awardProbability={82}
-  reasons={[
-    "Executive leadership validated",
-    "Financial qualification confirmed",
-    "Excellent coachability",
-    "High ownership motivation",
-  ]}
-  primaryAction="Start Discovery"
-  secondaryAction="Generate Consultant Brief"
-  tertiaryAction="Generate Executive Profile"
-/>
-      
       <ExecutiveIntelligencePanel
         summary={
           candidate.intelligence
@@ -127,31 +62,38 @@ export default async function CandidateWorkspacePage({
         }
         recommendation="Proceed immediately to Discovery. Candidate demonstrates a strong probability of successful franchise ownership."
         confidence={
-          candidate.intelligence.financial
+          candidate.intelligence
+            .financial
             .financingLikelihood
         }
       />
-            <TwoColumn
+
+      <TwoColumn
         left={
           <IntelligenceProfileCard
             leadership={
-              candidate.intelligence.competencies
+              candidate.intelligence
+                .competencies
                 .leadership
             }
             sales={
-              candidate.intelligence.competencies
+              candidate.intelligence
+                .competencies
                 .sales
             }
             operations={
-              candidate.intelligence.competencies
+              candidate.intelligence
+                .competencies
                 .operations
             }
             coachability={
-              candidate.intelligence.behavioral
+              candidate.intelligence
+                .behavioral
                 .coachability
             }
             financial={
-              candidate.intelligence.financial
+              candidate.intelligence
+                .financial
                 .financingLikelihood
             }
           />
@@ -164,16 +106,20 @@ export default async function CandidateWorkspacePage({
                 name: brand.name,
                 overallFit: brand.overallFit,
                 leadership:
-                  candidate.intelligence.competencies
+                  candidate.intelligence
+                    .competencies
                     .leadership,
                 sales:
-                  candidate.intelligence.competencies
+                  candidate.intelligence
+                    .competencies
                     .sales,
                 operations:
-                  candidate.intelligence.competencies
+                  candidate.intelligence
+                    .competencies
                     .operations,
                 financial:
-                  candidate.intelligence.financial
+                  candidate.intelligence
+                    .financial
                     .financingLikelihood,
                 reasons: brand.reasons,
               }),
@@ -181,29 +127,23 @@ export default async function CandidateWorkspacePage({
           />
         }
       />
-
-      <TwoColumn
+            <TwoColumn
         left={
           <AIMeetingCoach
             objective="Validate executive ownership expectations and confirm readiness to move into the formal discovery process."
-
             strategy="Lead the discussion around long-term ownership goals before discussing specific brands. Use the assessment results to validate assumptions instead of repeating assessment questions."
-
             questions={[
               "What motivated you to begin exploring franchise ownership?",
               "Describe the largest team you've led.",
               "How involved do you expect to be during the first year of ownership?",
               "What does success look like five years after opening?",
             ]}
-
             concern="Transitioning from executive employment into business ownership."
-
             response="Position franchise ownership as the next step in an executive career while emphasizing proven operating systems, coaching, and scalability."
-
             nextAction="Schedule Discovery Meeting"
-
             confidence={
-              candidate.intelligence.financial
+              candidate.intelligence
+                .financial
                 .financingLikelihood
             }
           />
@@ -216,12 +156,10 @@ export default async function CandidateWorkspacePage({
               "Strong coachability",
               "Excellent communication",
             ]}
-
             concerns={
               candidate.intelligence
                 .discoveryPriorities
             }
-
             questions={[
               "Why now?",
               "Why franchising instead of starting your own business?",
@@ -231,16 +169,15 @@ export default async function CandidateWorkspacePage({
           />
         }
       />
-            <TwoColumn
+
+      <TwoColumn
         left={
           <ConsultantBriefPanel
             executiveSummary={
               candidate.intelligence
                 .executiveSummary
             }
-
             recommendedApproach="Conduct the conversation as an executive business discussion rather than a franchise sales presentation. Validate long-term ownership goals before presenting specific franchise brands."
-
             objectives={[
               "Validate ownership expectations",
               "Confirm operational involvement",
@@ -248,14 +185,12 @@ export default async function CandidateWorkspacePage({
               "Understand family alignment",
               "Establish decision timeline",
             ]}
-
             openingQuestions={[
               "Why business ownership now?",
               "What attracted you to franchising?",
               "Describe the leadership experience you're most proud of.",
               "What legacy are you hoping to create?",
             ]}
-
             nextActions={[
               "Schedule Discovery Meeting",
               "Review financial qualification",
@@ -264,7 +199,6 @@ export default async function CandidateWorkspacePage({
             ]}
           />
         }
-
         right={
           <ActivityTimeline
             activities={[
@@ -305,8 +239,8 @@ export default async function CandidateWorkspacePage({
 
         <div className="border-b border-slate-100 px-8 py-6">
 
-          <p className="text-xs font-semibold uppercase tracking-[0.20em] text-blue-600">
-            FranchiseReady Intelligence Summary
+          <p className="text-xs font-semibold uppercase tracking-[0.20em] text-teal-600">
+            FranGroove AI Decision Summary
           </p>
 
           <h2 className="mt-3 text-3xl font-bold tracking-tight text-slate-900">
@@ -322,20 +256,15 @@ export default async function CandidateWorkspacePage({
             <p className="leading-8 text-slate-700">
               Based on the complete behavioral, financial,
               operational, leadership, timing, and competency
-              analysis, the Intelligence Engine recommends
-              advancing this candidate into the formal
-              discovery process. The overall readiness profile,
-              combined with strong leadership capability and
-              financial qualification, suggests a high
-              probability of successful franchise ownership.
+              analysis, FranGroove AI recommends advancing this
+              candidate into the formal Discovery process.
             </p>
 
             <p className="mt-6 leading-8 text-slate-700">
-              The remaining discovery conversation should focus
-              on validating long-term ownership expectations,
+              Continue validating ownership expectations,
               preferred operating style, family alignment,
-              desired lifestyle, and the candidate's preferred
-              role after the business reaches maturity.
+              desired lifestyle, and long-term business goals
+              before introducing specific franchise brands.
             </p>
 
           </div>
@@ -354,7 +283,8 @@ export default async function CandidateWorkspacePage({
             <SummaryMetric
               label="Decision Window"
               value={
-                candidate.intelligence.timing
+                candidate.intelligence
+                  .timing
                   .decisionWindow
               }
             />
@@ -362,7 +292,8 @@ export default async function CandidateWorkspacePage({
             <SummaryMetric
               label="Investment Range"
               value={
-                candidate.intelligence.financial
+                candidate.intelligence
+                  .financial
                   .investmentRange
               }
             />
@@ -393,7 +324,7 @@ function SummaryMetric({
         {label}
       </p>
 
-      <p className="mt-3 text-2xl font-bold tracking-tight text-blue-600">
+      <p className="mt-3 text-2xl font-bold tracking-tight text-teal-600">
         {value}
       </p>
 

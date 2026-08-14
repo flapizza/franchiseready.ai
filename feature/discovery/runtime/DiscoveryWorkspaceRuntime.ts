@@ -8,7 +8,7 @@ import { CandidateMemoryEngine } from "@/feature/intelligence/runtime/CandidateM
 import type { BrandRecommendation } from "@/feature/brand-strategy/models/BrandRecommendation";
 import type { ConsultantCoaching } from "@/feature/consultant-portal/models/ConsultantCoaching";
 import type { CandidateMemory } from "@/feature/intelligence/models/CandidateMemory";
-import type { CandidateIntelligenceState } from "@/feature/intelligence/runtime/CandidateIntelligenceEngine";
+import type { CandidateIntelligenceState } from "@/feature/intelligence/models/CandidateIntelligenceState";
 
 export interface DiscoveryWorkspaceState {
   intelligence: CandidateIntelligenceState;

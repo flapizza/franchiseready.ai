@@ -8,10 +8,9 @@ import type { DiscoverySession } from "../models/DiscoverySession";
 
 import type { LiveInsight } from "@/feature/intelligence/models/LiveInsight";
 
-import {
-  CandidateIntelligenceEngine,
-  type CandidateIntelligenceState,
-} from "@/feature/intelligence/runtime/CandidateIntelligenceEngine";
+import { CandidateIntelligenceEngine } from "@/feature/intelligence/runtime/CandidateIntelligenceEngine";
+
+import type { CandidateIntelligenceState } from "@/feature/intelligence/models/CandidateIntelligenceState";
 
 import { DiscoveryCopilotEngine } from "./DiscoveryCopilotEngine";
 import { DiscoverySessionEngine } from "./DiscoverySessionEngine";

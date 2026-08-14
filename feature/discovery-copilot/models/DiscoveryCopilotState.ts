@@ -1,34 +1,20 @@
-import type { TranscriptEntry } from "./TranscriptEntry";
-import type { LiveIntelligenceEvent } from "./LiveIntelligenceEvent";
-
-export interface AIInsight {
-  id: string;
-
-  title: string;
-
-  description: string;
-
-  severity: "success" | "warning" | "info";
-}
-
-export interface SuggestedQuestion {
-  id: string;
-
-  question: string;
-}
+import type { BuyingSignal } from "./BuyingSignal";
+import type { ConversationInsight } from "./ConversationInsight";
+import type { MeetingRisk } from "./MeetingRisk";
+import type { SuggestedQuestion } from "./SuggestedQuestion";
 
 export interface DiscoveryCopilotState {
-  candidate: string;
+  confidence: number;
 
-  transcript: TranscriptEntry[];
+  conversationMomentum: number;
 
-  insights: AIInsight[];
+  buyingSignals: BuyingSignal[];
 
-  buyingSignals: string[];
+  risks: MeetingRisk[];
 
-  risks: string[];
+  insights: ConversationInsight[];
 
-  suggestedQuestions: SuggestedQuestion[];
+  suggestedQuestion: SuggestedQuestion;
 
-  liveFeed: LiveIntelligenceEvent[];
+  recommendedTopic: string;
 }

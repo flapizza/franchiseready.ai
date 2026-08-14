@@ -1,128 +1,90 @@
-import type {
-  DiscoveryCopilotState,
-} from "../models/DiscoveryCopilotState";
+import type { DiscoveryCopilotState } from "../models/DiscoveryCopilotState";
 
 export class DiscoveryCopilotRuntime {
   public build(): DiscoveryCopilotState {
     return {
-      candidate: "John Smith",
+      confidence: 94,
 
-      transcript: [
+      conversationMomentum: 88,
+
+      buyingSignals: [
         {
-          id: "1",
-          speaker: "candidate",
-          timestamp: "10:02",
-          text:
-            "I've spent the last twenty years leading regional operations.",
+          id: "signal-1",
+          title: "Executive Leadership",
+          explanation:
+            "Candidate described leading regional operations and large teams.",
+          strength: "high",
+          confidence: 96,
         },
         {
-          id: "2",
-          speaker: "consultant",
-          timestamp: "10:03",
-          text:
-            "What made you begin exploring franchise ownership?",
+          id: "signal-2",
+          title: "Ownership Motivation",
+          explanation:
+            "Candidate expressed a strong desire to build something of their own.",
+          strength: "high",
+          confidence: 94,
         },
         {
-          id: "3",
-          speaker: "candidate",
-          timestamp: "10:04",
-          text:
-            "I want to build something of my own while using my leadership experience.",
+          id: "signal-3",
+          title: "Lifestyle Goals",
+          explanation:
+            "Candidate is seeking greater control over long-term career direction.",
+          strength: "medium",
+          confidence: 83,
+        },
+      ],
+
+      risks: [
+        {
+          id: "risk-1",
+          title: "Family Alignment",
+          explanation:
+            "The conversation has not yet explored family support for franchise ownership.",
+          severity: "medium",
+          confidence: 81,
+        },
+        {
+          id: "risk-2",
+          title: "Decision Timeline",
+          explanation:
+            "The candidate has not committed to a target investment timeline.",
+          severity: "low",
+          confidence: 72,
         },
       ],
 
       insights: [
         {
-          id: "1",
+          id: "insight-1",
           title: "Leadership Evidence",
-          description:
-            "Executive leadership experience detected.",
-          severity: "success",
+          summary:
+            "Executive leadership experience appears to translate well to franchise ownership.",
+          confidence: 95,
         },
         {
-          id: "2",
-          title: "Buying Signal",
-          description:
-            "Candidate expressed strong ownership motivation.",
-          severity: "success",
-        },
-        {
-          id: "3",
-          title: "Discovery Opportunity",
-          description:
-            "Family alignment has not yet been discussed.",
-          severity: "warning",
+          id: "insight-2",
+          title: "Ownership Motivation",
+          summary:
+            "The candidate consistently describes intrinsic reasons for business ownership rather than focusing solely on financial outcomes.",
+          confidence: 91,
         },
       ],
 
-      buyingSignals: [
-        "Interested in executive ownership",
-        "Plans to leave corporate America",
-        "Looking for recurring revenue",
-        "Long-term wealth creation",
-      ],
+      suggestedQuestion: {
+        id: "question-1",
+        category: "Discovery",
 
-      risks: [
-        "Family alignment not confirmed",
-        "Investment timeline needs validation",
-      ],
+        question:
+          "How does your family feel about your interest in business ownership?",
 
-      liveFeed: [
-        {
-          id: "1",
-          timestamp: "10:04",
-          category: "leadership",
-          title: "Leadership Evidence Detected",
-          description:
-            "Candidate described managing more than 300 employees.",
-          impact: "Leadership Confidence +4%",
-        },
-        {
-          id: "2",
-          timestamp: "10:06",
-          category: "buying",
-          title: "Buying Signal",
-          description:
-            "Candidate expressed desire to leave corporate America.",
-          impact: "Buying Confidence +6%",
-        },
-        {
-          id: "3",
-          timestamp: "10:08",
-          category: "risk",
-          title: "Discovery Opportunity",
-          description:
-            "Family alignment has not been discussed.",
-          impact: "Discovery Priority Added",
-        },
-        {
-          id: "4",
-          timestamp: "10:10",
-          category: "brand",
-          title: "Brand Match Updated",
-          description:
-            "Executive consulting brands increased in confidence.",
-          impact: "ERA Group +2%",
-        },
-      ],
+        reason:
+          "Family alignment has not yet been validated and represents the largest remaining unknown.",
 
-      suggestedQuestions: [
-        {
-          id: "1",
-          question:
-            "Tell me about the culture you intentionally built as a leader.",
-        },
-        {
-          id: "2",
-          question:
-            "How involved will your family be in this decision?",
-        },
-        {
-          id: "3",
-          question:
-            "What would need to happen for you to move forward this year?",
-        },
-      ],
+        confidence: 93,
+      },
+
+      recommendedTopic:
+        "Validate family alignment before moving into specific brand discussions.",
     };
   }
 }

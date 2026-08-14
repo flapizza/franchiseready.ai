@@ -1,6 +1,6 @@
 import type { ReferralPackage } from "../models/ReferralPackage";
 
-import type { CandidateIntelligenceState } from "@/feature/intelligence/runtime/CandidateIntelligenceEngine";
+import type { CandidateIntelligenceState } from "@/feature/intelligence/models/CandidateIntelligenceState";
 
 export class ReferralPackageEngine {
   public generate(

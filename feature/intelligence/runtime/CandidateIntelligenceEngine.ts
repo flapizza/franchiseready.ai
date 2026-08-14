@@ -1,17 +1,7 @@
 import type { DiscoverySession } from "@/feature/discovery/models/DiscoverySession";
 import type { DiscoveryMemory } from "@/feature/discovery/models/DiscoveryMemory";
 
-export interface CandidateIntelligenceState {
-  readiness: number;
-
-  confidence: number;
-
-  buyingSignals: string[];
-
-  risks: string[];
-
-  executiveSummary: string;
-}
+import type { CandidateIntelligenceState } from "../models/CandidateIntelligenceState";
 
 export class CandidateIntelligenceEngine {
   public evaluate(

@@ -1,10 +1,6 @@
-import type {
-  DiscoveryCopilotState,
-} from "../models/DiscoveryCopilotState";
+import type { DiscoveryCopilotState } from "../models/DiscoveryCopilotState";
 
 import { BuyingSignalsPanel } from "./BuyingSignalsPanel";
-import { LiveIntelligenceFeed } from "./LiveIntelligenceFeed";
-import { LiveTranscriptPanel } from "./LiveTranscriptPanel";
 import { RiskDetectionPanel } from "./RiskDetectionPanel";
 
 type Props = {
@@ -24,61 +20,57 @@ export function DiscoveryCopilotPage({
         </p>
 
         <h1 className="mt-4 text-5xl font-black">
-          {state.candidate}
+          Live AI Guidance
         </h1>
 
         <p className="mt-6 max-w-3xl text-xl leading-8 text-blue-100">
-          FranchiseReady AI is actively monitoring the
-          Discovery conversation, identifying buying
-          signals, highlighting risks, and recommending
-          the next best questions in real time.
+          FranGroove AI is continuously analyzing the Discovery
+          conversation and helping you ask better questions,
+          identify buying signals, and detect risks before they
+          become objections.
         </p>
 
       </section>
 
       <div className="grid gap-8 xl:grid-cols-[1.5fr_1fr]">
 
-        <LiveTranscriptPanel
-          transcript={state.transcript}
-        />
+        <section className="rounded-3xl border bg-white p-8 shadow-sm">
+
+          <div className="flex items-center justify-between">
+
+            <h2 className="text-2xl font-bold">
+              Conversation Intelligence
+            </h2>
+
+            <div className="rounded-full bg-emerald-100 px-4 py-2 text-sm font-semibold text-emerald-700">
+              {state.confidence}% Confidence
+            </div>
+
+          </div>
+
+          <div className="mt-8 space-y-4">
+
+            {state.insights.map((insight) => (
+              <div
+                key={insight.id}
+                className="rounded-xl border border-slate-200 p-5"
+              >
+                <div className="font-semibold text-slate-900">
+                  {insight.title}
+                </div>
+
+                <div className="mt-2 text-sm leading-6 text-slate-600">
+                  {insight.summary}
+                </div>
+
+              </div>
+            ))}
+
+          </div>
+
+        </section>
 
         <div className="space-y-6">
-
-          <section className="rounded-3xl border bg-white p-6 shadow-sm">
-
-            <div className="flex items-center justify-between">
-
-              <h2 className="text-xl font-bold">
-                AI Insights
-              </h2>
-
-              <div className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold uppercase text-blue-700">
-                LIVE
-              </div>
-
-            </div>
-
-            <div className="mt-6 space-y-4">
-
-              {state.insights.map((insight) => (
-                <div
-                  key={insight.id}
-                  className="rounded-xl border border-slate-200 p-4"
-                >
-                  <div className="font-semibold">
-                    {insight.title}
-                  </div>
-
-                  <div className="mt-2 text-sm leading-6 text-slate-600">
-                    {insight.description}
-                  </div>
-
-                </div>
-              ))}
-
-            </div>
-
-          </section>
 
           <BuyingSignalsPanel
             signals={state.buyingSignals}
@@ -88,36 +80,33 @@ export function DiscoveryCopilotPage({
             risks={state.risks}
           />
 
-          <LiveIntelligenceFeed
-            events={state.liveFeed}
-          />
+          <section className="rounded-3xl border bg-white p-6 shadow-sm">
+
+            <h2 className="text-xl font-bold">
+              Recommended Topic
+            </h2>
+
+            <div className="mt-4 rounded-xl bg-slate-50 p-4">
+              {state.recommendedTopic}
+            </div>
+
+          </section>
 
           <section className="rounded-3xl border bg-white p-6 shadow-sm">
 
-            <div className="flex items-center justify-between">
+            <h2 className="text-xl font-bold">
+              Suggested Next Question
+            </h2>
 
-              <h2 className="text-xl font-bold">
-                Suggested Questions
-              </h2>
+            <div className="mt-4 rounded-xl border border-blue-200 bg-blue-50 p-5">
 
-              <div className="rounded-full bg-indigo-100 px-3 py-1 text-xs font-semibold uppercase text-indigo-700">
-                AI
+              <div className="font-semibold text-blue-900">
+                {state.suggestedQuestion.question}
               </div>
 
-            </div>
-
-            <div className="mt-6 space-y-4">
-
-              {state.suggestedQuestions.map(
-                (item) => (
-                  <div
-                    key={item.id}
-                    className="rounded-xl bg-slate-50 p-4 leading-7"
-                  >
-                    {item.question}
-                  </div>
-                ),
-              )}
+              <div className="mt-3 text-sm leading-6 text-slate-600">
+                {state.suggestedQuestion.reason}
+              </div>
 
             </div>
 

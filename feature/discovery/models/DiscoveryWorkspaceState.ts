@@ -7,7 +7,7 @@ import type { MeetingSummary } from "./MeetingSummary";
 import type { NextBestAction } from "./NextBestAction";
 
 import type { LiveInsight } from "@/feature/intelligence/models/LiveInsight";
-import type { CandidateIntelligenceState } from "@/feature/intelligence/runtime/CandidateIntelligenceEngine";
+import type { CandidateIntelligenceState } from "@/feature/intelligence/models/CandidateIntelligenceState";
 
 export interface DiscoveryWorkspaceState {
   session: DiscoverySession;

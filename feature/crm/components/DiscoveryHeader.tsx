@@ -1,6 +1,6 @@
 import { Card } from "@/feature/ui";
 
-import type { CandidateIntelligenceState } from "@/feature/intelligence/runtime/CandidateIntelligenceEngine";
+import type { CandidateIntelligenceState } from "@/feature/intelligence/models/CandidateIntelligenceState";
 
 import { CandidateIntelligencePanel } from "./CandidateIntelligencePanel";
 
