@@ -1,36 +1,107 @@
-export interface PriorityItem {
-  id: string;
+export type MissionControlPriority =
+  | "critical"
+  | "high"
+  | "normal";
 
-  title: string;
-
-  description: string;
-
-  priority:
-    | "critical"
-    | "high"
-    | "normal";
-
-  action: string;
+export interface MissionControlAction {
+  label: string;
+  href?: string;
 }
 
-export interface TodayMeeting {
+export interface MissionControlKpi {
   id: string;
+  label: string;
+  value: number;
+}
 
-  candidate: string;
+export interface DailyBriefPriority {
+  candidateId: string;
+  candidateName: string;
+  priority: MissionControlPriority;
+  recommendedAction: string;
+}
 
+export interface DailyBriefState {
+  summary: string;
+  priorities: DailyBriefPriority[];
+  kpis: MissionControlKpi[];
+}
+
+export interface PriorityCandidateState {
+  candidateId: string;
+  candidateName: string;
+  reason: string;
+  priority: MissionControlPriority;
+  recommendedAction: string;
+  openCandidateHref: string;
+}
+
+export interface AgendaMeetingState {
+  id: string;
+  candidateId: string;
+  candidateName: string;
   time: string;
+  objective: string;
+  status: string;
+  briefingHref: string;
+}
 
-  focus: string;
+export interface TopOpportunityState {
+  candidateId: string;
+  candidateName: string;
+  rationale: string;
+  confidence: number;
+  readiness: number;
+  momentum: string;
+  bestBrand: string;
+  estimatedTimeline: string;
+  primaryAction: MissionControlAction;
+  secondaryActions: MissionControlAction[];
+}
+
+export interface RecommendedActionState {
+  id: string;
+  candidateId: string;
+  candidateName: string;
+  signal: string;
+  recommendation: string;
+  action: MissionControlAction;
+  tone: "emerald" | "amber" | "blue";
+}
+
+export interface IntroductionReadyState {
+  candidateId: string;
+  candidateName: string;
+  brandName: string;
+  confidence: number;
+  action: MissionControlAction;
+}
+
+export type IntelligenceEventType =
+  | "assessment-completed"
+  | "momentum-change"
+  | "brand-readiness"
+  | "discovery-milestone"
+  | "risk-signal"
+  | "referral-ready";
+
+export interface IntelligenceEventState {
+  id: string;
+  type: IntelligenceEventType;
+  label: string;
+  candidateId: string;
+  candidateName: string;
+  explanation: string;
+  dateLabel: string;
 }
 
 export interface MissionControlState {
-  greeting: string;
-
-  consultant: string;
-
-  activeCandidates: number;
-
-  discoveryToday: TodayMeeting[];
-
-  priorities: PriorityItem[];
+  consultantName: string;
+  dailyBrief: DailyBriefState;
+  topOpportunity: TopOpportunityState;
+  priorityCandidates: PriorityCandidateState[];
+  agenda: AgendaMeetingState[];
+  recommendedActions: RecommendedActionState[];
+  introductionReady: IntroductionReadyState[];
+  intelligenceFeed: IntelligenceEventState[];
 }

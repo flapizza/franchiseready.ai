@@ -14,11 +14,11 @@ export default function RequestDemoPage() {
           </p>
 
           <h1 className="mt-6 text-5xl font-black tracking-tight text-ink lg:text-6xl">
-            See FranchiseReady AI in Action
+            See FranGroove AI in Action
           </h1>
 
           <p className="mx-auto mt-8 max-w-3xl text-xl leading-9 text-muted">
-            Discover how FranchiseReady AI helps professional franchise
+            Discover how FranGroove AI helps professional franchise
             consultants conduct better Discovery meetings, understand
             candidates faster, generate transparent brand recommendations,
             and deliver stronger candidates to franchisors.
@@ -41,7 +41,7 @@ export default function RequestDemoPage() {
             </h2>
 
             <p className="mt-6 leading-8 text-muted">
-              Already know you'd like to see the platform?
+              Already know you’d like to see the platform?
               Choose a time that works for you and book
               your personalized demonstration instantly.
             </p>
@@ -93,7 +93,7 @@ export default function RequestDemoPage() {
 
             <p className="mt-6 leading-8 text-muted">
               Have questions before scheduling?
-              Send us a message and we'll personally
+              Send us a message and we’ll personally
               reach out to discuss your consulting practice.
             </p>
 
@@ -155,7 +155,7 @@ export default function RequestDemoPage() {
           </h2>
 
           <p className="mx-auto mt-8 max-w-3xl text-lg leading-9 text-slate-300">
-            FranchiseReady AI is intentionally available only to professional
+            FranGroove AI is intentionally available only to professional
             franchise consultants. We do not license our recommendation engine
             to franchisors, ensuring every recommendation is based solely on
             candidate fit—not sponsorships, commercial relationships, or paid

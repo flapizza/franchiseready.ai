@@ -1,17 +1,16 @@
 "use client";
 
 import {
-  BarChart3,
-  Brain,
-  Briefcase,
+  BrainCircuit,
   FileText,
   Home,
+  SearchCheck,
   Settings,
-  Target,
   Users,
 } from "lucide-react";
 
 import { BrandLockup } from "@/feature/branding/components/BrandLockup";
+import { APP_ROUTES } from "@/lib/auth/constants";
 
 import { NavigationItem } from "./NavigationItem";
 
@@ -28,52 +27,49 @@ export function Sidebar() {
       <nav className="flex-1 space-y-2 p-5">
 
         <NavigationItem
-          href="/mission-control"
+          href={APP_ROUTES.missionControl}
           label="Mission Control"
           icon={<Home size={20} />}
+          exactMatch
         />
 
         <NavigationItem
-          href="/crm"
-          label="Candidate Intelligence"
+          href={APP_ROUTES.candidateIntelligence}
+          label="Candidates"
           icon={<Users size={20} />}
+          excludedSuffixes={["/strategy", "/referral"]}
         />
 
+        <p className="px-4 pt-5 text-[10px] font-bold uppercase tracking-[0.22em] text-slate-600">AI Workspaces</p>
+
         <NavigationItem
-          href="/crm/pipeline"
+          href={APP_ROUTES.discoveryCopilot}
           label="Discovery Copilot"
-          icon={<Brain size={20} />}
+          icon={<SearchCheck size={20} />}
+          activeSuffixes={["/discovery"]}
         />
 
         <NavigationItem
-          href="/crm/brands"
+          href={APP_ROUTES.brandStrategy}
           label="Brand Strategy"
-          icon={<Target size={20} />}
+          icon={<BrainCircuit size={20} />}
+          activeSuffixes={["/strategy"]}
         />
 
         <NavigationItem
-          href="/crm/reports"
+          href={APP_ROUTES.referralStudio}
           label="Referral Studio"
-          icon={<Briefcase size={20} />}
-        />
-
-        <NavigationItem
-          href="/crm/tasks"
-          label="Insights"
           icon={<FileText size={20} />}
+          activeSuffixes={["/referral"]}
         />
 
+        <div className="pt-5">
         <NavigationItem
-          href="/workbench"
-          label="AI Studio"
-          icon={<BarChart3 size={20} />}
-        />
-
-        <NavigationItem
-          href="/settings/profile"
+          href={APP_ROUTES.settings}
           label="Settings"
           icon={<Settings size={20} />}
         />
+        </div>
 
       </nav>
 

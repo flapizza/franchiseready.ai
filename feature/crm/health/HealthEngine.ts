@@ -6,30 +6,32 @@ export class HealthEngine {
   calculate(
     candidate: CandidateRecord,
   ): HealthScore {
+    const intelligence = candidate.intelligence;
+    if (!intelligence) throw new Error("Health scoring requires completed Candidate Intelligence.");
     const factors = [
       {
         name: "Readiness",
         weight: 30,
-        value: candidate.intelligence.overallReadiness,
+        value: intelligence.overallReadiness,
         explanation: "Overall assessment readiness",
       },
       {
         name: "Coachability",
         weight: 20,
-        value: candidate.intelligence.behavioral.coachability,
+        value: intelligence.behavioral.coachability,
         explanation: "Willingness to receive coaching",
       },
       {
         name: "Financial Readiness",
         weight: 25,
         value:
-          candidate.intelligence.financial.financingLikelihood,
+          intelligence.financial.financingLikelihood,
         explanation: "Ability to fund a franchise",
       },
       {
         name: "Timeline",
         weight: 25,
-        value: candidate.intelligence.timing.urgency,
+        value: intelligence.timing.urgency,
         explanation: "Expected buying timeframe",
       },
     ];

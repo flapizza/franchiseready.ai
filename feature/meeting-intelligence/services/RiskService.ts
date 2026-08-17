@@ -6,6 +6,15 @@ export class RiskService {
   public evaluate(
     transcript: MeetingTranscript,
   ): MeetingRisk[] {
+    const meetingText = transcript.entries
+      .map((entry) => entry.text)
+      .join(" ")
+      .toLowerCase();
+
+    const familyDiscussed =
+      meetingText.includes("family") ||
+      meetingText.includes("spouse");
+
     return [
       {
         id: "family",
@@ -17,7 +26,7 @@ export class RiskService {
 
         severity: "medium",
 
-        confidence: 82,
+        confidence: familyDiscussed ? 64 : 82,
       },
     ];
   }

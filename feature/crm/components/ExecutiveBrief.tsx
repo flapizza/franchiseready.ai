@@ -27,11 +27,11 @@ export function ExecutiveBrief({
           <div>
 
             <h2 className="text-4xl font-black tracking-tight text-slate-900">
-              Prepared by FranchiseReady AI
+              Prepared by FranGroove AI
             </h2>
 
             <p className="mt-3 max-w-3xl text-lg leading-8 text-slate-600">
-              Executive assessment generated from the candidate's
+              Executive assessment generated from the candidate’s
               Discovery conversation, assessment profile, and AI
               intelligence engine.
             </p>

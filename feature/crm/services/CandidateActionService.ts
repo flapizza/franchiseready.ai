@@ -4,11 +4,13 @@ import type { CandidateAction } from "../models/CandidateAction";
 export class CandidateActionService {
   build(candidate: CandidateRecord): CandidateAction[] {
     const actions: CandidateAction[] = [];
+    const intelligence = candidate.intelligence;
+    if (!intelligence) return actions;
 
-    const readiness = candidate.intelligence.overallReadiness;
+    const readiness = intelligence.overallReadiness;
     const health = candidate.healthScore;
     const coachability =
-      candidate.intelligence.behavioral.coachability;
+      intelligence.behavioral.coachability;
 
     if (readiness >= 85) {
       actions.push({

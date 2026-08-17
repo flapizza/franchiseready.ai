@@ -1,15 +1,19 @@
 import type { ReferralPackage } from "../models/ReferralPackage";
 
 import type { CandidateIntelligenceState } from "@/feature/intelligence/models/CandidateIntelligenceState";
+import { demoConsultant } from "@/feature/demo/data/demoConsultant";
+import { getDemoBrandById } from "@/feature/brand-library/data/demoBrands";
 
 export class ReferralPackageEngine {
   public generate(
     intelligence: CandidateIntelligenceState,
   ): ReferralPackage {
+    const eraGroup = getDemoBrandById("era-group");
+
     return {
       consultant: {
         companyName: "Smith Franchise Advisors",
-        consultantName: "Jim Wood",
+        consultantName: demoConsultant.displayName,
         website: "www.smithfranchise.com",
         email: "jim@example.com",
       },
@@ -21,7 +25,7 @@ export class ReferralPackageEngine {
       },
 
       brand: {
-        name: "ERA Group",
+        name: eraGroup.name,
         overallFit: 95,
       },
 

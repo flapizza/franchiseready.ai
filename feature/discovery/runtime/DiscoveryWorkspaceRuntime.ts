@@ -37,19 +37,22 @@ export class DiscoveryWorkspaceRuntime {
     candidate: CandidateRecord,
   ): DiscoveryWorkspaceState {
 
+    const profile = candidate.intelligence;
+    if (!profile) throw new Error("Discovery requires completed Candidate Intelligence.");
+
     const memory =
       this.memoryEngine.create();
 
     const intelligence: CandidateIntelligenceState = {
   readiness:
-    candidate.intelligence.overallReadiness,
+    profile.overallReadiness,
 
   confidence:
-    candidate.intelligence.financial
+    profile.financial
       .financingLikelihood,
 
   executiveSummary:
-    candidate.intelligence.executiveSummary,
+    profile.executiveSummary,
 
   buyingSignals: [],
 
@@ -59,7 +62,7 @@ export class DiscoveryWorkspaceRuntime {
     const coaching =
       this.coachingEngine.evaluate({
         detectedRisks: [],
-      } as any);
+      });
 
     const recommendations =
   this.recommendationEngine.generate({

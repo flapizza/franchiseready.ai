@@ -1,19 +1,26 @@
 import { Candidate360Runtime } from "../runtime/Candidate360Runtime";
+import { notFound } from "next/navigation";
 
 import { CandidateHeader } from "./CandidateHeader";
 import { ExecutiveSummary } from "./ExecutiveSummary";
 import { ReadinessScorecard } from "./ReadinessScorecard";
+import { CandidateRelationshipOverview } from "./CandidateRelationshipOverview";
+import { CandidateActivityTimeline } from "./CandidateActivityTimeline";
 
 type Props = {
   candidateId: string;
 };
 
-export function Candidate360Page({
+export async function Candidate360Page({
   candidateId,
 }: Props) {
   const runtime = new Candidate360Runtime();
 
-  const candidate = runtime.load(candidateId);
+  const candidate = await runtime.load(candidateId);
+
+  if (!candidate) {
+    notFound();
+  }
 
   return (
     <div className="space-y-8">
@@ -22,13 +29,17 @@ export function Candidate360Page({
         candidate={candidate}
       />
 
-      <ExecutiveSummary
-        candidate={candidate}
-      />
+      <CandidateRelationshipOverview candidate={candidate} />
 
-      <ReadinessScorecard
+      {candidate.hasIntelligence && <ExecutiveSummary
         candidate={candidate}
-      />
+      />}
+
+      {candidate.hasIntelligence && <ReadinessScorecard
+        candidate={candidate}
+      />}
+
+      <CandidateActivityTimeline candidate={candidate} />
 
     </div>
   );

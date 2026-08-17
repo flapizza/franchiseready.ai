@@ -9,6 +9,16 @@ export const AUTH_ROUTES = {
 } as const;
 
 export const APP_ROUTES = {
+  missionControl: "/crm",
+  candidates: "/crm/candidates",
+  candidateIntelligence: "/crm/candidates",
+  discoveryCopilot: "/crm/discovery",
+  brandStrategy: "/crm/strategy",
+  referralStudio: "/crm/referrals",
+  insights: "/crm/tasks",
+  aiStudio: "/crm/reports",
+  settings: "/settings/profile",
+  assessment: "/assessment",
   candidate: "/candidate",
   consultant: "/consultant",
   franchisor: "/franchisor",
@@ -36,6 +46,9 @@ export const AUTH_ROUTES_ONLY = [
 ] as const;
 
 export const PROTECTED_ROUTE_PREFIXES = [
+  APP_ROUTES.missionControl,
+  APP_ROUTES.settings,
+  APP_ROUTES.assessment,
   APP_ROUTES.onboarding,
   APP_ROUTES.candidate,
   APP_ROUTES.consultant,

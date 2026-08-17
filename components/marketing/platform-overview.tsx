@@ -60,7 +60,7 @@ export function PlatformOverview() {
           </h2>
 
           <p className="mx-auto mt-8 max-w-3xl text-xl leading-9 text-muted">
-            FranchiseReady AI combines candidate intelligence,
+            FranGroove AI combines candidate intelligence,
             Discovery meeting guidance, brand recommendations,
             CRM workflows, and automated referral packages into
             a single AI-powered platform.

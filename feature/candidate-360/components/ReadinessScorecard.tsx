@@ -27,7 +27,7 @@ export function ReadinessScorecard({
         <div className="rounded-2xl bg-blue-600 px-6 py-4 text-center">
 
           <div className="text-4xl font-black text-white">
-            {candidate.readinessScore}
+            {candidate.readinessScore ?? "—"}
           </div>
 
           <div className="text-xs font-semibold uppercase tracking-widest text-blue-100">
@@ -42,22 +42,22 @@ export function ReadinessScorecard({
 
         <ScoreBar
           label="Financial Readiness"
-          score={candidate.financialReadiness}
+          score={candidate.financialReadiness ?? 0}
         />
 
         <ScoreBar
           label="Leadership"
-          score={candidate.leadershipReadiness}
+          score={candidate.leadershipReadiness ?? 0}
         />
 
         <ScoreBar
           label="Lifestyle Alignment"
-          score={candidate.lifestyleAlignment}
+          score={candidate.lifestyleAlignment ?? 0}
         />
 
         <ScoreBar
           label="Coachability"
-          score={candidate.coachability}
+          score={candidate.coachability ?? 0}
         />
 
       </div>

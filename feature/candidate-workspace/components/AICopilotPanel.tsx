@@ -124,7 +124,7 @@ export function AICopilotPanel({
         <Section title="Suggested Question">
 
           <blockquote className="rounded-xl bg-slate-50 p-4 italic text-slate-700">
-            "{suggestedQuestion}"
+            “{suggestedQuestion}”
           </blockquote>
 
         </Section>

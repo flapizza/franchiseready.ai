@@ -1,14 +1,38 @@
 "use client";
 
 import {
-  Bell,
   Bot,
   Plus,
-  Search,
-  Sparkles,
 } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { demoConsultant } from "@/feature/demo/data/demoConsultant";
 
 export function TopBar() {
+  const pathname = usePathname();
+  const context = pathname === "/crm/referrals"
+    ? { eyebrow: "Consultant Workspace", title: "Referral Studio", description: "Manage candidates ready for referral preparation and introduction." }
+    : pathname === "/crm/strategy"
+    ? { eyebrow: "AI Workspace", title: "Brand Strategy", description: "Open the candidates ready for evidence-backed brand evaluation." }
+    : pathname === "/crm/discovery"
+    ? { eyebrow: "AI Workspace", title: "Discovery Copilot", description: "Continue Discovery with candidates who are ready for evidence validation." }
+    : /^\/crm\/candidates\/[^/]+\/referral$/.test(pathname)
+    ? { eyebrow: "Referral Studio", title: "Referral Studio", description: "Prepare, review, and approve franchisor introductions." }
+    : /^\/crm\/candidates\/[^/]+\/strategy$/.test(pathname)
+    ? { eyebrow: "AI Brand Strategy", title: "Brand Strategy", description: "Evaluate candidate-brand fit, presentation order, and readiness for introduction." }
+    : pathname === "/crm"
+    ? { eyebrow: "Mission Control", title: `Welcome back, ${demoConsultant.firstName}.`, description: "Your AI team has prioritized the candidates and actions that deserve attention today." }
+    : pathname === "/crm/candidates/new"
+      ? { eyebrow: "Candidate Intake", title: "New Candidate", description: "Create the relationship first, then invite the candidate to complete their assessment." }
+      : pathname === "/crm/candidates"
+        ? { eyebrow: "Candidate CRM", title: "Candidates", description: "Manage candidate progress, assessment status, and next actions." }
+        : /^\/crm\/candidates\/[^/]+$/.test(pathname)
+          ? { eyebrow: "Candidate 360", title: "Candidate Workspace", description: "Review candidate context, intelligence, activity, and recommended next actions." }
+          : /^\/crm\/[^/]+\/discovery$/.test(pathname)
+            ? { eyebrow: "Discovery Copilot", title: "Discovery", description: "Validate ownership goals, risks, and evidence before Brand Strategy." }
+            : /^\/crm\/[^/]+\/briefing$/.test(pathname)
+              ? { eyebrow: "Consultant Briefing", title: "Meeting Brief", description: "Prepare candidate context, objectives, and conversation guidance." }
+        : { eyebrow: "FranGroove Workspace", title: `Welcome back, ${demoConsultant.firstName}.`, description: "Your consultant workspace is ready." };
   return (
     <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 backdrop-blur">
 
@@ -19,19 +43,15 @@ export function TopBar() {
           <div>
 
             <div className="text-sm font-semibold uppercase tracking-[0.22em] text-teal-600">
-              Mission Control
+              {context.eyebrow}
             </div>
 
             <h1 className="mt-1 text-3xl font-black tracking-tight text-slate-900">
-              Welcome back, Jim.
+              {context.title}
             </h1>
 
             <p className="mt-1 text-sm text-slate-500">
-              Your AI team identified{" "}
-              <span className="font-semibold text-slate-900">
-                3 opportunities
-              </span>{" "}
-              that deserve your attention today.
+              {context.description}
             </p>
 
           </div>
@@ -40,28 +60,13 @@ export function TopBar() {
 
         <div className="flex items-center gap-4">
 
-          <div className="relative w-[420px]">
-
-            <Search
-              size={18}
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
-            />
-
-            <input
-              type="text"
-              placeholder="Ask FranGroove anything..."
-              className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-12 pr-4 outline-none transition-all focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-100"
-            />
-
-          </div>
-
-          <button className="flex items-center gap-2 rounded-xl bg-slate-900 px-5 py-3 font-semibold text-white transition hover:bg-slate-800">
+          <Link href="/crm/candidates/new" className="flex items-center gap-2 rounded-xl bg-slate-900 px-5 py-3 font-semibold text-white transition hover:bg-slate-800">
 
             <Plus size={18} />
 
             New Candidate
 
-          </button>
+          </Link>
 
           <div className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
 
@@ -78,39 +83,20 @@ export function TopBar() {
 
           </div>
 
-          <button className="relative rounded-xl border border-slate-200 p-3 transition hover:bg-slate-100">
-
-            <Bell size={18} />
-
-            <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
-              2
-            </span>
-
-          </button>
-
-          <button className="rounded-xl border border-slate-200 p-3 transition hover:bg-slate-100">
-
-            <Sparkles
-              size={18}
-              className="text-teal-600"
-            />
-
-          </button>
-
           <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-2 shadow-sm">
 
             <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-slate-900 to-slate-700 font-bold text-white">
-              JW
+              {demoConsultant.initials}
             </div>
 
             <div>
 
               <div className="font-semibold text-slate-900">
-                Jim Wood
+                {demoConsultant.displayName}
               </div>
 
               <div className="text-sm text-slate-500">
-                Franchise Consultant
+                {demoConsultant.title}
               </div>
 
             </div>

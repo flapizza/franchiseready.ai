@@ -10,13 +10,18 @@ import { QuestionCard } from "./QuestionCard";
 
 import { SeedAssessmentRepository } from "../repositories/AssessmentRepository";
 import { useAssessmentRuntime } from "../hooks/useAssessmentRuntime";
+import { completeAssessmentAction, type AssessmentIdentityInput } from "../actions/complete-assessment";
 
 type Props = {
   assessmentId: string;
+  invitationToken?: string;
+  invitedIdentity?: AssessmentIdentityInput;
 };
 
 export function AssessmentPlayer({
   assessmentId,
+  invitationToken,
+  invitedIdentity,
 }: Props) {
   const router = useRouter();
 
@@ -38,6 +43,9 @@ export function AssessmentPlayer({
 
   const [selectedValue, setSelectedValue] =
     useState<Response["value"] | null>(null);
+  const [identity, setIdentity] = useState<AssessmentIdentityInput | null>(invitedIdentity ?? null);
+  const [completionError, setCompletionError] = useState<string | null>(null);
+  const [completing, setCompleting] = useState(false);
 
   if (loading) {
     return (
@@ -57,6 +65,10 @@ export function AssessmentPlayer({
 
   const snapshot = runtime.snapshot();
 
+  if (!identity) {
+    return <AssessmentIdentityForm onContinue={setIdentity} />;
+  }
+
   const question =
     runtime.currentQuestion();
 
@@ -72,7 +84,7 @@ export function AssessmentPlayer({
     snapshot.progress.answeredQuestions >=
     snapshot.progress.totalQuestions - 1;
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (selectedValue === null) {
       return;
     }
@@ -84,9 +96,15 @@ export function AssessmentPlayer({
     setSelectedValue(null);
 
     if (isLastQuestion) {
-      router.push(
-        `/assessment/${assessmentId}/results`,
-      );
+      setCompleting(true);
+      const completedSnapshot = runtime.snapshot();
+      const result = await completeAssessmentAction({ assessmentId, sessionId: completedSnapshot.session.id, invitationToken, identity, responses: completedSnapshot.responses as Response[] });
+      if (result.status === "requires-review") {
+        setCompletionError(result.message);
+        setCompleting(false);
+        return;
+      }
+      router.push(`/crm/candidates/${result.candidateId}`);
 
       return;
     }
@@ -112,7 +130,7 @@ export function AssessmentPlayer({
             </h1>
 
             <p className="mt-6 max-w-3xl text-lg leading-8 text-blue-100">
-              We're going to learn about your
+              We’re going to learn about your
               professional background,
               leadership style,
               financial readiness,
@@ -153,7 +171,7 @@ export function AssessmentPlayer({
             </h2>
 
             <p className="mt-3 leading-7 text-slate-600">
-              Every answer helps FranchiseReady AI
+              Every answer helps FranGroove AI
               understand your goals,
               leadership experience,
               financial readiness,
@@ -213,17 +231,30 @@ export function AssessmentPlayer({
           type="button"
           onClick={handleNext}
           disabled={
-            selectedValue === null
+            selectedValue === null || completing
           }
           className="rounded-xl bg-blue-600 px-8 py-3 font-semibold text-white shadow-lg transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isLastQuestion
-            ? "Complete Discovery"
+            ? completing ? "Completing…" : "Complete Assessment"
             : "Continue"}
         </button>
 
       </div>
 
+      {completionError && <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-800">{completionError}</div>}
+
     </div>
   );
 }
+
+function AssessmentIdentityForm({ onContinue }: { onContinue: (identity: AssessmentIdentityInput) => void }) {
+  const submit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const data = new FormData(event.currentTarget);
+    onContinue({ firstName: String(data.get("firstName")), lastName: String(data.get("lastName")), email: String(data.get("email")), phone: String(data.get("phone") ?? "") });
+  };
+  return <div className="mx-auto max-w-xl rounded-3xl border border-slate-200 bg-white p-8 shadow-sm"><p className="text-xs font-bold uppercase tracking-[0.25em] text-blue-600">Before you begin</p><h1 className="mt-3 text-3xl font-black text-slate-950">Tell us who you are</h1><p className="mt-2 text-sm text-slate-600">We use this information to connect your assessment to the correct candidate record.</p><form onSubmit={submit} className="mt-6 grid gap-4 sm:grid-cols-2"><IdentityField name="firstName" label="First Name" /><IdentityField name="lastName" label="Last Name" /><div className="sm:col-span-2"><IdentityField name="email" label="Email" type="email" /></div><div className="sm:col-span-2"><IdentityField name="phone" label="Phone (optional)" required={false} /></div><button className="sm:col-span-2 rounded-xl bg-blue-600 px-5 py-3 font-bold text-white">Continue to Assessment</button></form></div>;
+}
+
+function IdentityField({ name, label, type = "text", required = true }: { name: string; label: string; type?: string; required?: boolean }) { return <label className="block text-sm font-bold text-slate-700">{label}<input name={name} type={type} required={required} className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2.5 outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-50" /></label>; }

@@ -1,126 +1,73 @@
-"use client";
+import Link from "next/link";
 
-const suggestions = [
-  "Who should I call first today?",
-  "Generate John's referral package",
-  "Show candidates ready for Discovery",
-  "Which candidates are losing momentum?",
-];
+import type { RecommendedActionState } from "../models/MissionControlState";
 
-const actions = [
-  {
-    title: "Call John Smith",
-    reason: "Buying confidence dropped 8%",
-    color: "bg-red-500",
+const toneStyles = {
+  emerald: {
+    dot: "bg-emerald-400",
+    badge: "bg-emerald-500/15 text-emerald-300",
   },
-  {
-    title: "Generate ERA referral package",
-    reason: "Sarah Williams reached 97% AI confidence",
-    color: "bg-emerald-500",
+  amber: {
+    dot: "bg-amber-400",
+    badge: "bg-amber-500/15 text-amber-300",
   },
-  {
-    title: "Schedule Discovery",
-    reason: "Michael completed assessment yesterday",
-    color: "bg-blue-500",
+  blue: {
+    dot: "bg-blue-400",
+    badge: "bg-blue-500/15 text-blue-300",
   },
-];
+};
 
-export function AICommandCenter() {
+type Props = {
+  actions: RecommendedActionState[];
+};
+
+export function AICommandCenter({ actions }: Props) {
   return (
-    <section className="overflow-hidden rounded-3xl border border-slate-800 bg-slate-950 text-white shadow-2xl">
-
-      <div className="border-b border-slate-800 p-8">
-
-        <div className="flex items-center gap-3">
-
-          <div className="h-3 w-3 rounded-full bg-emerald-400 animate-pulse" />
-
-          <span className="text-xs font-bold uppercase tracking-[0.3em] text-emerald-300">
-            AI COMMAND CENTER
-          </span>
-
+    <section className="overflow-hidden rounded-3xl border border-slate-800 bg-slate-950 text-white shadow-lg">
+      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-slate-800 px-7 py-5">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-[0.28em] text-emerald-300">
+            FranGroove Intelligence
+          </p>
+          <h2 className="mt-2 text-2xl font-black">
+            AI Recommended Actions
+          </h2>
         </div>
-
-        <h2 className="mt-6 text-3xl font-black">
-          What would you like FranchiseReady AI to do?
-        </h2>
-
-        <div className="mt-6 rounded-2xl border border-slate-700 bg-slate-900 px-6 py-5 text-slate-400">
-          Ask anything...
-        </div>
-
+        <p className="max-w-xl text-sm text-slate-400">
+          Highest-value moves selected from candidate momentum, lifecycle, and readiness.
+        </p>
       </div>
 
-      <div className="grid gap-8 p-8 lg:grid-cols-2">
+      <div className="grid gap-px bg-slate-800 lg:grid-cols-3">
+        {actions.map((action) => {
+          const styles = toneStyles[action.tone];
 
-        <div>
-
-          <h3 className="text-lg font-bold">
-            Suggested Questions
-          </h3>
-
-          <div className="mt-5 space-y-3">
-
-            {suggestions.map((question) => (
-
-              <button
-                key={question}
-                className="w-full rounded-xl border border-slate-700 bg-slate-900 px-5 py-4 text-left transition hover:border-blue-500 hover:bg-slate-800"
-              >
-                {question}
-              </button>
-
-            ))}
-
-          </div>
-
-        </div>
-
-        <div>
-
-          <h3 className="text-lg font-bold">
-            AI Recommendations
-          </h3>
-
-          <div className="mt-5 space-y-4">
-
-            {actions.map((action) => (
-
-              <div
-                key={action.title}
-                className="rounded-xl border border-slate-700 bg-slate-900 p-5"
-              >
-
-                <div className="flex items-center gap-3">
-
-                  <div
-                    className={`h-3 w-3 rounded-full ${action.color}`}
-                  />
-
-                  <div className="font-bold">
-                    {action.title}
-                  </div>
-
-                </div>
-
-                <p className="mt-3 text-sm text-slate-400">
-                  {action.reason}
-                </p>
-
-                <button className="mt-5 rounded-xl bg-blue-600 px-5 py-2 font-semibold hover:bg-blue-700">
-                  Execute
-                </button>
-
+          return (
+            <article key={action.id} className="bg-slate-950 p-6">
+              <div className="flex items-center gap-3">
+                <span className={`h-2.5 w-2.5 rounded-full ${styles.dot}`} />
+                <span className={`rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide ${styles.badge}`}>
+                  {action.signal}
+                </span>
               </div>
-
-            ))}
-
-          </div>
-
-        </div>
-
+              <h3 className="mt-4 text-lg font-bold">
+                {action.candidateName}
+              </h3>
+              <p className="mt-2 min-h-12 text-sm leading-6 text-slate-400">
+                {action.recommendation}
+              </p>
+              {action.action.href ? (
+                <Link
+                  href={action.action.href}
+                  className="mt-5 inline-flex rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold transition hover:bg-blue-500"
+                >
+                  {action.action.label}
+                </Link>
+              ) : null}
+            </article>
+          );
+        })}
       </div>
-
     </section>
   );
 }

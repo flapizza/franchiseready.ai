@@ -1,4 +1,9 @@
 import type { CandidateIntelligenceProfile } from "../models/CandidateIntelligenceProfile";
+import { getDemoBrandById } from "@/feature/brand-library/data/demoBrands";
+
+const eraGroup = getDemoBrandById("era-group");
+const schooleyMitchell = getDemoBrandById("schooley-mitchell");
+const actionCoach = getDemoBrandById("actioncoach");
 
 export const demoProfile: CandidateIntelligenceProfile = {
   id: "candidate-demo",
@@ -58,7 +63,7 @@ export const demoProfile: CandidateIntelligenceProfile = {
   recommendations: [
     {
       id: "era-group",
-      name: "ERA Group",
+      name: eraGroup.name,
       overallFit: 96,
       behavioralFit: 95,
       competencyFit: 97,
@@ -78,7 +83,7 @@ export const demoProfile: CandidateIntelligenceProfile = {
     },
     {
       id: "schooley-mitchell",
-      name: "Schooley Mitchell",
+      name: schooleyMitchell.name,
       overallFit: 93,
       behavioralFit: 91,
       competencyFit: 95,
@@ -95,7 +100,7 @@ export const demoProfile: CandidateIntelligenceProfile = {
     },
     {
       id: "actioncoach",
-      name: "ActionCOACH",
+      name: actionCoach.name,
       overallFit: 90,
       behavioralFit: 90,
       competencyFit: 92,

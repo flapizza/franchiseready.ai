@@ -52,7 +52,7 @@ export function FranchiseDNAReport() {
         </h1>
 
         <p className="mt-6 max-w-3xl text-lg text-blue-100">
-          FranchiseReady AI analyzed your assessment and
+          FranGroove AI analyzed your assessment and
           generated your initial Franchise DNA profile.
         </p>
 
@@ -100,7 +100,7 @@ export function FranchiseDNAReport() {
 
         <p className="mt-5 leading-8 text-slate-600">
           Based on your assessment,
-          FranchiseReady AI believes you possess
+          FranGroove AI believes you possess
           strong executive leadership,
           excellent consultative communication skills,
           and financial readiness for professional

@@ -25,7 +25,7 @@ export function SuggestedQuestionCard({
           </p>
 
           <h2 className="mt-5 text-3xl font-bold tracking-tight text-slate-900 leading-tight">
-            "{question}"
+            “{question}”
           </h2>
 
         </div>

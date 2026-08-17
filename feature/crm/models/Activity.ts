@@ -2,8 +2,14 @@ export type ActivityType =
   | "candidate-created"
   | "assessment-started"
   | "assessment-completed"
+  | "discovery-started"
   | "discovery-completed"
+  | "validation-started"
   | "brand-presented"
+  | "brand-strategy-ready"
+  | "referral-ready"
+  | "referral-generated"
+  | "candidate-introduced"
   | "validation-completed"
   | "fdd-delivered"
   | "funding-updated"
@@ -28,4 +34,9 @@ export interface Activity {
   description?: string;
 
   createdAt: string;
+
+  previousStage?: import("./CandidateRecord").PipelineStage;
+  newStage?: import("./CandidateRecord").PipelineStage;
+
+  metadata?: Record<string, string | number | boolean>;
 }

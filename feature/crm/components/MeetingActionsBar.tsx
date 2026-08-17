@@ -1,4 +1,4 @@
-import { Button, Card } from "@/feature/ui";
+import { Card } from "@/feature/ui";
 
 type Props = {
   onGenerateSummary?: () => void;
@@ -81,10 +81,6 @@ function ActionButton({
       <p className="mt-2 text-sm leading-6 text-slate-500">
         {description}
       </p>
-
-      <div className="mt-5">
-        
-      </div>
 
     </button>
   );

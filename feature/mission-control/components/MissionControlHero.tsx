@@ -10,6 +10,10 @@ type Props = {
   referralReady: number;
 
   urgentCandidates: number;
+
+  recommendationTitle: string;
+
+  recommendationExplanation: string;
 };
 
 export function MissionControlHero({
@@ -18,6 +22,8 @@ export function MissionControlHero({
   discoveryCandidates,
   referralReady,
   urgentCandidates,
+  recommendationTitle,
+  recommendationExplanation,
 }: Props) {
   return (
     <section className="overflow-hidden rounded-[32px] bg-gradient-to-br from-slate-950 via-slate-900 to-teal-950 text-white shadow-2xl">
@@ -54,14 +60,11 @@ export function MissionControlHero({
             </div>
 
             <h2 className="mt-3 text-3xl font-bold">
-              Call Mike Lavalle Today
+              {recommendationTitle}
             </h2>
 
             <p className="mt-4 max-w-xl leading-8 text-slate-300">
-              Buying momentum has decreased over the past week.
-              A Discovery follow-up today significantly improves
-              the probability of moving the candidate toward
-              referral.
+              {recommendationExplanation}
             </p>
 
             <button

@@ -19,22 +19,13 @@ export class ExecutiveRecommendationEngine {
 
     let confidence = 85;
 
-    // Recommendation rules will be added here one at a time.
-    //
-    // for (const rule of rules) {
-    //   const result = rule.evaluate(context);
-    //
-    //   if (result.evidence) {
-    //     evidence.push(...result.evidence);
-    //   }
-    //
-    //   if (result.risks) {
-    //     risks.push(...result.risks);
-    //   }
-    //
-    //   confidence +=
-    //     result.confidenceAdjustment ?? 0;
-    // }
+    for (const rule of rules) {
+      const result = rule.evaluate(context);
+
+      evidence.push(...(result.evidence ?? []));
+      risks.push(...(result.risks ?? []));
+      confidence += result.confidenceAdjustment ?? 0;
+    }
 
     confidence = Math.max(
       0,

@@ -42,7 +42,7 @@ export function DiscoveryHeader({
               </div>
 
               <p className="mt-6 max-w-3xl text-lg leading-8 text-blue-100">
-                FranchiseReady AI continuously evaluates leadership,
+                FranGroove AI continuously evaluates leadership,
                 financial readiness, coachability, buying intent and
                 franchise compatibility throughout Discovery.
               </p>

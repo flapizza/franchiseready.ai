@@ -1,85 +1,52 @@
-export function CandidateSpotlight() {
+import Link from "next/link";
+
+import type {
+  MissionControlAction,
+  TopOpportunityState,
+} from "../models/MissionControlState";
+
+type Props = {
+  candidate: TopOpportunityState;
+};
+
+export function CandidateSpotlight({ candidate }: Props) {
   return (
-    <section className="overflow-hidden rounded-3xl bg-gradient-to-br from-blue-700 via-indigo-700 to-slate-900 text-white shadow-2xl">
+    <section className="overflow-hidden rounded-3xl bg-gradient-to-br from-blue-700 via-indigo-700 to-slate-900 text-white shadow-xl">
+      <div className="grid gap-8 p-7 lg:grid-cols-[1.45fr_0.8fr] lg:p-8">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-[0.3em] text-blue-200">
+            Top Opportunity
+          </p>
+          <h2 className="mt-3 text-4xl font-black tracking-tight">
+            {candidate.candidateName}
+          </h2>
+          <p className="mt-3 max-w-2xl leading-7 text-blue-100">
+            {candidate.rationale}
+          </p>
 
-      <div className="p-8">
-
-        <div className="flex items-center justify-between">
-
-          <div>
-
-            <p className="text-sm uppercase tracking-[0.3em] text-blue-200">
-              Candidate Spotlight
-            </p>
-
-            <h2 className="mt-3 text-4xl font-black">
-              John Smith
-            </h2>
-
-            <p className="mt-3 max-w-xl text-blue-100">
-              AI believes John has the highest probability of
-              becoming your next franchise owner if family
-              alignment is confirmed this week.
-            </p>
-
+          <div className="mt-6 flex flex-wrap gap-3">
+            <ActionControl action={candidate.primaryAction} primary />
+            {candidate.secondaryActions.map((action) => (
+              <ActionControl key={action.label} action={action} />
+            ))}
           </div>
-
-          <div className="rounded-3xl bg-white/10 px-8 py-6 text-center backdrop-blur">
-
-            <div className="text-6xl font-black text-emerald-300">
-              96%
-            </div>
-
-            <div className="mt-2 text-sm uppercase tracking-widest">
-              AI Confidence
-            </div>
-
-          </div>
-
         </div>
 
-        <div className="mt-10 grid gap-5 md:grid-cols-4">
-
-          <Metric
-            title="Readiness"
-            value="92%"
-          />
-
-          <Metric
-            title="Buying"
-            value="High"
-          />
-
-          <Metric
-            title="Best Brand"
-            value="ERA"
-          />
-
-          <Metric
-            title="Timeline"
-            value="60 Days"
-          />
-
+        <div className="grid grid-cols-2 gap-3">
+          <Metric title="Match Confidence" value={`${candidate.confidence}%`} accent />
+          <Metric title="Readiness" value={`${candidate.readiness}%`} />
+          <Metric title="Momentum" value={candidate.momentum} />
+          <Metric title="Best Brand" value={candidate.bestBrand} />
+          <div className="col-span-2 rounded-2xl bg-white/10 px-5 py-4 backdrop-blur">
+            <p className="text-xs uppercase tracking-[0.18em] text-blue-200">
+              Estimated Timeline
+            </p>
+            <p className="mt-2 text-xl font-bold">
+              {candidate.estimatedTimeline}
+            </p>
+          </div>
         </div>
-
       </div>
-
-      <div className="grid gap-px bg-white/10 md:grid-cols-3">
-
-        <Action
-          title="Open Candidate"
-        />
-
-        <Action
-          title="Generate Referral Package"
-        />
-
-        <Action
-          title="Launch Discovery"
-        />
-
-      </div>
-
     </section>
   );
 }
@@ -87,37 +54,46 @@ export function CandidateSpotlight() {
 function Metric({
   title,
   value,
+  accent = false,
 }: {
   title: string;
   value: string;
+  accent?: boolean;
 }) {
   return (
-    <div className="rounded-2xl bg-white/5 p-5">
-
-      <div className="text-3xl font-black">
-        {value}
-      </div>
-
-      <div className="mt-2 text-sm text-blue-100">
+    <div className="rounded-2xl bg-white/10 px-5 py-4 backdrop-blur">
+      <p className="text-xs uppercase tracking-[0.18em] text-blue-200">
         {title}
-      </div>
-
+      </p>
+      <p
+        className={`mt-2 text-2xl font-black capitalize ${
+          accent ? "text-emerald-300" : "text-white"
+        }`}
+      >
+        {value}
+      </p>
     </div>
   );
 }
 
-function Action({
-  title,
+function ActionControl({
+  action,
+  primary = false,
 }: {
-  title: string;
+  action: MissionControlAction;
+  primary?: boolean;
 }) {
-  return (
-    <button className="bg-slate-900/70 p-6 text-left transition hover:bg-blue-700">
+  const className = primary
+    ? "rounded-xl bg-emerald-400 px-5 py-3 text-sm font-bold text-slate-950 transition hover:bg-emerald-300"
+    : "rounded-xl border border-white/20 bg-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/20";
 
-      <div className="font-bold">
-        {title}
-      </div>
+  if (action.href) {
+    return (
+      <Link href={action.href} className={className}>
+        {action.label}
+      </Link>
+    );
+  }
 
-    </button>
-  );
+  return null;
 }

@@ -1,67 +1,60 @@
 import type { CandidateRecord } from "../models/CandidateRecord";
 import type { CandidateRepository } from "./CandidateRepository";
 
-import { demoProfile } from "@/feature/intelligence/data/demoProfile";
+import { SeedDemoScenarioRepository } from "@/feature/demo/repositories/SeedDemoScenarioRepository";
+import { demoCandidateOverlayStore } from "./DemoCandidateOverlayStore";
 
 export class SeedCandidateRepository
   implements CandidateRepository
 {
-  private readonly candidates: CandidateRecord[] = [
-    {
-      id: "candidate-demo",
-
-      firstName: "John",
-      lastName: "Smith",
-
-      email: "john@example.com",
-      phone: "(555) 555-1234",
-
-      city: "Greensboro",
-      state: "NC",
-      country: "USA",
-
-      consultantId: "consultant-demo",
-
-      status: "active",
-
-      pipelineStage: "discovery",
-
-      healthScore: 92,
-
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      lastActivityAt: new Date().toISOString(),
-
-      intelligence: demoProfile,
-    },
-  ];
+  private readonly scenarioRepository =
+    new SeedDemoScenarioRepository();
 
   async getAll(): Promise<CandidateRecord[]> {
-    return this.candidates;
+    const scenario = await this.scenarioRepository.getScenario();
+    const overlay = demoCandidateOverlayStore.getCandidates();
+    const overlayById = new Map(overlay.map((candidate) => [candidate.id, candidate]));
+    const baseline = scenario.candidates.map((candidate) => overlayById.get(candidate.id) ?? candidate);
+    const baselineIds = new Set(scenario.candidates.map((candidate) => candidate.id));
+    return [...baseline, ...overlay.filter((candidate) => !baselineIds.has(candidate.id))];
   }
 
   async getById(
     id: string,
   ): Promise<CandidateRecord | null> {
-    return (
-      this.candidates.find(
-        (candidate) => candidate.id === id,
-      ) ?? null
+    return demoCandidateOverlayStore.getCandidate(id) ??
+      this.scenarioRepository.getCandidateById(id);
+  }
+
+  async findByNormalizedEmail(
+    consultantId: string,
+    normalizedEmail: string,
+  ): Promise<CandidateRecord[]> {
+    const candidates = await this.getAll();
+
+    return candidates.filter(
+      (candidate) =>
+        candidate.consultantId === consultantId &&
+        candidate.email.trim().toLowerCase() === normalizedEmail,
+    );
+  }
+
+  async findByNormalizedPhone(
+    consultantId: string,
+    normalizedPhone: string,
+  ): Promise<CandidateRecord[]> {
+    const candidates = await this.getAll();
+
+    return candidates.filter(
+      (candidate) =>
+        candidate.consultantId === consultantId &&
+        candidate.phone.replace(/\D/g, "") === normalizedPhone,
     );
   }
 
   async save(
     candidate: CandidateRecord,
   ): Promise<void> {
-    const index = this.candidates.findIndex(
-      (c) => c.id === candidate.id,
-    );
-
-    if (index >= 0) {
-      this.candidates[index] = candidate;
-      return;
-    }
-
-    this.candidates.push(candidate);
+    demoCandidateOverlayStore.saveCandidate(candidate);
   }
 }

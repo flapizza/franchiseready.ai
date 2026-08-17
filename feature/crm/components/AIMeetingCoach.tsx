@@ -142,7 +142,7 @@ export function AIMeetingCoach({
               </h2>
 
               <p className="mt-3 max-w-2xl text-slate-300">
-                Complete this action while the candidate's engagement level is
+                Complete this action while the candidate’s engagement level is
                 high. The Intelligence Engine predicts the greatest probability
                 of forward momentum immediately following discovery.
               </p>

@@ -1,5 +1,6 @@
 import { ConsultantBriefingPage } from "@/feature/consultant-briefing/components/ConsultantBriefingPage";
 import { ConsultantBriefingRuntime } from "@/feature/consultant-briefing/runtime/ConsultantBriefingRuntime";
+import { notFound } from "next/navigation";
 
 type Props = {
   params: Promise<{
@@ -10,11 +11,15 @@ type Props = {
 export default async function BriefingPage({
   params,
 }: Props) {
-  await params;
+  const { id } = await params;
 
   const runtime = new ConsultantBriefingRuntime();
 
-  const briefing = runtime.build();
+  const briefing = await runtime.build(id);
+
+  if (!briefing) {
+    notFound();
+  }
 
   return (
     <main className="mx-auto max-w-7xl p-8">

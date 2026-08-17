@@ -1,10 +1,8 @@
 import { notFound } from "next/navigation";
 
 import { DiscoveryCopilot } from "@/feature/crm/components/DiscoveryCopilot";
-import { DiscoveryCopilotEngine } from "@/feature/discovery/runtime/DiscoveryCopilotEngine";
 
 import { SeedCandidateRepository } from "@/feature/crm/repositories/SeedCandidateRepository";
-import { ExecutiveRecommendationPanel } from "@/feature/crm/components/ExecutiveRecommendationPanel";
 
 import type {
   ExecutiveRecommendation,
@@ -22,12 +20,13 @@ import {
 import { ExecutiveBrief } from "@/feature/crm/components/ExecutiveBrief";
 import { DiscoveryHeader } from "@/feature/crm/components/DiscoveryHeader";
 import { SessionObjectivesCard } from "@/feature/crm/components/SessionObjectivesCard";
-import { AIInsightsPanel } from "@/feature/crm/components/AIInsightsPanel";
 import { LiveNotesPanel } from "@/feature/crm/components/LiveNotesPanel";
 import { SuggestedQuestionCard } from "@/feature/crm/components/SuggestedQuestionCard";
 import { MeetingActionsBar } from "@/feature/crm/components/MeetingActionsBar";
 
 import { DiscoveryRuntime } from "@/feature/discovery/runtime/DiscoveryRuntime";
+import { createDemoCandidateLifecycleService } from "@/feature/crm/services/DemoCandidateLifecycleService";
+import { CandidateLifecycleAction } from "@/feature/crm/components/CandidateLifecycleAction";
 
 import type { DiscoveryContext } from "@/feature/discovery/models/DiscoveryContext";
 
@@ -48,7 +47,7 @@ export default async function DiscoveryWorkspacePage({
   const candidate =
     await repository.getById(id);
 
-  if (!candidate) {
+  if (!candidate || !candidate.intelligence) {
     notFound();
   }
 
@@ -58,11 +57,7 @@ export default async function DiscoveryWorkspacePage({
     intelligence:
       candidate.intelligence,
 
-    notes: `Candidate has over 20 years of executive leadership experience.
-Interested in long-term wealth creation.
-Considering leaving corporate America.
-Family has discussed franchise ownership.
-Seeking validation before making a final decision.`,
+    notes: candidate.intelligence.executiveSummary,
 
     stage: "opening",
 
@@ -70,20 +65,11 @@ Seeking validation before making a final decision.`,
       "Validate ownership motivation",
     ],
 
-    activeTopics: [
-      "Family Alignment",
-      "Financial Readiness",
-      "Leadership",
-    ],
+    activeTopics: candidate.intelligence.discoveryPriorities,
 
-    detectedBuyingSignals: [
-      "Asked about next steps",
-      "Discussed ownership timeline",
-    ],
+    detectedBuyingSignals: candidate.intelligence.preferredBusinessModels,
 
-    detectedRisks: [
-      "Family alignment not fully confirmed",
-    ],
+    detectedRisks: candidate.intelligence.discoveryPriorities,
 
     startedAt: new Date(),
 
@@ -95,6 +81,7 @@ Seeking validation before making a final decision.`,
 
   const workspace =
     runtime.evaluate(context);
+  const lifecycleAction = createDemoCandidateLifecycleService(repository).getRecommendedAction(candidate);
 
     const recommendation: ExecutiveRecommendation = {
   status: "ready",
@@ -254,6 +241,15 @@ Seeking validation before making a final decision.`,
 />
 
       <MeetingActionsBar />
+
+      {lifecycleAction?.kind === "discovery-completed" && (
+        <section className="rounded-2xl border border-teal-200 bg-teal-50 p-6">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-teal-700">Lifecycle orchestration</p>
+          <h2 className="mt-2 text-xl font-black text-slate-900">Discovery is ready to close</h2>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">The canonical lifecycle service will validate the candidate evidence, select Validation or Brand Strategy, and record the transition activity.</p>
+          <div className="mt-4 w-fit"><CandidateLifecycleAction candidateId={candidate.id} label={lifecycleAction.label} /></div>
+        </section>
+      )}
   
 
     </WorkspaceLayout>

@@ -7,6 +7,15 @@ export class ActionEngine {
     context: DiscoveryContext,
     insights: AIInsight[],
   ): NextBestAction[] {
+    const hasHighPriorityInsight = insights.some(
+      (insight) => insight.priority === "high",
+    );
+
+    const brandMatchPriority =
+      context.stage === "closing" && !hasHighPriorityInsight
+        ? "high"
+        : "medium";
+
     return [
       {
         id: "brand-match",
@@ -16,7 +25,7 @@ export class ActionEngine {
         description:
           "Present the highest-ranked franchise opportunities.",
 
-        priority: "high",
+        priority: brandMatchPriority,
 
         completed: false,
       },

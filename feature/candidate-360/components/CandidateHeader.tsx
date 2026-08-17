@@ -36,7 +36,7 @@ export function CandidateHeader({
 
           </div>
 
-          <div className="grid gap-5 sm:grid-cols-2">
+          {candidate.hasIntelligence && <div className="grid gap-5 sm:grid-cols-2">
 
             <ScoreCard
               label="Buying Confidence"
@@ -50,7 +50,7 @@ export function CandidateHeader({
               color="blue"
             />
 
-          </div>
+          </div>}
 
         </div>
 
@@ -66,7 +66,7 @@ function ScoreCard({
   color,
 }: {
   label: string;
-  value: number;
+  value: number | null;
   color: "emerald" | "blue";
 }) {
   const colors = {
@@ -95,7 +95,7 @@ function ScoreCard({
       </div>
 
       <div className={`mt-4 text-6xl font-black ${theme.value}`}>
-        {value}%
+        {value ?? "—"}{value === null ? "" : "%"}
       </div>
     </div>
   );

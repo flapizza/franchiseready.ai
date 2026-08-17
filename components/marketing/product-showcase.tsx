@@ -150,7 +150,7 @@ function DiscoveryCopilotPreview() {
           </div>
 
           <p className="mt-3 text-white">
-            "I've managed more than 300 employees across multiple states."
+            “I’ve managed more than 300 employees across multiple states.”
           </p>
 
         </div>
@@ -389,7 +389,7 @@ export function ProductShowcase() {
         <div className="mx-auto max-w-4xl text-center">
 
           <p className="text-sm font-semibold uppercase tracking-[0.30em] text-brand">
-            See FranchiseReady AI
+            See FranGroove AI
           </p>
 
           <h2 className="mt-6 text-5xl font-black tracking-tight text-ink">

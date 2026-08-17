@@ -7,6 +7,7 @@ type Props = {
 export function CandidateHeader({
   candidate,
 }: Props) {
+  if (!candidate.intelligence) return null;
   return (
     <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
 
@@ -33,7 +34,7 @@ export function CandidateHeader({
             </h1>
 
             <p className="mt-2 max-w-2xl text-blue-100">
-              FranchiseReady AI has analyzed this candidate and generated
+              FranGroove AI has analyzed this candidate and generated
               intelligence, readiness, behavioral insights, and franchise
               recommendations to support the discovery process.
             </p>

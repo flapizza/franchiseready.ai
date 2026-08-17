@@ -58,11 +58,15 @@ export function Navbar({
 
             <div className="text-xl font-black tracking-tight text-slate-900">
 
-              Fran
+              {brand.startsWith("FranGroove") ? "Fran" : brand}
+              {brand.startsWith("FranGroove") && (
+                <>
               <span className="text-teal-500">
                 Groove
               </span>{" "}
               AI
+                </>
+              )}
 
             </div>
 

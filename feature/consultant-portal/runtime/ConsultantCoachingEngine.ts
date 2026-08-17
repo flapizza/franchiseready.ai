@@ -1,9 +1,12 @@
-import type { DiscoveryContext } from "@/feature/discovery/models/DiscoveryContext";
 import type { ConsultantCoaching } from "../models/ConsultantCoaching";
+
+export type CoachingContext = {
+  detectedRisks: string[];
+};
 
 export class ConsultantCoachingEngine {
   public evaluate(
-    context: DiscoveryContext,
+    context: CoachingContext,
   ): ConsultantCoaching {
     const hasFamilyRisk =
       context.detectedRisks.some((risk) =>

@@ -23,7 +23,7 @@ export function AIMissionControl({
         <div>
 
           <p className="text-xs font-semibold uppercase tracking-[0.25em] text-blue-300">
-            FranchiseReady AI
+            FranGroove AI
           </p>
 
           <h2 className="mt-2 text-3xl font-black">

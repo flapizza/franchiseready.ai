@@ -58,7 +58,7 @@ export function TodayPriorities({
           <div>
 
             <div className="text-sm font-semibold uppercase tracking-[0.20em] text-teal-600">
-              Today's AI Priorities
+              Today’s AI Priorities
             </div>
 
             <h2 className="mt-3 text-3xl font-black tracking-tight">

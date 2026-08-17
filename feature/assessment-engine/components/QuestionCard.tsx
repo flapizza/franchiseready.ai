@@ -47,7 +47,7 @@ export function QuestionCard({
           ))}
         </div>
       ) : (
-        <p>This question type isn't supported yet.</p>
+        <p>This question type isn’t supported yet.</p>
       )}
     </div>
   );

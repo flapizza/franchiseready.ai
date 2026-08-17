@@ -22,7 +22,7 @@ export function AIAnalysisScreen() {
           <div className="h-3 w-3 animate-pulse rounded-full bg-emerald-400" />
 
           <p className="text-sm uppercase tracking-[0.35em] text-emerald-300">
-            FranchiseReady AI
+            FranGroove AI
           </p>
 
         </div>

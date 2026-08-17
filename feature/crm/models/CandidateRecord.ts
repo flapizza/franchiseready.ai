@@ -8,6 +8,7 @@ export type PipelineStage =
   | "education"
   | "brand-matching"
   | "validation"
+  | "referral"
   | "fdd-delivered"
   | "funding"
   | "meet-the-team"
@@ -49,5 +50,12 @@ export interface CandidateRecord {
 
   lastActivityAt: string;
 
-  intelligence: CandidateIntelligenceProfile;
+  assessmentIds: string[];
+
+  /** Null until a completed assessment produces Candidate Intelligence. */
+  intelligence: CandidateIntelligenceProfile | null;
+
+  preferredTerritory?: string;
+  leadSource?: string;
+  notes?: string;
 }

@@ -6,6 +6,15 @@ export class BuyingSignalService {
   public evaluate(
     transcript: MeetingTranscript,
   ): BuyingSignal[] {
+    const meetingText = transcript.entries
+      .map((entry) => entry.text)
+      .join(" ")
+      .toLowerCase();
+
+    const ownershipLanguageDetected =
+      meetingText.includes("own") ||
+      meetingText.includes("build");
+
     return [
       {
         id: "ownership",
@@ -17,7 +26,7 @@ export class BuyingSignalService {
 
         strength: "high",
 
-        confidence: 94,
+        confidence: ownershipLanguageDetected ? 94 : 72,
       },
     ];
   }

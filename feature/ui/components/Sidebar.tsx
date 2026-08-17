@@ -11,36 +11,37 @@ import {
 } from "lucide-react";
 
 import { BrandLockup } from "@/feature/branding/components/BrandLockup";
+import { APP_ROUTES } from "@/lib/auth/constants";
 
 const navigation = [
   {
     label: "Mission Control",
-    href: "/crm",
+    href: APP_ROUTES.missionControl,
     icon: Home,
   },
   {
     label: "Candidate Intelligence",
-    href: "/crm/candidates",
+    href: APP_ROUTES.candidateIntelligence,
     icon: Users,
   },
   {
     label: "Discovery Copilot",
-    href: "/crm/discovery",
+    href: APP_ROUTES.discoveryCopilot,
     icon: ClipboardList,
   },
   {
     label: "Brand Strategy",
-    href: "/crm/brand-strategy",
+    href: APP_ROUTES.brandStrategy,
     icon: BrainCircuit,
   },
   {
     label: "Referral Studio",
-    href: "/crm/referrals",
+    href: APP_ROUTES.referralStudio,
     icon: FileText,
   },
   {
     label: "Insights",
-    href: "/crm/analytics",
+    href: APP_ROUTES.insights,
     icon: BarChart3,
   },
 ];

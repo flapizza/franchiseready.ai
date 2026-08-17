@@ -9,11 +9,25 @@ export interface BrandProfile {
 
   website?: string;
 
+  referralContact?: {
+    name: string;
+    email: string;
+    title: string;
+  };
+
   investment: InvestmentProfile;
 
   idealCandidate: IdealCandidateProfile;
 
   businessModel: BusinessModelProfile;
+
+  operatingModel: OperatingModelProfile;
+
+  culture: string[];
+
+  successTraits: string[];
+
+  poorFitTraits: string[];
 
   strengths: string[];
 
@@ -60,4 +74,16 @@ export interface BusinessModelProfile {
   b2b: boolean;
 
   b2c: boolean;
+}
+
+export interface OperatingModelProfile {
+  teamModel: "solo" | "small-team" | "team-led";
+
+  salesIntensity: number;
+
+  operationalIntensity: number;
+
+  scheduleFlexibility: number;
+
+  primaryCustomer: string;
 }

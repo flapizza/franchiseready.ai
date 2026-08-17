@@ -1,5 +1,6 @@
-import type { NextRequest } from "next/server";
-import { AUTH_ROUTES } from "@/lib/auth/constants";
+import { NextResponse, type NextRequest } from "next/server";
+import { APP_ROUTES, AUTH_ROUTES } from "@/lib/auth/constants";
+import { hasConferenceDemoRequestSession } from "@/lib/auth/demo-access";
 import {
   getSafeReturnPath,
   isAuthEntryPath,
@@ -11,18 +12,30 @@ import {
 } from "@/lib/supabase/proxy";
 
 export async function proxy(request: NextRequest) {
-  const session = await refreshSupabaseSession(request);
+  const hasDemoSession = hasConferenceDemoRequestSession(request);
+  const session = hasDemoSession
+    ? {
+        isAuthenticated: false,
+        response: NextResponse.next({ request }),
+      }
+    : await refreshSupabaseSession(request);
+  const isAuthenticated = session.isAuthenticated || hasDemoSession;
   const { pathname, search } = request.nextUrl;
 
-  if (isProtectedPath(pathname) && !session.isAuthenticated) {
+  if (isProtectedPath(pathname) && !isAuthenticated) {
     const loginUrl = new URL(AUTH_ROUTES.login, request.url);
     loginUrl.searchParams.set("next", getSafeReturnPath(`${pathname}${search}`));
     return redirectWithSession(loginUrl, session.response);
   }
 
-  if (isAuthEntryPath(pathname) && session.isAuthenticated) {
+  if (isAuthEntryPath(pathname) && isAuthenticated) {
     return redirectWithSession(
-      new URL(AUTH_ROUTES.home, request.url),
+      new URL(
+        hasDemoSession
+          ? APP_ROUTES.missionControl
+          : AUTH_ROUTES.home,
+        request.url,
+      ),
       session.response,
     );
   }

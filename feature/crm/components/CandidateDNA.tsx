@@ -18,7 +18,7 @@ export function CandidateDNA({
       </h2>
 
       <p className="mt-2 text-slate-600">
-        FranchiseReady AI's current understanding of the candidate.
+        FranGroove AI’s current understanding of the candidate.
       </p>
 
       <div className="mt-8 space-y-6">

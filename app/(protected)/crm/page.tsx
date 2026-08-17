@@ -1,12 +1,12 @@
 import { MissionControlPage } from "@/feature/mission-control/components/MissionControlPage";
 import { MissionControlRuntime } from "@/feature/mission-control/runtime/MissionControlRuntime";
 
-export default function CRMPage() {
+export default async function CRMPage() {
   const runtime =
     new MissionControlRuntime();
 
   const state =
-    runtime.build();
+    await runtime.build();
 
   return (
     <MissionControlPage

@@ -70,7 +70,7 @@ export function ConsultantBrief({
           </h3>
 
           <div className="mt-3 rounded-xl bg-blue-50 p-5 text-slate-800 italic">
-            "{brief.openingQuestion}"
+            “{brief.openingQuestion}”
           </div>
 
         </section>

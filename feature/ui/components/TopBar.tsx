@@ -4,6 +4,7 @@ import {
   Plus,
   Search,
 } from "lucide-react";
+import { demoConsultant } from "@/feature/demo/data/demoConsultant";
 
 export function TopBar() {
   return (
@@ -72,17 +73,17 @@ export function TopBar() {
           <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2">
 
             <div className="flex h-11 w-11 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white">
-              JW
+              {demoConsultant.initials}
             </div>
 
             <div>
 
               <div className="text-sm font-semibold text-slate-900">
-                Jim Wood
+                {demoConsultant.displayName}
               </div>
 
               <div className="text-xs text-slate-500">
-                Franchise Consultant
+                {demoConsultant.title}
               </div>
 
             </div>

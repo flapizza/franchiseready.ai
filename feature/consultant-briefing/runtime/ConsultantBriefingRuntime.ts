@@ -1,43 +1,39 @@
-import type {
-  ConsultantBriefing,
-} from "../models/ConsultantBriefing";
+import type { CandidateRepository } from "@/feature/crm/repositories/CandidateRepository";
+import { SeedCandidateRepository } from "@/feature/crm/repositories/SeedCandidateRepository";
+
+import type { ConsultantBriefing } from "../models/ConsultantBriefing";
 
 export class ConsultantBriefingRuntime {
-  public build(): ConsultantBriefing {
+  public constructor(
+    private readonly candidates: CandidateRepository =
+      new SeedCandidateRepository(),
+  ) {}
+
+  public async build(candidateId: string): Promise<ConsultantBriefing | null> {
+    const candidate = await this.candidates.getById(candidateId);
+
+    if (!candidate?.intelligence) return null;
+
+    const intelligence = candidate.intelligence;
+
     return {
-      candidateName: "John Smith",
-
-      aiConfidence: 96,
-
-      discoveryStage: "Discovery",
-
+      candidateName: `${candidate.firstName} ${candidate.lastName}`,
+      aiConfidence: intelligence.timing.confidence,
+      discoveryStage: candidate.pipelineStage,
       meetingObjective:
-        "Validate family alignment before presenting recommended brands.",
-
-      discussionTopics: [
-        "Why franchise ownership now?",
-        "Exit timeline",
-        "Family support",
-        "Hiring experience",
-      ],
-
+        intelligence.discoveryPriorities[0] ??
+        "Validate ownership goals before presenting recommended brands.",
+      discussionTopics: intelligence.discoveryPriorities,
       buyingSignals: [
-        "Executive ownership motivation",
-        "Recurring revenue preference",
-        "Long-term wealth creation",
+        intelligence.behavioral.leadershipStyle,
+        ...intelligence.preferredBusinessModels,
       ],
-
-      watchFor: [
-        "Decision hesitation",
-        "Family alignment",
-        "Investment expectations",
-      ],
-
+      watchFor: intelligence.discoveryPriorities,
       suggestedClosing:
-        "If today's conversation confirms family alignment, introduce the candidate to the top recommended brands and schedule the Brand Strategy meeting.",
-
+        `If today’s conversation resolves the remaining priorities, advance ${candidate.firstName} to ${candidate.pipelineStage === "discovery" ? "Brand Strategy" : "the next lifecycle stage"}.`,
       nextBestAction:
-        "Proceed to Brand Strategy",
+        intelligence.discoveryPriorities[0] ??
+        "Continue candidate evaluation",
     };
   }
 }

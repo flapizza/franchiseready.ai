@@ -121,7 +121,7 @@ export function AIInsightsPanel({
             accent="blue"
           >
             <p className="text-lg font-semibold text-slate-900">
-              "What concerns you most about leaving your corporate career?"
+              “What concerns you most about leaving your corporate career?”
             </p>
 
             <p className="mt-4 leading-7 text-slate-600">
@@ -179,8 +179,8 @@ export function AIInsightsPanel({
             </p>
 
             <blockquote className="mt-4 rounded-2xl border-l-4 border-amber-400 bg-white p-4 italic text-slate-700">
-              "Tell me about the management style that has been most
-              successful for you."
+              “Tell me about the management style that has been most
+              successful for you.”
             </blockquote>
 
           </InfoCard>

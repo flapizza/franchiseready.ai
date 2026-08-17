@@ -5,9 +5,11 @@ export class CandidateDNARuntime {
   public build(
     responses: AssessmentResponse[],
   ): CandidateDNA {
+    const hasAssessmentEvidence = responses.length > 0;
+
     return {
       identity: {
-        confidence: 100,
+        confidence: hasAssessmentEvidence ? 100 : 0,
         evidence: [],
       },
 

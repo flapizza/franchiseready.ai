@@ -53,7 +53,7 @@ export function ConsultantTrust() {
           </h2>
 
           <p className="mx-auto mt-8 max-w-3xl text-xl leading-9 text-muted">
-            FranchiseReady AI was built exclusively for professional franchise
+            FranGroove AI was built exclusively for professional franchise
             consultants. We intentionally do not license our recommendation
             engine to franchisors, ensuring every recommendation remains
             independent and focused entirely on candidate success.

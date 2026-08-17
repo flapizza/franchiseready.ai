@@ -30,7 +30,7 @@ export function CandidateIntelligenceDashboard({
         </h1>
 
         <p className="mt-2 text-gray-600">
-          FranchiseReady Intelligence Engine
+          FranGroove Intelligence Engine
         </p>
       </header>
 

@@ -39,7 +39,7 @@ export function Footer({
               <div>
 
                 <h3 className="text-xl font-bold">
-                  FranchiseReady AI
+                  FranGroove AI
                 </h3>
 
                 <p className="text-sm text-slate-400">
@@ -51,7 +51,7 @@ export function Footer({
             </div>
 
             <p className="mt-8 max-w-md leading-8 text-slate-400">
-              FranchiseReady AI helps professional franchise consultants
+              FranGroove AI helps professional franchise consultants
               understand candidates faster, conduct better Discovery meetings,
               generate transparent brand recommendations, and deliver stronger
               candidates to franchisors.
@@ -93,7 +93,7 @@ export function Footer({
         <div className="mt-14 flex flex-col items-center justify-between gap-4 border-t border-slate-800 pt-8 text-sm text-slate-500 md:flex-row">
 
           <p>
-            © 2026 FranchiseReady AI. All rights reserved.
+            © 2026 FranGroove AI. All rights reserved.
           </p>
 
           <div className="flex items-center gap-6">

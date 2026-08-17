@@ -77,7 +77,7 @@ export function HowItWorks({
           </h2>
 
           <p className="mx-auto mt-8 max-w-3xl text-xl leading-9 text-muted">
-            FranchiseReady AI follows the same workflow professional franchise
+            FranGroove AI follows the same workflow professional franchise
             consultants use every day—only faster, smarter, and supported by
             transparent AI.
           </p>

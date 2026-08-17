@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "FranchiseReady AI | Find the Right Franchise",
-    template: "%s | FranchiseReady AI",
+    default: "FranGroove AI | Franchise Consultant Operating System",
+    template: "%s | FranGroove AI",
   },
   description:
     "AI-powered franchise readiness assessments, intelligent matching, and expert guidance for confident franchise decisions.",

@@ -3,6 +3,7 @@ import type {
   FranchiseCategory,
   FranchiseMatch,
 } from "../FranchiseMatch";
+import { demoBrands } from "@/feature/brand-library/data/demoBrands";
 
 export class FranchiseMatchingService {
   public match(
@@ -10,26 +11,20 @@ export class FranchiseMatchingService {
   ): FranchiseMatch[] {
     void candidate;
 
-    return [
+    const categories: Record<string, FranchiseCategory> = {
+      "era-group": "B2B Services",
+      "schooley-mitchell": "B2B Services",
+      actioncoach: "Business Coaching",
+    };
+
+    return demoBrands.map((brand, index) =>
       this.createMatch(
-        "era-group",
-        "ERA Group",
-        "B2B Services",
-        96,
+        brand.id,
+        brand.name,
+        categories[brand.id] ?? "Other",
+        96 - index * 2,
       ),
-      this.createMatch(
-        "schooley-mitchell",
-        "Schooley Mitchell",
-        "B2B Services",
-        94,
-      ),
-      this.createMatch(
-        "actioncoach",
-        "ActionCOACH",
-        "Business Coaching",
-        91,
-      ),
-    ];
+    );
   }
 
   private createMatch(

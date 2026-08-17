@@ -5,17 +5,19 @@ export class BrandStrategyEngine {
   public generate(
     candidate: CandidateRecord,
   ): BrandStrategy {
+    const intelligence = candidate.intelligence;
+    if (!intelligence) throw new Error("Brand Strategy requires completed Candidate Intelligence.");
     return {
       generatedAt: new Date().toISOString(),
 
       candidateSummary:
-        candidate.intelligence.executiveSummary,
+        intelligence.executiveSummary,
 
       overallRecommendation:
         "Present the top-ranked brand first while validating ownership expectations before introducing additional concepts.",
 
       rankedBrands:
-        candidate.intelligence.recommendations.map(
+        intelligence.recommendations.map(
           (brand) => ({
             id: brand.id,
 

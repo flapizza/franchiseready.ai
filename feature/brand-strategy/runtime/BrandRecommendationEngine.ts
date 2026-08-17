@@ -3,16 +3,19 @@ import type { CandidateIntelligenceState } from "@/feature/intelligence/models/C
 import type {
   BrandRecommendation,
 } from "../models/BrandRecommendation";
+import { getDemoBrandById } from "@/feature/brand-library/data/demoBrands";
 
 export class BrandRecommendationEngine {
   public generate(
     intelligence: CandidateIntelligenceState,
   ): BrandRecommendation[] {
+    const eraGroup = getDemoBrandById("era-group");
+
     return [
       {
-        id: "era",
+        id: eraGroup.id,
 
-        brandName: "ERA Group",
+        brandName: eraGroup.name,
 
         score: intelligence.readiness + 5,
 

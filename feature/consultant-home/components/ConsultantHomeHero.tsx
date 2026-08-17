@@ -13,7 +13,7 @@ export function ConsultantHomeHero({
     <section className="rounded-3xl bg-slate-950 p-10 text-white shadow-xl">
 
       <p className="text-sm uppercase tracking-[0.25em] text-blue-300">
-        FranchiseReady AI
+        FranGroove AI
       </p>
 
       <h1 className="mt-3 text-5xl font-black">

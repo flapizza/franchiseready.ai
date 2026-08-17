@@ -12,7 +12,7 @@ type CtaProps = {
 
 export function Cta({
   title = "Ready to Transform Your Franchise Consulting Business?",
-  description = "Schedule a personalized demonstration and see how FranchiseReady AI helps consultants prepare for Discovery meetings, understand candidates faster, generate transparent recommendations, and deliver stronger candidates to franchisors.",
+  description = "Schedule a personalized demonstration and see how FranGroove AI helps consultants prepare for Discovery meetings, understand candidates faster, generate transparent recommendations, and deliver stronger candidates to franchisors.",
   href = "/request-demo",
   label = "Request a Demo",
 }: CtaProps) {

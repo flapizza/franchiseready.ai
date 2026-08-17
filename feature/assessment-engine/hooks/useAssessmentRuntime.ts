@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { Response } from "../types/domain";
 
@@ -50,30 +50,30 @@ export function useAssessmentRuntime(
     initialize();
   }, [assessmentId, repository]);
 
-  const refresh = () => {
+  const refresh = useCallback(() => {
     setVersion((v) => v + 1);
-  };
+  }, []);
 
-  const answerCurrentQuestion = (value: Response["value"]) => {
+  const answerCurrentQuestion = useCallback((value: Response["value"]) => {
     if (!runtime) return;
 
     runtime.answerCurrentQuestion(value);
     refresh();
-  };
+  }, [refresh, runtime]);
 
-  const next = () => {
+  const next = useCallback(() => {
     if (!runtime) return;
 
     runtime.next();
     refresh();
-  };
+  }, [refresh, runtime]);
 
-  const previous = () => {
+  const previous = useCallback(() => {
     if (!runtime) return;
 
     runtime.previous();
     refresh();
-  };
+  }, [refresh, runtime]);
 
   return useMemo(
     () => ({
@@ -83,6 +83,6 @@ export function useAssessmentRuntime(
       next,
       previous,
     }),
-    [runtime, loading],
+    [answerCurrentQuestion, loading, next, previous, runtime],
   );
 }

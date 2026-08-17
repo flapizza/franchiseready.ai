@@ -28,6 +28,9 @@ export class IntelligenceGraphRuntime {
     candidate: CandidateRecord,
   ): IntelligenceGraph {
 
+    const profile = candidate.intelligence;
+    if (!profile) throw new Error("Intelligence Graph requires completed Candidate Intelligence.");
+
     const memory =
       this.memory.create();
 
@@ -40,14 +43,14 @@ export class IntelligenceGraphRuntime {
     const recommendations =
       this.brands.generate({
         readiness:
-          candidate.intelligence.overallReadiness,
+          profile.overallReadiness,
 
         confidence:
-          candidate.intelligence.financial
+          profile.financial
             .financingLikelihood,
 
         executiveSummary:
-          candidate.intelligence.executiveSummary,
+          profile.executiveSummary,
 
         buyingSignals: [],
 
@@ -57,11 +60,11 @@ export class IntelligenceGraphRuntime {
     const coaching =
       this.coaching.evaluate({
         detectedRisks: [],
-      } as any);
+      });
 
     return {
       readiness:
-        candidate.intelligence.overallReadiness,
+        profile.overallReadiness,
 
       confidence,
 

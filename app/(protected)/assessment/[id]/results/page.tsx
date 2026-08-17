@@ -20,7 +20,7 @@ export default async function AssessmentResultsPage({
     <main className="mx-auto max-w-7xl space-y-8 p-8">
       <header>
         <p className="text-sm font-semibold uppercase tracking-wide text-blue-600">
-          FranchiseReady Intelligence Profile™
+          FranGroove Intelligence Profile™
         </p>
 
         <h1 className="mt-2 text-4xl font-bold text-gray-900">

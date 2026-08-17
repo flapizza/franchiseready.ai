@@ -19,7 +19,7 @@ export function AuthShell({ title, description, children, footer }: AuthShellPro
           className="inline-flex items-center gap-2 text-sm font-semibold text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-4 focus-visible:ring-offset-canvas"
         >
           <span className="grid size-8 place-items-center rounded-lg bg-brand text-sm font-bold text-brand-foreground">F</span>
-          FranchiseReady AI
+          FranGroove AI
         </Link>
         <section className="mt-8 rounded-2xl border border-border bg-surface p-6 shadow-sm sm:p-8" aria-labelledby="auth-title">
           <h1 id="auth-title" className="text-2xl font-semibold tracking-tight text-ink">{title}</h1>
