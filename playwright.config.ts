@@ -1,5 +1,8 @@
 import { defineConfig, devices } from "@playwright/test";
 
+const E2E_PORT = 3100;
+const E2E_BASE_URL = `http://127.0.0.1:${E2E_PORT}`;
+
 export default defineConfig({
   testDir: "./tests/e2e",
   timeout: 90_000,
@@ -8,16 +11,20 @@ export default defineConfig({
   retries: 0,
   reporter: "list",
   use: {
-    baseURL: "http://localhost:3100",
+    baseURL: E2E_BASE_URL,
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: {
-    command: "npm run dev -- -p 3100",
-    url: "http://localhost:3100/login",
-    reuseExistingServer: true,
+    command: `node node_modules/next/dist/bin/next start -p ${E2E_PORT}`,
+    url: `${E2E_BASE_URL}/login`,
+    reuseExistingServer: false,
     timeout: 120_000,
-    env: { ...process.env, CONFERENCE_DEMO_ACCESS: "true" },
+    env: {
+      ...process.env,
+      PLAYWRIGHT_TEST_MODE: "true",
+      CONFERENCE_DEMO_ACCESS: "true",
+    },
   },
 });

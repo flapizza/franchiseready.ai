@@ -84,15 +84,19 @@ export default async function DiscoveryWorkspacePage({
   const lifecycleAction = createDemoCandidateLifecycleService(repository).getRecommendedAction(candidate);
 
     const recommendation: ExecutiveRecommendation = {
-  status: "ready",
+  status: lifecycleAction?.targetStage === "validation" ? "developing" : "ready",
 
   confidence: 96,
 
   summary:
-    "Candidate demonstrates exceptional executive leadership, strong financial readiness, and a genuine willingness to follow proven systems. Based on the Discovery conversation, the AI believes this candidate is well positioned to move into Brand Matching. The only remaining concern is validating family alignment before introducing specific franchise opportunities.",
+    lifecycleAction?.targetStage === "validation"
+      ? "Discovery evidence is complete, but unresolved alignment items require Validation before Brand Strategy."
+      : "Discovery evidence is complete and supports progression to Brand Strategy.",
 
   recommendation:
-    "Advance the candidate to Brand Matching and schedule a Top 3 Brand Presentation within the next seven days.",
+    lifecycleAction?.targetStage === "validation"
+      ? "Complete Discovery and begin Validation. Brand Strategy remains pending."
+      : "Complete Discovery and begin Brand Strategy.",
 
   evidence: [
     {

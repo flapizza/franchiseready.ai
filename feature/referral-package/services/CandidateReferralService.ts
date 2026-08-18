@@ -10,6 +10,7 @@ import { SeedDemoScenarioRepository } from "@/feature/demo/repositories/SeedDemo
 import type { CandidateBrandReferral, CandidateBrandReferralSource } from "../models/CandidateBrandReferral";
 import type { CandidateReferralPackage } from "../models/CandidateReferralPackage";
 import { DemoReferralDeliveryService } from "./DemoReferralDeliveryService";
+import { getConferenceReferralHistory } from "@/feature/demo/data/conferenceReferralHistory";
 
 export type ReferralServiceResult = { status: "success"; referral: CandidateBrandReferral } | { status: "blocked" | "not-found" | "not-approved"; message: string };
 export type BulkReferralResult = { status: "success"; referrals: CandidateBrandReferral[] } | { status: "blocked" | "not-found"; message: string };
@@ -22,7 +23,10 @@ export class CandidateReferralService {
   private readonly strategy = new CandidateBrandStrategyRuntime(this.candidates, this.brands, this.scenarios);
   private readonly delivery = new DemoReferralDeliveryService(this.activities);
 
-  getByCandidate(candidateId: string) { return demoCandidateOverlayStore.getCandidateReferrals(candidateId); }
+  getByCandidate(candidateId: string) {
+    const overlay = demoCandidateOverlayStore.getCandidateReferrals(candidateId);
+    return overlay.length ? overlay : getConferenceReferralHistory(candidateId);
+  }
 
   async prepareRecommended(candidateId: string, brandIds: string[]): Promise<BulkReferralResult> {
     const context = await this.context(candidateId);

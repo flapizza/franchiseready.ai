@@ -4,7 +4,7 @@ import { isConferenceDemoAccessEnabled } from "@/lib/auth/demo-access";
 import { demoCandidateOverlayStore } from "@/feature/crm/repositories/DemoCandidateOverlayStore";
 
 export async function POST() {
-  if (process.env.NODE_ENV !== "development" || !isConferenceDemoAccessEnabled()) {
+  if (!isConferenceDemoAccessEnabled()) {
     return new NextResponse("Not found", { status: 404 });
   }
   const user = await getConferenceDemoUser();

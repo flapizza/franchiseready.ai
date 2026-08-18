@@ -7,7 +7,7 @@ async function enterDemoAndReset(page: Page) {
 
 test("consultant manages independent referrals for multiple recommended brands", async ({ page }) => {
   await enterDemoAndReset(page);
-  await page.goto("/crm/candidates/jared-wirsig/strategy"); await page.getByRole("link", { name: "Prepare Referral" }).click();
+  await page.goto("/crm/candidates/jared-wirsig/strategy"); await page.getByRole("link", { name: "Open Referral Studio" }).click();
   await expect(page).toHaveURL(/\/crm\/candidates\/jared-wirsig\/referral$/);
   await expect(page.locator("header").getByRole("heading", { name: "Referral Studio", exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Recommended Opportunities" })).toBeVisible();

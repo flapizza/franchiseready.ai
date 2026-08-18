@@ -4,7 +4,6 @@ import { SeedBrandRepository } from "@/feature/brand-library/repositories/SeedBr
 import type { CandidateRecord, PipelineStage } from "@/feature/crm/models/CandidateRecord";
 import type { CandidateRepository } from "@/feature/crm/repositories/CandidateRepository";
 import { SeedCandidateRepository } from "@/feature/crm/repositories/SeedCandidateRepository";
-import { createDemoCandidateLifecycleService } from "@/feature/crm/services/DemoCandidateLifecycleService";
 import type { DemoScenarioRepository } from "@/feature/demo/repositories/DemoScenarioRepository";
 import { SeedDemoScenarioRepository } from "@/feature/demo/repositories/SeedDemoScenarioRepository";
 import type { Evidence } from "@/feature/evidence/models/Evidence";
@@ -76,7 +75,6 @@ export class CandidateBrandStrategyRuntime {
       buyingSignals: scenarioCandidate?.discovery.detectedBuyingSignals ?? [],
       risks: scenarioCandidate?.discovery.detectedRisks ?? candidate.intelligence.discoveryPriorities,
     });
-    const lifecycleAction = createDemoCandidateLifecycleService(this.candidates).getRecommendedAction(candidate);
     const openConcerns = [...new Set([
       ...(scenarioCandidate?.discovery.detectedRisks ?? []),
       ...candidate.intelligence.discoveryPriorities.filter((item) => /confirm|validate|risk|alignment/i.test(item)),
@@ -120,9 +118,9 @@ export class CandidateBrandStrategyRuntime {
           ? `${base.fullName} has satisfied the canonical readiness conditions for introduction. ${top.brandName} is the recommended lead opportunity.`
           : `The canonical referral requirements have not yet been satisfied for ${base.fullName}.`,
         unresolvedReasons: referral.remainingRequirements,
-        nextAction: gatePassed ? `Prepare the ${top.brandName} referral handoff.` : top.nextAction,
+        nextAction: gatePassed ? "Open Referral Studio to review brands for referral." : top.nextAction,
       },
-      lifecycleAction: lifecycleAction?.kind === "referral-approved" ? { label: "Prepare Referral" } : null,
+      lifecycleAction: gatePassed && candidate.pipelineStage === "brand-matching" ? { label: "Open Referral Studio" } : null,
       referralHandoff: {
         ...referralContext, ...recommendedBrands[0],
       },

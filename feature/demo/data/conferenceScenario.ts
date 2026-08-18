@@ -102,6 +102,23 @@ function buildIntelligence(seed: CandidateSeed): CandidateIntelligenceProfile {
 
 function buildCandidate(seed: CandidateSeed, index: number): DemoCandidate {
   const fullName = `${seed.firstName} ${seed.lastName}`;
+  const history = [
+    { stage: "lead", title: "Candidate Added" },
+    { stage: "assessment-started", title: "Assessment Sent" },
+    { stage: "assessment-completed", title: "Assessment Completed" },
+    { stage: "discovery", title: "Discovery Started" },
+    { stage: "validation", title: "Discovery Completed" },
+    { stage: "brand-matching", title: "Brand Strategy Ready" },
+    { stage: "referral", title: "Candidate Introduced" },
+    { stage: "awarded", title: "Awarded" },
+  ] as const;
+  const stageRank = history.findIndex((item) => item.stage === seed.stage);
+  const historicalActivity = history.slice(0, Math.max(stageRank + 1, 1)).map((item, activityIndex) => ({
+    id: `${seed.id}-history-${activityIndex}`,
+    occurredAt: new Date(Date.parse("2026-07-20T13:00:00.000Z") + activityIndex * 86_400_000).toISOString(),
+    title: item.title,
+    detail: `${item.title} recorded in the canonical candidate lifecycle.`,
+  }));
 
   return {
     id: seed.id,
@@ -141,14 +158,7 @@ function buildCandidate(seed: CandidateSeed, index: number): DemoCandidate {
       brandId,
       fit: Math.max(72, seed.readiness - brandIndex * 4 + 3),
     })),
-    recentActivity: [
-      {
-        id: `${seed.id}-activity-1`,
-        occurredAt: DEMO_NOW,
-        title: seed.nextBestAction,
-        detail: seed.explanation,
-      },
-    ],
+    recentActivity: [...historicalActivity, { id: `${seed.id}-activity-current`, occurredAt: DEMO_NOW, title: seed.nextBestAction, detail: seed.explanation }],
     createdAt: "2026-07-20T13:00:00.000Z",
     updatedAt: DEMO_NOW,
     lastActivityAt: DEMO_NOW,
@@ -156,7 +166,7 @@ function buildCandidate(seed: CandidateSeed, index: number): DemoCandidate {
       seed.stage === "assessment-started"
         ? []
         : [`assessment-${seed.id}-1`],
-    intelligence: buildIntelligence(seed),
+    intelligence: seed.stage === "lead" || seed.stage === "assessment-started" ? null : buildIntelligence(seed),
   };
 }
 

@@ -48,18 +48,6 @@ export function DiscoveryCopilot({
         <section>
 
           <h3 className="font-semibold text-slate-900">
-            Next Best Question
-          </h3>
-
-          <div className="mt-3 rounded-xl bg-blue-50 p-5 text-slate-800">
-            {copilot.nextQuestion}
-          </div>
-
-        </section>
-
-        <section>
-
-          <h3 className="font-semibold text-slate-900">
             Recommended Action
           </h3>
 

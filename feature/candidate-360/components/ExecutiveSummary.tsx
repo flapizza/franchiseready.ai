@@ -45,7 +45,7 @@ export function ExecutiveSummary({
             items={[
               "Validate desired timeline",
               "Confirm geographic flexibility",
-              "Discuss financing strategy",
+              "Discuss preferred financing structure (qualification is separate)",
             ]}
             color="amber"
           />

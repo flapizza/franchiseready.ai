@@ -45,7 +45,7 @@ export function CandidateHeader({
             />
 
             <ScoreCard
-              label="Recommendation"
+              label="Candidate Readiness"
               value={candidate.recommendationConfidence}
               color="blue"
             />

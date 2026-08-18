@@ -29,7 +29,7 @@ export class SeedDemoScenarioRepository implements DemoScenarioRepository {
   async getCandidateIntelligence(id: string) {
     const candidate = await this.getCandidateById(id);
 
-    if (!candidate) return null;
+    if (!candidate?.intelligence) return null;
 
     return this.intelligenceAdapter.fromProfile(candidate.intelligence, {
       candidateId: candidate.id,

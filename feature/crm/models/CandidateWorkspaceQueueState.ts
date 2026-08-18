@@ -1,4 +1,5 @@
 export type CandidateWorkspaceKind = "discovery" | "strategy" | "referral";
+export type CandidateWorkspaceView = "active" | "completed" | "all";
 
 export interface CandidateWorkspaceQueueItem {
   id: string;
@@ -11,6 +12,7 @@ export interface CandidateWorkspaceQueueItem {
   summary: string;
   actionLabel: string;
   href: string;
+  candidateHref: string;
 }
 
 export interface CandidateWorkspaceQueueState {
@@ -19,4 +21,5 @@ export interface CandidateWorkspaceQueueState {
   description: string;
   emptyMessage: string;
   candidates: CandidateWorkspaceQueueItem[];
+  activeView: CandidateWorkspaceView;
 }

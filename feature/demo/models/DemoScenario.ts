@@ -2,7 +2,6 @@ import type {
   CandidateRecord,
   PipelineStage,
 } from "@/feature/crm/models/CandidateRecord";
-import type { CandidateIntelligenceProfile } from "@/feature/intelligence/models/CandidateIntelligenceProfile";
 
 export interface DemoConsultant {
   id: string;
@@ -42,8 +41,7 @@ export interface DemoActivity {
   detail: string;
 }
 
-export interface DemoCandidate extends Omit<CandidateRecord, "intelligence"> {
-  intelligence: CandidateIntelligenceProfile;
+export interface DemoCandidate extends CandidateRecord {
   initials: string;
   confidence: number;
   buyingMomentum: BuyingMomentum;

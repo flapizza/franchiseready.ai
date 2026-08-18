@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, ChevronRight, Columns3, List, Search, Sparkles, TrendingDown, TrendingUp } from "lucide-react";
 
@@ -36,14 +36,15 @@ function stagePresentation(stage: CandidateCRMState["stages"][number]["stage"]) 
 function CandidateCard({ candidate }: { candidate: CandidateCRMItem }) {
   const momentumTone = candidate.momentum === "accelerating" ? "text-emerald-700" : candidate.momentum === "slowing" ? "text-amber-700" : "text-slate-500";
   return (
-    <article className={`group rounded-2xl border bg-white p-4 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-lg ${candidate.referralReady ? "border-emerald-300 ring-1 ring-emerald-100" : "border-slate-200 hover:border-blue-300"}`}>
+    <article className={`group relative rounded-2xl border bg-white p-4 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-lg ${candidate.referralReady ? "border-emerald-300 ring-1 ring-emerald-100" : "border-slate-200 hover:border-blue-300"}`}>
+      <Link href={candidate.href} aria-label={`Open ${candidate.fullName} Candidate 360`} className="absolute inset-0 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500" />
       <div className="flex items-start justify-between gap-3">
         <Link href={candidate.href} className="flex min-w-0 items-center gap-3"><span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-xs font-black text-white">{candidate.initials}</span><span className="min-w-0"><span className="block truncate font-black text-slate-900 group-hover:text-blue-700">{candidate.fullName}</span><span className="mt-0.5 block truncate text-xs text-slate-500">{candidate.location || candidate.email}</span></span></Link>
         <ChevronRight size={16} className="mt-2 shrink-0 text-slate-300 transition group-hover:translate-x-0.5 group-hover:text-blue-500" />
       </div>
       <div className="mt-4 flex items-center justify-between gap-2"><span className={`inline-flex rounded-full border px-2 py-1 text-[10px] font-black uppercase tracking-wide ${attentionClass(candidate.attention)}`}>{candidate.attentionLabel}</span><span className={`inline-flex items-center gap-1 text-[11px] font-bold ${momentumTone}`}>{candidate.momentum === "accelerating" ? <TrendingUp size={13} /> : candidate.momentum === "slowing" ? <TrendingDown size={13} /> : null}{candidate.momentumLabel}</span></div>
       <div className="mt-4"><div className="flex items-center justify-between text-[11px]"><span className="font-bold uppercase tracking-wide text-slate-400">Readiness</span><span className="font-black text-slate-700">{candidate.readinessLabel}</span></div><div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-100"><div className={`h-full rounded-full ${candidate.referralReady ? "bg-emerald-500" : "bg-teal-500"}`} style={{ width: `${candidate.readiness ?? 0}%` }} /></div></div>
-      <div className="mt-4 border-t border-slate-100 pt-3"><p className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400">Next best action</p><p className="mt-1 min-h-10 text-xs font-semibold leading-5 text-slate-700">{candidate.nextAction}</p>{candidate.actionKind === "lifecycle" ? <div className="mt-3"><CandidateLifecycleAction candidateId={candidate.id} label={candidate.actionLabel} compact /></div> : <Link href={candidate.actionHref} className={`mt-3 inline-flex w-full items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-black transition ${candidate.referralReady ? "bg-emerald-600 text-white hover:bg-emerald-700" : "bg-slate-900 text-white hover:bg-blue-700"}`}>{candidate.actionLabel}<ArrowRight size={13} /></Link>}</div>
+      <div className="relative z-10 mt-4 border-t border-slate-100 pt-3"><p className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400">Next best action</p><p className="mt-1 min-h-10 text-xs font-semibold leading-5 text-slate-700">{candidate.nextAction}</p>{candidate.actionKind === "lifecycle" ? <div className="mt-3"><CandidateLifecycleAction candidateId={candidate.id} label={candidate.actionLabel} compact /></div> : <Link href={candidate.actionHref} className={`mt-3 inline-flex w-full items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-black transition ${candidate.referralReady ? "bg-emerald-600 text-white hover:bg-emerald-700" : "bg-slate-900 text-white hover:bg-blue-700"}`}>{candidate.actionLabel}<ArrowRight size={13} /></Link>}</div>
     </article>
   );
 }
@@ -53,6 +54,9 @@ export function CandidateCRMPage({ state }: { state: CandidateCRMState }) {
   const [quickFilter, setQuickFilter] = useState<QuickFilter>("all");
   const [stage, setStage] = useState("all");
   const [view, setView] = useState<View>("list");
+  const topScroll = useRef<HTMLDivElement>(null);
+  const boardScroll = useRef<HTMLDivElement>(null);
+  const [pipelineWidth, setPipelineWidth] = useState(0);
 
   const filtered = useMemo(() => {
     const normalized = query.trim().toLowerCase();
@@ -66,6 +70,14 @@ export function CandidateCRMPage({ state }: { state: CandidateCRMState }) {
       return matchesSearch && matchesStage && matchesQuick;
     });
   }, [query, quickFilter, stage, state.candidates]);
+  useEffect(() => {
+    if (view === "pipeline" && boardScroll.current) setPipelineWidth(boardScroll.current.scrollWidth);
+  }, [view, filtered.length, state.stages.length]);
+  const syncScroll = (source: "top" | "board") => {
+    const from = source === "top" ? topScroll.current : boardScroll.current;
+    const to = source === "top" ? boardScroll.current : topScroll.current;
+    if (from && to && Math.abs(to.scrollLeft - from.scrollLeft) > 1) to.scrollLeft = from.scrollLeft;
+  };
 
   return (
     <div className="space-y-6">
@@ -130,7 +142,8 @@ export function CandidateCRMPage({ state }: { state: CandidateCRMState }) {
       ) : (
         <section className="relative overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 shadow-sm">
           <div className="border-b border-slate-200 bg-white px-5 py-4"><div className="flex items-center justify-between gap-4"><div><p className="text-xs font-bold uppercase tracking-[0.2em] text-teal-600">Candidate journey</p><p className="mt-1 text-sm text-slate-500">Follow progress from first contact through franchise award.</p></div><p className="hidden text-xs font-semibold text-slate-400 md:block">Scroll horizontally to explore every stage →</p></div></div>
-          <div className="overflow-x-auto px-4 py-5 [scrollbar-color:#94a3b8_#e2e8f0] [scrollbar-width:thin]">
+          <div ref={topScroll} onScroll={() => syncScroll("top")} aria-label="Pipeline top horizontal scroll" className="overflow-x-auto border-b border-slate-200 bg-white px-4 [scrollbar-color:#94a3b8_#e2e8f0] [scrollbar-width:thin]"><div style={{ width: pipelineWidth, height: 12 }} /></div>
+          <div ref={boardScroll} onScroll={() => syncScroll("board")} className="overflow-x-auto px-4 py-5 [scrollbar-color:#94a3b8_#e2e8f0] [scrollbar-width:thin]">
           <div className="flex min-w-max gap-4">
             {state.stages.map((column) => {
               const candidates = filtered.filter((candidate) => candidate.pipelineStage === column.stage);

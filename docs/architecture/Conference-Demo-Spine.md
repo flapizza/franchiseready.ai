@@ -194,6 +194,8 @@ CONFERENCE_DEMO_ACCESS === true
 
 Production mode rejects the demo cookie even if the environment flag is accidentally present. The control is not rendered when disabled, and the server action independently verifies the guard before setting a cookie. Real Supabase login remains available and unchanged.
 
+The sole exception is the isolated Playwright server: `npm run test:e2e` starts a production build with both `PLAYWRIGHT_TEST_MODE=true` and `CONFERENCE_DEMO_ACCESS=true`. This explicit pair enables the same guarded demo session and authenticated reset route only inside the E2E-owned process. Ordinary production starts set neither variable and continue to reject demo access.
+
 Disable access by removing the variable or setting:
 
 ```dotenv

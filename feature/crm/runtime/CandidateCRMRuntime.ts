@@ -8,6 +8,7 @@ import { SeedDemoScenarioRepository } from "@/feature/demo/repositories/SeedDemo
 import { AssessmentInvitationService } from "../services/AssessmentInvitationService";
 import { createDemoCandidateLifecycleService } from "../services/DemoCandidateLifecycleService";
 import { demoCandidateOverlayStore } from "../repositories/DemoCandidateOverlayStore";
+import { getConferenceReferralHistory } from "@/feature/demo/data/conferenceReferralHistory";
 
 import type { CandidateAttention, CandidateCRMItem, CandidateCRMState } from "../models/CandidateCRMState";
 
@@ -41,6 +42,7 @@ function formatDate(value: string): string {
 
 function attentionFor(candidate: DemoCandidate | undefined): CandidateAttention {
   if (!candidate) return "on-track";
+  if (candidate.pipelineStage === "awarded") return "on-track";
   if (candidate.pipelineStage === "referral" || candidate.referralReadiness >= 90) return "referral-ready";
   if (candidate.buyingMomentum === "slowing" || candidate.discovery.detectedRisks.length > 0) return "needs-attention";
   return "on-track";
@@ -77,10 +79,13 @@ export class CandidateCRMRuntime {
     const attention = attentionFor(demo);
     const invitation = this.invitations.getForCandidate(record.id);
     const lifecycleAction = createDemoCandidateLifecycleService(this.candidates).getRecommendedAction(record);
-    const referrals = demoCandidateOverlayStore.getCandidateReferrals(record.id);
+    const overlayReferrals = demoCandidateOverlayStore.getCandidateReferrals(record.id);
+    const referrals = overlayReferrals.length ? overlayReferrals : getConferenceReferralHistory(record.id);
     const awaitingApproval = referrals.filter((item) => item.status === "ready-for-review").length;
     const approvedReferrals = referrals.filter((item) => item.status === "approved");
-    const workflowAction = referrals.length
+    const workflowAction = record.pipelineStage === "awarded"
+      ? { actionLabel: referrals.length ? "View Referral History" : "Open Candidate", actionHref: referrals.length ? `/crm/candidates/${record.id}/referral` : `/crm/candidates/${record.id}`, actionKind: "navigate" as const }
+      : referrals.length
       ? { actionLabel: approvedReferrals.length ? `Record ${approvedReferrals[0].brandName} Introduction` : awaitingApproval ? `Review ${awaitingApproval} Referral Package${awaitingApproval === 1 ? "" : "s"}` : "View Referrals", actionHref: `/crm/candidates/${record.id}/referral`, actionKind: "navigate" as const }
       : record.pipelineStage === "referral"
       ? { actionLabel: "Prepare Referral", actionHref: `/crm/candidates/${record.id}/referral`, actionKind: "navigate" as const }
@@ -111,11 +116,11 @@ export class CandidateCRMRuntime {
       readinessLabel: assessmentPending ? (record.pipelineStage === "lead" ? "Not Yet Evaluated" : "Assessment Pending") : `${record.intelligence!.overallReadiness}%`,
       bestBrand: demo ? brands.get(demo.recommendedBrands[0]?.brandId) ?? null : null,
       lastActivityLabel: formatDate(record.lastActivityAt),
-      nextAction: referrals.length ? `${referrals.length} referral${referrals.length === 1 ? "" : "s"} · ${referrals.filter((item) => item.status === "introduced").length} introduced` : demo?.nextBestAction ?? (record.pipelineStage === "lead" ? "Send Assessment Invitation" : record.pipelineStage === "assessment-started" ? "Complete Assessment" : "Review Candidate Intelligence"),
+      nextAction: record.pipelineStage === "awarded" ? "Prepare Onboarding" : referrals.length ? `${referrals.length} referral${referrals.length === 1 ? "" : "s"} · ${referrals.filter((item) => item.status === "introduced").length} introduced` : demo?.nextBestAction ?? (record.pipelineStage === "lead" ? "Send Assessment Invitation" : record.pipelineStage === "assessment-started" ? "Complete Assessment" : "Review Candidate Intelligence"),
       attention,
-      attentionLabel: attention === "needs-attention" ? "Needs Attention" : attention === "referral-ready" ? "Referral Ready" : "On Track",
+      attentionLabel: record.pipelineStage === "awarded" ? "Placement Complete" : attention === "needs-attention" ? "Needs Attention" : attention === "referral-ready" ? "Referral Ready" : "On Track",
       momentum: demo?.buyingMomentum ?? "steady",
-      referralReady: record.pipelineStage === "referral" || (demo?.referralReadiness ?? 0) >= 90,
+      referralReady: record.pipelineStage !== "awarded" && (record.pipelineStage === "referral" || (demo?.referralReadiness ?? 0) >= 90),
       href: `/crm/candidates/${record.id}`,
       ...workflowAction,
       momentumLabel: demo?.buyingMomentum === "accelerating" ? "Accelerating" : demo?.buyingMomentum === "slowing" ? "Slowing" : "Steady",

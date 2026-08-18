@@ -112,7 +112,7 @@ export class CandidateLifecycleService {
       case "validation":
         return { label: "Complete Validation", targetStage: "brand-matching", kind: "validation-completed", reason: "Validation requirements are resolved and the candidate is ready for Brand Strategy." };
       case "brand-matching":
-        return this.isReferralReady(candidate) ? { label: "Mark Referral Ready", targetStage: "referral", kind: "referral-approved", reason: "Referral readiness meets the introduction threshold." } : null;
+        return null;
       case "referral":
         return { label: "Mark Awarded", targetStage: "awarded", kind: "candidate-awarded", reason: "The candidate accepted the franchise award." };
       default:

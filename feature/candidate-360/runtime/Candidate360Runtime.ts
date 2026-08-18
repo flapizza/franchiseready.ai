@@ -1,4 +1,5 @@
 import type { CandidateRepository } from "@/feature/crm/repositories/CandidateRepository";
+import type { CandidateRecord } from "@/feature/crm/models/CandidateRecord";
 import { SeedCandidateRepository } from "@/feature/crm/repositories/SeedCandidateRepository";
 import { AssessmentInvitationService } from "@/feature/crm/services/AssessmentInvitationService";
 import type { Activity, ActivityType } from "@/feature/crm/models/Activity";
@@ -8,6 +9,7 @@ import type { DemoScenarioRepository } from "@/feature/demo/repositories/DemoSce
 import { SeedDemoScenarioRepository } from "@/feature/demo/repositories/SeedDemoScenarioRepository";
 import { createDemoCandidateLifecycleService } from "@/feature/crm/services/DemoCandidateLifecycleService";
 import { demoCandidateOverlayStore } from "@/feature/crm/repositories/DemoCandidateOverlayStore";
+import { getConferenceReferralHistory } from "@/feature/demo/data/conferenceReferralHistory";
 
 import type { Candidate360State, CandidateActivityState } from "../models/Candidate360State";
 
@@ -67,14 +69,16 @@ export class Candidate360Runtime {
     const scenarioCandidate = await this.scenarios.getCandidateById(candidate.id);
     const intelligence = candidate.intelligence;
     const lifecycleAction = createDemoCandidateLifecycleService(this.candidates).getRecommendedAction(candidate);
-    const referrals = demoCandidateOverlayStore.getCandidateReferrals(candidate.id);
+    const overlayReferrals = demoCandidateOverlayStore.getCandidateReferrals(candidate.id);
+    const referrals = overlayReferrals.length ? overlayReferrals : getConferenceReferralHistory(candidate.id);
     const awaitingApproval = referrals.filter((item) => item.status === "ready-for-review").length;
     const approvedReferrals = referrals.filter((item) => item.status === "approved").length;
     const assessmentStatus = candidate.pipelineStage === "assessment-started"
       ? "pending" as const
       : intelligence ? "completed" as const : "not-completed" as const;
+    const lifecycleDetail = this.lifecycleDetail(candidate.pipelineStage);
     const assessment = assessmentStatus === "completed"
-      ? { label: "Assessment Complete", detail: "Candidate Intelligence is available and ready to guide Discovery.", invitationSent: Boolean(invitation), actionLabel: "Begin Discovery", actionHref: `/crm/${candidate.id}/discovery` }
+      ? { label: candidate.pipelineStage === "awarded" ? "Placement Awarded" : "Assessment Complete", detail: lifecycleDetail, invitationSent: Boolean(invitation), actionLabel: candidate.pipelineStage === "awarded" ? "View Referral History" : "Open Candidate Workspace", actionHref: candidate.pipelineStage === "awarded" ? `/crm/candidates/${candidate.id}/referral` : `/crm/${candidate.id}/discovery` }
       : assessmentStatus === "pending"
         ? { label: "Assessment Pending", detail: invitation ? `Invitation sent to ${invitation.candidateEmail}. The candidate has not completed the assessment yet.` : "The assessment is pending, but an active invitation link is not available. Send a new invitation to continue.", invitationSent: Boolean(invitation), actionLabel: invitation ? "Open Assessment" : "Send Assessment", actionHref: invitation?.assessmentUrl }
         : { label: "Assessment Not Started", detail: "No completed assessment or Candidate Intelligence is available.", invitationSent: false, actionLabel: "Send Assessment" };
@@ -96,14 +100,13 @@ export class Candidate360Runtime {
       assessmentUrl: invitation?.assessmentUrl,
       readinessScore: intelligence?.overallReadiness ?? null,
       buyingConfidence: intelligence?.timing.confidence ?? null,
-      recommendationConfidence:
-        intelligence?.recommendations[0]?.confidence ?? intelligence?.timing.confidence ?? null,
+      recommendationConfidence: intelligence?.overallReadiness ?? null,
       executiveSummary: intelligence?.executiveSummary ?? "Assessment not completed. Candidate Intelligence will become available after assessment completion.",
       financialReadiness: intelligence?.financial.financingLikelihood ?? null,
       leadershipReadiness: intelligence?.competencies.leadership ?? null,
       lifestyleAlignment: intelligence?.behavioral.adaptability ?? null,
       coachability: intelligence?.behavioral.coachability ?? null,
-      nextBestAction: intelligence?.discoveryPriorities[0] ?? (assessmentStatus === "pending" && invitation ? "Complete the assessment" : "Send the assessment invitation"),
+      nextBestAction: candidate.pipelineStage === "awarded" ? "Prepare Onboarding" : lifecycleAction?.label ?? scenarioCandidate?.nextBestAction ?? (assessmentStatus === "pending" && invitation ? "Complete the assessment" : "Send the assessment invitation"),
       knownInformation: [
         { label: "Email", value: candidate.email, icon: "email" },
         { label: "Phone", value: candidate.phone || "Not provided", icon: "phone" },
@@ -118,13 +121,22 @@ export class Candidate360Runtime {
         ? `/crm/candidates/${candidate.id}/strategy`
         : undefined,
       referralAction: referrals.length
-        ? { label: approvedReferrals ? "Record Introduction" : awaitingApproval ? `Review ${awaitingApproval} Referral Package${awaitingApproval === 1 ? "" : "s"}` : "View Referrals", href: `/crm/candidates/${candidate.id}/referral` }
+        ? { label: candidate.pipelineStage === "awarded" ? "View Referral History" : approvedReferrals ? "Record Introduction" : awaitingApproval ? `Review ${awaitingApproval} Referral Package${awaitingApproval === 1 ? "" : "s"}` : "View Referrals", href: `/crm/candidates/${candidate.id}/referral` }
         : candidate.pipelineStage === "referral"
           ? { label: "Prepare Referral", href: `/crm/candidates/${candidate.id}/referral` }
           : undefined,
       referrals: referrals.length ? { total: referrals.length, introduced: referrals.filter((item) => item.status === "introduced").length,
         items: referrals.map((item) => ({ brandName: item.brandName, statusLabel: item.status.split("-").map((word) => word[0].toUpperCase() + word.slice(1)).join(" ") })) } : undefined,
     };
+  }
+
+  private lifecycleDetail(stage: CandidateRecord["pipelineStage"]): string {
+    const details: Partial<Record<CandidateRecord["pipelineStage"], string>> = {
+      lead: "Assessment not completed.", "assessment-started": "Assessment is in progress.", "assessment-completed": "Candidate Intelligence is available and ready to guide Discovery.",
+      discovery: "Discovery is in progress.", validation: "Discovery is complete. Validation remains before Brand Strategy.", "brand-matching": "Discovery intelligence is validated and ready to support Brand Strategy.",
+      referral: "Candidate is progressing through franchisor introductions.", awarded: "Placement awarded. Referral history is complete.",
+    };
+    return details[stage] ?? "Candidate relationship history is available.";
   }
 
   private toActivity(activity: Activity): CandidateActivityState {

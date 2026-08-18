@@ -7,7 +7,8 @@ export const CONFERENCE_DEMO_COOKIE =
 
 export function isConferenceDemoAccessEnabled(): boolean {
   return (
-    process.env.NODE_ENV === "development" &&
+    (process.env.NODE_ENV === "development" ||
+      process.env.PLAYWRIGHT_TEST_MODE === "true") &&
     process.env.CONFERENCE_DEMO_ACCESS === "true"
   );
 }

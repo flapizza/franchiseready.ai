@@ -28,10 +28,10 @@ test("consultant reviews evidence-backed Brand Strategy and advances referral re
   await expect(referralGate.getByText("Referral Gate · Passed", { exact: true })).toBeVisible();
   await expect(referralGate.getByRole("heading", { name: "Ready for Introduction" })).toBeVisible();
   await expect(referralGate.getByText(/\d+%/)).toHaveCount(0);
-  await expect(referralGate.getByRole("link", { name: "Prepare Referral" })).toBeVisible();
+  await expect(referralGate.getByRole("link", { name: "Open Referral Studio" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Ranked alternatives" })).toBeVisible();
 
-  await referralGate.getByRole("link", { name: "Prepare Referral" }).click();
+  await referralGate.getByRole("link", { name: "Open Referral Studio" }).click();
   await expect(page).toHaveURL(/\/crm\/candidates\/jared-wirsig\/referral$/);
 });
 
@@ -42,5 +42,5 @@ test("candidate who does not pass the referral gate cannot prepare a referral", 
   const referralGate = page.getByLabel("Referral Gate");
   await expect(referralGate.getByText("Referral Gate · Not Yet Ready", { exact: true })).toBeVisible();
   await expect(referralGate.getByRole("heading", { name: "Not Yet Ready for Introduction" })).toBeVisible();
-  await expect(referralGate.getByRole("link", { name: "Prepare Referral" })).toHaveCount(0);
+  await expect(referralGate.getByRole("link", { name: "Open Referral Studio" })).toHaveCount(0);
 });

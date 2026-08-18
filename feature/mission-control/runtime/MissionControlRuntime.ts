@@ -42,14 +42,14 @@ function priorityScore(candidate: DemoCandidate): number {
 
   if (candidate.discovery.detectedRisks.length > 0) {
     if (candidate.pipelineStage === "validation") {
-      return 100 + candidate.intelligence.overallReadiness / 100;
+      return 100 + (candidate.intelligence?.overallReadiness ?? 0) / 100;
     }
 
-    return 80 + candidate.intelligence.overallReadiness / 100;
+    return 80 + (candidate.intelligence?.overallReadiness ?? 0) / 100;
   }
 
   if (candidate.pipelineStage === "brand-matching") {
-    return 90 + candidate.intelligence.overallReadiness / 100;
+    return 90 + (candidate.intelligence?.overallReadiness ?? 0) / 100;
   }
 
   if (candidate.pipelineStage === "assessment-completed") return 60;
@@ -218,10 +218,10 @@ export class MissionControlRuntime {
       candidateName: candidateName(candidate),
       rationale: candidate.aiExplanation,
       confidence: candidate.confidence,
-      readiness: candidate.intelligence.overallReadiness,
+      readiness: candidate.intelligence?.overallReadiness ?? 0,
       momentum: candidate.buyingMomentum,
       bestBrand: bestBrand?.name ?? "Recommendation pending",
-      estimatedTimeline: candidate.intelligence.timing.decisionWindow,
+      estimatedTimeline: candidate.intelligence?.timing.decisionWindow ?? "Assessment pending",
       primaryAction,
       secondaryActions: [
         {
@@ -239,9 +239,7 @@ export class MissionControlRuntime {
   ): IntroductionReadyState[] {
     return candidates
       .filter(
-        (candidate) =>
-          candidate.pipelineStage === "referral" ||
-          candidate.referralReadiness >= 90,
+        (candidate) => candidate.pipelineStage === "referral",
       )
       .sort((left, right) => right.referralReadiness - left.referralReadiness)
       .slice(0, 2)

@@ -48,14 +48,15 @@ test("consultant-first candidate remains one identity through assessment and Dis
   await expect(page.getByText("Discovery Started", { exact: true })).toBeVisible();
 });
 
-test("referral readiness gates transition and awarded removes active status", async ({ page }) => {
+test("awarded candidate is coherent and historical referral remains viewable", async ({ page }) => {
   await enterDemoAndReset(page);
-  await page.goto("/crm/candidates/jared-wirsig");
-  await expect(page.getByText("Brand Matching", { exact: true })).toBeVisible();
-  await page.getByRole("button", { name: "Mark Referral Ready" }).click();
-  await expect(page.getByText("Referral", { exact: true }).first()).toBeVisible();
-  await expect(page.getByText("Referral Ready", { exact: true })).toBeVisible();
-  await page.getByRole("button", { name: "Mark Awarded" }).click();
+  await page.goto("/crm/candidates/robert-king");
   await expect(page.getByText("Awarded", { exact: true }).first()).toBeVisible();
-  await expect(page.getByText("Candidate Awarded", { exact: true })).toBeVisible();
+  await expect(page.getByText("Placement awarded. Referral history is complete.")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Mark Referral Ready" })).toHaveCount(0);
+  await page.getByRole("link", { name: "View Referral History" }).first().click();
+  await expect(page.getByRole("heading", { name: "Robert King" })).toBeVisible();
+  await expect(page.getByText("Completed Referral History", { exact: true })).toBeVisible();
+  await expect(page.getByText("Introduced", { exact: true }).first()).toBeVisible();
+  await expect(page.getByText(/Referral Studio is blocked/)).toHaveCount(0);
 });

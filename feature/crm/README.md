@@ -33,7 +33,15 @@ For Supabase, replace repository and activity adapters while retaining `Candidat
 
 ## Conference E2E reset
 
-Playwright uses `POST /crm/test-reset` after entering the authenticated conference demo. The endpoint is available only when `NODE_ENV=development`, conference access is explicitly enabled, and the request carries a valid demo session cookie. It calls the overlay's existing `reset()` method and never changes seed fixtures. In production it responds as not found.
+Playwright uses `POST /crm/test-reset` after entering the authenticated conference demo. The endpoint is available only when conference access is explicitly enabled in development or by the dedicated `PLAYWRIGHT_TEST_MODE=true` server environment, and the request carries a valid demo session cookie. It calls the overlay's existing `reset()` method and never changes seed fixtures. Normal production starts do not set the test-mode variable, so the endpoint responds as not found.
+
+## End-to-end test server
+
+Run `npm run test:e2e` from the repository root. The cross-platform Node runner creates the standard production build, then Playwright starts one production Next.js server on `127.0.0.1:3100`, runs Chromium serially, and owns server shutdown. `reuseExistingServer` is disabled so stale code can never satisfy the run. Development uses `.next-dev`, while production/E2E uses `.next`; this keeps build output and ports independent when a developer server is already running.
+
+The runner injects `PLAYWRIGHT_TEST_MODE=true` and `CONFERENCE_DEMO_ACCESS=true`; neither variable needs to be added to `.env.local`. Tests enter through the real conference-demo login action before calling the authenticated reset endpoint. A single worker is intentional because the demo overlay is process-local and mutable. Failure screenshots, traces, and reports remain in gitignored Playwright output directories.
+
+Interactive variants are `npm run test:e2e:ui` and `npm run test:e2e:headed`. A future CI job can run `npm ci` followed by `npm run test:e2e`; the E2E runner performs its isolated production build automatically. If port 3100 is occupied, the run fails rather than attaching to or terminating that process.
 
 ## Candidate Brand Strategy
 
