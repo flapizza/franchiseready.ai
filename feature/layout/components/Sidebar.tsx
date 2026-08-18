@@ -2,6 +2,7 @@
 
 import {
   BrainCircuit,
+  Library,
   FileText,
   Home,
   SearchCheck,
@@ -37,7 +38,7 @@ export function Sidebar() {
           href={APP_ROUTES.candidateIntelligence}
           label="Candidates"
           icon={<Users size={20} />}
-          excludedSuffixes={["/strategy", "/referral"]}
+          excludedSuffixes={["/strategy", "/presentation", "/referral"]}
         />
 
         <p className="px-4 pt-5 text-[10px] font-bold uppercase tracking-[0.22em] text-slate-600">AI Workspaces</p>
@@ -53,7 +54,13 @@ export function Sidebar() {
           href={APP_ROUTES.brandStrategy}
           label="Brand Strategy"
           icon={<BrainCircuit size={20} />}
-          activeSuffixes={["/strategy"]}
+          activeSuffixes={["/strategy", "/presentation"]}
+        />
+
+        <NavigationItem
+          href={APP_ROUTES.brandLibrary}
+          label="Brand Library"
+          icon={<Library size={20} />}
         />
 
         <NavigationItem

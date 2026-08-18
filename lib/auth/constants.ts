@@ -14,6 +14,7 @@ export const APP_ROUTES = {
   candidateIntelligence: "/crm/candidates",
   discoveryCopilot: "/crm/discovery",
   brandStrategy: "/crm/strategy",
+  brandLibrary: "/crm/brands",
   referralStudio: "/crm/referrals",
   insights: "/crm/tasks",
   aiStudio: "/crm/reports",

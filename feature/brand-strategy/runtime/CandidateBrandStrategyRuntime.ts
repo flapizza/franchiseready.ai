@@ -12,6 +12,9 @@ import type { CandidateBrandRecommendationState, CandidateBrandStrategyState } f
 import { demoCandidateOverlayStore } from "@/feature/crm/repositories/DemoCandidateOverlayStore";
 import { getConferenceReferralHistory } from "@/feature/demo/data/conferenceReferralHistory";
 import type { StrategyWorkflowStatus } from "../models/StrategyBuilderRecord";
+import type { CandidateBrandPresentationState, PresentationTalkingPoint } from "../models/CandidateBrandPresentationBrief";
+import { PresentationQuestionBuilder } from "./PresentationQuestionBuilder";
+import { BrandIntelligenceRuntime, presentationValue } from "@/feature/brand-library/runtime/BrandIntelligenceRuntime";
 
 const STRATEGY_STAGES: readonly PipelineStage[] = ["brand-matching", "referral", "awarded"];
 
@@ -30,6 +33,8 @@ function money(value: number) {
 
 export class CandidateBrandStrategyRuntime {
   private readonly referralEvaluator = new ReferralReadinessEvaluator();
+  private readonly presentationQuestions = new PresentationQuestionBuilder();
+  private readonly brandIntelligence = new BrandIntelligenceRuntime();
 
   public constructor(
     private readonly candidates: CandidateRepository = new SeedCandidateRepository(),
@@ -55,7 +60,7 @@ export class CandidateBrandStrategyRuntime {
           ? "Candidate Intelligence must be available before Brand Strategy can be generated."
           : `Brand Strategy becomes available after Discovery and Validation. Current stage: ${stageLabel(candidate.pipelineStage)}.`,
         candidate: base, overallStrategy: "", leadRecommendation: null, recommendations: [], presentationOrder: [],
-        workflow: { status: "strategy-building", label: "Strategy Building", presented: 0, reactionsCaptured: 0, strongInterest: 0, referralSelections: 0, historical: false }, openConcerns: [],
+        workflow: { status: "strategy-building", label: "Strategy Building", presented: 0, selected: 0, reactionsCaptured: 0, strongInterest: 0, referralSelections: 0, historical: false }, openConcerns: [],
         referralReadiness: null, referralDecision: null, lifecycleAction: null, referralHandoff: null, referralStrategyHandoff: null,
       };
     }
@@ -84,7 +89,8 @@ export class CandidateBrandStrategyRuntime {
         presentationOrder: decision?.presentationOrder ?? (historical ? item.rank : null),
         candidateReaction: decision?.candidateReaction ?? (historical ? "strong-interest" as const : null),
         consultantNotes: decision?.consultantNotes ?? "",
-        shortlistDisposition: decision?.shortlistDisposition ?? (historical ? "refer" as const : null) };
+        shortlistDisposition: decision?.shortlistDisposition ?? (historical ? "refer" as const : null),
+        presentedAt: decision?.presentedAt ?? (historical ? historical.introducedAt : null) };
     });
     const top = recommendations[0];
     if (!top) throw new Error("Brand Strategy requires at least one canonical brand.");
@@ -119,9 +125,10 @@ export class CandidateBrandStrategyRuntime {
 
     const selected = recommendations.filter((item) => item.selectedForPresentation).sort((a, b) => (a.presentationOrder ?? 999) - (b.presentationOrder ?? 999));
     const reactionsCaptured = selected.filter((item) => item.candidateReaction).length;
+    const presented = selected.filter((item) => item.presentedAt).length;
     const historical = candidate.pipelineStage === "awarded";
-    const workflowStatus: StrategyWorkflowStatus = historical ? "historical" : referralSelections.length ? "referral-selection-ready" : selected.some((item) => item.shortlistDisposition) ? "final-shortlist-ready" : reactionsCaptured ? "candidate-discussion" : selected.length ? "presentation-set-ready" : "strategy-building";
-    const labels: Record<StrategyWorkflowStatus, string> = { "strategy-building": "Build Presentation Set", "presentation-set-ready": "Ready to Present", "candidate-discussion": "Candidate Discussion", "final-shortlist-ready": "Finalize Shortlist", "referral-selection-ready": "Ready for Referral", historical: "Historical" };
+    const workflowStatus: StrategyWorkflowStatus = historical ? "historical" : referralSelections.length ? "referral-selection-ready" : selected.length > 0 && presented === selected.length ? "final-shortlist-ready" : presented ? "candidate-discussion" : selected.length ? "presentation-set-ready" : "strategy-building";
+    const labels: Record<StrategyWorkflowStatus, string> = { "strategy-building": "Build Presentation Set", "presentation-set-ready": "Ready to Present", "candidate-discussion": "Presentation In Progress", "final-shortlist-ready": "Review Candidate Reactions", "referral-selection-ready": "Ready for Referral", historical: "Historical" };
     return {
       available: true, candidate: base,
       overallStrategy,
@@ -132,7 +139,7 @@ export class CandidateBrandStrategyRuntime {
       },
       recommendations,
       presentationOrder: selected.map((item) => item.brandName),
-      workflow: { status: workflowStatus, label: labels[workflowStatus], presented: selected.length, reactionsCaptured,
+      workflow: { status: workflowStatus, label: labels[workflowStatus], presented, selected: selected.length, reactionsCaptured,
         strongInterest: selected.filter((item) => item.candidateReaction === "strong-interest").length, referralSelections: referralSelections.length, historical },
       openConcerns,
       referralReadiness: {
@@ -217,7 +224,44 @@ export class CandidateBrandStrategyRuntime {
       candidateReaction: null,
       consultantNotes: "",
       shortlistDisposition: null,
+      presentedAt: null,
     };
+  }
+
+  async loadPresentation(candidateId: string, requestedBrandId?: string): Promise<CandidateBrandPresentationState | null> {
+    const [strategy, brands, governedProfiles] = await Promise.all([this.load(candidateId), this.brands.getAll(), this.brandIntelligence.getAll()]);
+    if (!strategy) return null;
+    const selected = strategy.recommendations.filter((item) => item.selectedForPresentation).sort((a, b) => (a.presentationOrder ?? 999) - (b.presentationOrder ?? 999));
+    if (!strategy.available || selected.length === 0) return { available: false, reason: "Add at least one brand to the Presentation Set first.", candidateId, candidateName: strategy.candidate.fullName, historical: strategy.workflow.historical, completed: false, briefs: [], activeIndex: 0 };
+    const byId = new Map(brands.map((brand) => [brand.id, brand]));
+    const governedById = new Map(governedProfiles.map((profile) => [profile.brandId, profile]));
+    const briefs = selected.map((item, index) => {
+      const brand = byId.get(item.brandId);
+      const governed = governedById.get(item.brandId);
+      if (!brand || !governed) throw new Error(`Canonical brand profile missing for ${item.brandId}.`);
+      const facts = [
+        { label: "Industry", value: presentationValue(governed.category) ?? "Not Yet Available" },
+        { label: "Business Model", value: presentationValue(governed.businessModel) ?? "Not Yet Available" },
+        { label: "Customer Type", value: presentationValue(governed.customerType) ?? "Not Yet Available" },
+        { label: "Owner Role", value: presentationValue(governed.ownerRole) ?? "Not Yet Available" },
+        { label: "Staffing Model", value: presentationValue(governed.staffingModel) ?? "Not Yet Available" },
+        { label: "Revenue Model", value: presentationValue(governed.revenueModel) ?? "Not Yet Available" },
+        { label: "Investment Range", value: `${money(presentationValue(governed.financial.totalInvestmentMin) ?? brand.investment.minimum)}–${money(presentationValue(governed.financial.totalInvestmentMax) ?? brand.investment.maximum)}` },
+        { label: "Training & Support", value: presentationValue(governed.trainingSupport.initialTraining) ?? "Not Yet Profiled" },
+      ];
+      const evidence = item.evidence.slice(0, 5).map((entry): PresentationTalkingPoint => ({ text: `${entry.title}: ${entry.description}`, source: entry.source === "meeting" ? "Discovery" : entry.category === "financial" ? "Financial Profile" : "Assessment" }));
+      return { candidateId, candidateName: strategy.candidate.fullName, brandId: item.brandId, brandName: item.brandName,
+        presentationOrder: index + 1, presentationCount: selected.length, aiRank: item.rank, aiMatch: item.score, recommendationConfidence: item.confidence,
+        overview: presentationValue(governed.overview) ?? "Not Yet Profiled", facts, differentiators: presentationValue(governed.differentiators) ?? [], matchRationale: item.rationale, fitFactors: evidence,
+        emphasize: [...item.fitDimensions.slice().sort((a, b) => b.alignment - a.alignment).slice(0, 2).map((fit) => ({ text: `Connect ${fit.label.toLowerCase()} (${fit.candidateValue}%) to this ownership model.`, source: "Assessment" as const })),
+          ...[...item.presentationGuidance.emphasize, ...item.presentationGuidance.leadWith].slice(0, 3).map((text) => ({ text, source: "Brand Intelligence" as const }))],
+        concerns: item.concerns.slice(0, 4).map((text) => ({ text, source: /investment|financial/i.test(text) ? "Financial Profile" as const : "Brand Intelligence" as const })),
+        questions: this.presentationQuestions.build(presentationValue(governed.canonicalQuestions) ?? [], strategy.openConcerns),
+        candidateReaction: item.candidateReaction, consultantNotes: item.consultantNotes, shortlistDisposition: item.shortlistDisposition, presentedAt: item.presentedAt };
+    });
+    const activeIndex = Math.max(0, requestedBrandId ? briefs.findIndex((item) => item.brandId === requestedBrandId) : briefs.findIndex((item) => !item.presentedAt));
+    return { available: true, candidateId, candidateName: strategy.candidate.fullName, historical: strategy.workflow.historical,
+      completed: strategy.workflow.historical || briefs.every((item) => Boolean(item.presentedAt)), briefs, activeIndex: activeIndex < 0 ? 0 : activeIndex };
   }
 
   private dimension(id: string, label: string, candidateValue: number, brandTarget: number, explanation: string) {

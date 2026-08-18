@@ -62,8 +62,10 @@ export class CandidateWorkspaceQueueRuntime {
     const strategy = demoCandidateOverlayStore.getStrategy(candidateId);
     const selected = strategy?.decisions.filter((item) => item.selectedForPresentation) ?? [];
     if (!selected.length) return "Build Presentation Set";
-    if (selected.some((item) => !item.candidateReaction)) return "Ready to Present · candidate reactions incomplete";
-    if (!selected.some((item) => item.shortlistDisposition)) return "Finalize Shortlist";
+    const presented = selected.filter((item) => item.presentedAt).length;
+    if (!presented) return "Ready to Present";
+    if (presented < selected.length) return `Presentation In Progress · ${presented}/${selected.length} presented`;
+    if (!selected.some((item) => item.shortlistDisposition)) return "Review Candidate Reactions · finalize shortlist";
     return selected.some((item) => item.shortlistDisposition === "refer") ? "Ready for Referral" : "Candidate Discussion";
   }
 }

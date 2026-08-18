@@ -51,7 +51,7 @@ export class StrategyBuilderService {
     } else {
       const changed = existing.shortlistDisposition !== command.disposition;
       decisions.set(command.brandId, { ...existing, shortlistDisposition: command.disposition, updatedAt: now });
-      if (changed) activity = { title: command.disposition === "remove" ? `Brand Removed from Consideration — ${recommendation.brandName}` : `Brand Added to Shortlist — ${recommendation.brandName}`,
+      if (changed) activity = { title: `Final Shortlist Updated — ${recommendation.brandName}`,
         description: `Consultant disposition: ${command.disposition.replace("-", " ")}.` };
     }
 
@@ -62,7 +62,52 @@ export class StrategyBuilderService {
     return { status: "success", message: "Strategy Builder updated." };
   }
 
-  private empty(brandId: string, updatedAt: string): StrategyBrandDecision { return { brandId, selectedForPresentation: false, presentationOrder: null, candidateReaction: null, consultantNotes: "", shortlistDisposition: null, updatedAt }; }
+  async startPresentation(candidateId: string): Promise<StrategyBuilderResult> {
+    const strategy = await this.runtime.load(candidateId);
+    if (!strategy?.available || strategy.workflow.historical) return { status: "invalid", message: "This presentation cannot be started." };
+    if (!strategy.recommendations.some((item) => item.selectedForPresentation)) return { status: "invalid", message: "Add at least one brand to the Presentation Set first." };
+    const now = new Date().toISOString();
+    const current = demoCandidateOverlayStore.getStrategy(candidateId) ?? { candidateId, decisions: [], createdAt: now, updatedAt: now };
+    if (!current.presentationStartedAt) {
+      demoCandidateOverlayStore.saveStrategy({ ...current, presentationStartedAt: now, presentationCompletedAt: null, updatedAt: now });
+      await this.activities.add({ id: `strategy:${candidateId}:presentation-started`, candidateId, consultantId: demoConsultant.id,
+        type: "brand-presented", title: "Brand Presentation Started", description: `${strategy.workflow.selected} brands in consultant presentation order.`, createdAt: now });
+    }
+    return { status: "success", message: "Brand Presentation started." };
+  }
+
+  async presentBrand(candidateId: string, brandId: string, reaction: CandidateBrandReaction, notes: string): Promise<StrategyBuilderResult> {
+    const strategy = await this.runtime.load(candidateId);
+    const recommendation = strategy?.recommendations.find((item) => item.brandId === brandId);
+    if (!strategy?.available || strategy.workflow.historical || !recommendation?.selectedForPresentation) return { status: "invalid", message: "Brand is not in the active Presentation Set." };
+    const now = new Date().toISOString();
+    const current = demoCandidateOverlayStore.getStrategy(candidateId);
+    if (!current) return { status: "invalid", message: "Start the Brand Presentation first." };
+    const decisions = current.decisions.map((item) => item.brandId === brandId ? { ...item, candidateReaction: reaction, consultantNotes: notes.trim(), presentedAt: item.presentedAt ?? now, updatedAt: now } : item);
+    const previous = current.decisions.find((item) => item.brandId === brandId);
+    demoCandidateOverlayStore.saveStrategy({ ...current, decisions, updatedAt: now });
+    if (!previous?.presentedAt) await this.activities.add({ id: `strategy:${candidateId}:${brandId}:presented`, candidateId, consultantId: demoConsultant.id,
+      type: "brand-presented", title: `Brand Presented — ${recommendation.brandName}`, description: "Consultant completed this brand discussion and captured the candidate response.", createdAt: now });
+    if (previous?.candidateReaction !== reaction) await this.activities.add({ id: `strategy:${candidateId}:${brandId}:reaction:${reaction}`, candidateId, consultantId: demoConsultant.id,
+      type: "brand-presented", title: `Candidate ${this.reactionLabel(reaction)} — ${recommendation.brandName}`, description: notes.trim() || "Candidate reaction captured during Brand Presentation.", createdAt: now });
+    return { status: "success", message: "Presentation response saved." };
+  }
+
+  async completePresentation(candidateId: string): Promise<StrategyBuilderResult> {
+    const strategy = await this.runtime.load(candidateId);
+    if (!strategy?.available || strategy.workflow.historical || strategy.workflow.selected === 0 || strategy.workflow.presented !== strategy.workflow.selected) return { status: "invalid", message: "Present every selected brand before completing the presentation." };
+    const now = new Date().toISOString();
+    const current = demoCandidateOverlayStore.getStrategy(candidateId);
+    if (!current) return { status: "invalid", message: "Presentation state was not found." };
+    if (!current.presentationCompletedAt) {
+      demoCandidateOverlayStore.saveStrategy({ ...current, presentationCompletedAt: now, updatedAt: now });
+      await this.activities.add({ id: `strategy:${candidateId}:presentation-completed`, candidateId, consultantId: demoConsultant.id,
+        type: "brand-presented", title: "Brand Presentation Completed", description: `${strategy.workflow.presented} brands presented; final shortlist is ready for consultant review.`, createdAt: now });
+    }
+    return { status: "success", message: "Brand Presentation completed." };
+  }
+
+  private empty(brandId: string, updatedAt: string): StrategyBrandDecision { return { brandId, selectedForPresentation: false, presentationOrder: null, candidateReaction: null, consultantNotes: "", shortlistDisposition: null, presentedAt: null, updatedAt }; }
   private compact(decisions: Map<string, StrategyBrandDecision>) { [...decisions.values()].filter((item) => item.selectedForPresentation).sort((a, b) => (a.presentationOrder ?? 0) - (b.presentationOrder ?? 0)).forEach((item, index) => decisions.set(item.brandId, { ...item, presentationOrder: index + 1 })); }
   private reactionLabel(value: CandidateBrandReaction) { return ({ "strong-interest": "Strong Interest", interested: "Interested", neutral: "Neutral", "not-interested": "Not Interested" })[value]; }
 }

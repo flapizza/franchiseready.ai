@@ -123,7 +123,9 @@ export class Candidate360Runtime {
         ? `/crm/candidates/${candidate.id}/strategy`
         : undefined,
       brandStrategy: brandStrategy?.available ? { recommendations: brandStrategy.recommendations.length, presented: brandStrategy.workflow.presented,
-        strongInterest: brandStrategy.workflow.strongInterest, referralSelections: brandStrategy.workflow.referralSelections, statusLabel: brandStrategy.workflow.label } : undefined,
+        strongInterest: brandStrategy.workflow.strongInterest, referralSelections: brandStrategy.workflow.referralSelections, statusLabel: brandStrategy.workflow.label,
+        actionLabel: brandStrategy.workflow.referralSelections ? "Open Referral Studio" : brandStrategy.workflow.presented < brandStrategy.workflow.selected ? (brandStrategy.workflow.presented ? "Continue Brand Presentation" : "Start Brand Presentation") : "Review Final Shortlist",
+        actionHref: brandStrategy.workflow.referralSelections ? `/crm/candidates/${candidate.id}/referral` : brandStrategy.workflow.selected ? `/crm/candidates/${candidate.id}/strategy/presentation${brandStrategy.workflow.presented === brandStrategy.workflow.selected ? "?summary=1" : ""}` : `/crm/candidates/${candidate.id}/strategy` } : undefined,
       referralAction: referrals.length
         ? { label: candidate.pipelineStage === "awarded" ? "View Referral History" : approvedReferrals ? "Review Delivery Status" : awaitingApproval ? `Review ${awaitingApproval} Referral Package${awaitingApproval === 1 ? "" : "s"}` : "View Referrals", href: `/crm/candidates/${candidate.id}/referral` }
         : candidate.pipelineStage === "referral"

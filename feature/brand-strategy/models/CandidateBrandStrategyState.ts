@@ -44,6 +44,7 @@ export interface CandidateBrandRecommendationState {
   candidateReaction: CandidateBrandReaction | null;
   consultantNotes: string;
   shortlistDisposition: BrandShortlistDisposition | null;
+  presentedAt: string | null;
 }
 
 export interface ReferralBrandHandoffState {
@@ -107,6 +108,7 @@ export interface CandidateBrandStrategyState {
     status: StrategyWorkflowStatus;
     label: string;
     presented: number;
+    selected: number;
     reactionsCaptured: number;
     strongInterest: number;
     referralSelections: number;

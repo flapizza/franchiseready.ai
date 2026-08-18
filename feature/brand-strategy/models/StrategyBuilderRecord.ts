@@ -9,6 +9,7 @@ export interface StrategyBrandDecision {
   candidateReaction: CandidateBrandReaction | null;
   consultantNotes: string;
   shortlistDisposition: BrandShortlistDisposition | null;
+  presentedAt: string | null;
   updatedAt: string;
 }
 
@@ -19,4 +20,6 @@ export interface StrategyBuilderRecord {
   decisions: StrategyBrandDecision[];
   createdAt: string;
   updatedAt: string;
+  presentationStartedAt?: string | null;
+  presentationCompletedAt?: string | null;
 }
