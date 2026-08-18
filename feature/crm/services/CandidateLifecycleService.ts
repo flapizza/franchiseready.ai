@@ -104,7 +104,7 @@ export class CandidateLifecycleService {
   getRecommendedAction(candidate: CandidateRecord): CandidateLifecycleAction | null {
     switch (candidate.pipelineStage) {
       case "assessment-completed":
-        return { label: "Start Discovery", targetStage: "discovery", kind: "discovery-started", reason: "The completed assessment is ready for consultant-led Discovery.", returnPath: `/crm/${candidate.id}/discovery` };
+        return { label: "Start Discovery", targetStage: "discovery", kind: "discovery-started", reason: "The completed assessment is ready for consultant-led Discovery.", returnPath: `/crm/${candidate.id}/discovery?phase=live` };
       case "discovery": {
         const targetStage = this.discoveryTarget(candidate);
         return { label: targetStage === "validation" ? "Complete Discovery · Begin Validation" : "Complete Discovery · Brand Strategy", targetStage, kind: "discovery-completed", reason: targetStage === "validation" ? "Discovery completed with validation items still unresolved." : "Discovery completed with sufficient evidence for Brand Strategy." };
