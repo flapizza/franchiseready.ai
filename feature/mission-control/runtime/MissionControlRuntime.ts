@@ -6,6 +6,7 @@ import { SeedDemoScenarioRepository } from "@/feature/demo/repositories/SeedDemo
 import type { CandidateRepository } from "@/feature/crm/repositories/CandidateRepository";
 import { SeedCandidateRepository } from "@/feature/crm/repositories/SeedCandidateRepository";
 import { demoCandidateOverlayStore } from "@/feature/crm/repositories/DemoCandidateOverlayStore";
+import { EmailCommunicationRuntime } from "@/feature/communications/runtime/EmailCommunicationRuntime";
 
 import type {
   IntelligenceEventState,
@@ -342,6 +343,11 @@ export class MissionControlRuntime {
         candidateName: candidateName(candidate),
       });
     };
+
+    const engaged = candidates.map((candidate) => ({ candidate, message: new EmailCommunicationRuntime().load(candidate.id).find((message) => message.mostRecentEngagement) }))
+      .filter((item): item is { candidate: DemoCandidate; message: NonNullable<typeof item.message> } => Boolean(item.message))
+      .sort((left, right) => Date.parse(right.message.sentAt ?? "") - Date.parse(left.message.sentAt ?? ""))[0];
+    if (engaged) append(engaged.candidate, { id: `email-engagement-${engaged.message.messageId}`, type: "email-engagement", label: "Email Engagement", explanation: `${engaged.message.mostRecentEngagement}. ${engaged.message.nextAction ?? "Behavioral evidence recorded for consultant review."}`, dateLabel: "Recent" });
 
     append(
       candidates.find((candidate) => candidate.pipelineStage === "assessment-completed"),

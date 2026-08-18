@@ -11,6 +11,9 @@ import { createDemoCandidateLifecycleService } from "@/feature/crm/services/Demo
 import { demoCandidateOverlayStore } from "@/feature/crm/repositories/DemoCandidateOverlayStore";
 import { getConferenceReferralHistory } from "@/feature/demo/data/conferenceReferralHistory";
 import { CandidateBrandStrategyRuntime } from "@/feature/brand-strategy/runtime/CandidateBrandStrategyRuntime";
+import { EmailCommunicationRuntime } from "@/feature/communications/runtime/EmailCommunicationRuntime";
+import { DemoEmailRepository } from "@/feature/communications/repositories/DemoEmailRepository";
+import { demoConsultant } from "@/feature/demo/data/demoConsultant";
 
 import type { Candidate360State, CandidateActivityState } from "../models/Candidate360State";
 
@@ -85,17 +88,35 @@ export class Candidate360Runtime {
         ? { label: "Assessment Pending", detail: invitation ? `Invitation sent to ${invitation.candidateEmail}. The candidate has not completed the assessment yet.` : "The assessment is pending, but an active invitation link is not available. Send a new invitation to continue.", invitationSent: Boolean(invitation), actionLabel: invitation ? "Open Assessment" : "Send Assessment", actionHref: invitation?.assessmentUrl }
         : { label: "Assessment Not Started", detail: "No completed assessment or Candidate Intelligence is available.", invitationSent: false, actionLabel: "Send Assessment" };
 
+    const emails = new EmailCommunicationRuntime().load(candidate.id);
+    const emailEvents = new DemoEmailRepository().getEvents(candidate.id);
+    const emailActivities: CandidateActivityState[] = emails.flatMap((message) => {
+      const own = emailEvents.filter((event) => event.messageId === message.messageId);
+      const opens = own.filter((event) => event.type === "open");
+      const clicks = own.filter((event) => event.type === "link-click");
+      const replies = own.filter((event) => event.type === "reply");
+      const values: CandidateActivityState[] = [];
+      if (message.sentAt) values.push({ id: `${message.messageId}:sent`, title: "Email Sent", description: message.subject, timestamp: message.sentAt, dateLabel: formatActivityDate(message.sentAt), icon: "email", tone: "blue" });
+      if (message.deliveryStatus === "delivered" && message.sentAt) values.push({ id: `${message.messageId}:delivered`, title: "Email Delivered", description: message.subject, timestamp: message.sentAt, dateLabel: formatActivityDate(message.sentAt), icon: "email", tone: "emerald" });
+      if (opens.length) values.push({ id: `${message.messageId}:opens`, title: `Email opened ${opens.length} time${opens.length === 1 ? "" : "s"}`, description: message.subject, timestamp: opens.at(-1)!.occurredAt, dateLabel: formatActivityDate(opens.at(-1)!.occurredAt), icon: "email", tone: "teal" });
+      if (clicks.length) values.push({ id: `${message.messageId}:clicks`, title: clicks.length === 1 ? "Link Clicked" : `${clicks.length} Link Clicks`, description: message.mostRecentEngagement, timestamp: clicks.at(-1)!.occurredAt, dateLabel: formatActivityDate(clicks.at(-1)!.occurredAt), icon: "email", tone: "emerald" });
+      if (replies.length) values.push({ id: `${message.messageId}:reply`, title: "Candidate Replied", description: message.subject, timestamp: replies.at(-1)!.occurredAt, dateLabel: formatActivityDate(replies.at(-1)!.occurredAt), icon: "email", tone: "emerald" });
+      return values;
+    });
     const overlayActivities = await this.activityRepository.getByCandidateId(candidate.id);
     const baselineActivities: CandidateActivityState[] = (scenarioCandidate?.recentActivity ?? []).map((activity) => ({
       id: activity.id, title: activity.title, description: activity.detail,
       timestamp: activity.occurredAt, dateLabel: formatActivityDate(activity.occurredAt), icon: "activity", tone: "slate",
     }));
-    const activities = [...baselineActivities, ...overlayActivities.map((activity) => this.toActivity(activity))]
+    const activities = [...baselineActivities, ...overlayActivities.map((activity) => this.toActivity(activity)), ...emailActivities]
       .sort((left, right) => Date.parse(right.timestamp) - Date.parse(left.timestamp));
 
     return {
       id: candidate.id,
       fullName: `${candidate.firstName} ${candidate.lastName}`,
+      email: candidate.email,
+      consultantSender: { name: demoConsultant.displayName, email: demoConsultant.email ?? null },
+      emails,
       currentStage: formatStage(candidate.pipelineStage),
       hasIntelligence: intelligence !== null,
       assessmentStatus,
@@ -108,7 +129,7 @@ export class Candidate360Runtime {
       leadershipReadiness: intelligence?.competencies.leadership ?? null,
       lifestyleAlignment: intelligence?.behavioral.adaptability ?? null,
       coachability: intelligence?.behavioral.coachability ?? null,
-      nextBestAction: candidate.pipelineStage === "awarded" ? "Prepare Onboarding" : lifecycleAction?.label ?? scenarioCandidate?.nextBestAction ?? (assessmentStatus === "pending" && invitation ? "Complete the assessment" : "Send the assessment invitation"),
+      nextBestAction: emails[0]?.nextAction ?? (candidate.pipelineStage === "awarded" ? "Prepare Onboarding" : lifecycleAction?.label ?? scenarioCandidate?.nextBestAction ?? (assessmentStatus === "pending" && invitation ? "Complete the assessment" : "Send the assessment invitation")),
       knownInformation: [
         { label: "Email", value: candidate.email, icon: "email" },
         { label: "Phone", value: candidate.phone || "Not provided", icon: "phone" },

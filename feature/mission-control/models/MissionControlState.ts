@@ -83,7 +83,8 @@ export type IntelligenceEventType =
   | "brand-readiness"
   | "discovery-milestone"
   | "risk-signal"
-  | "referral-ready";
+  | "referral-ready"
+  | "email-engagement";
 
 export interface IntelligenceEventState {
   id: string;

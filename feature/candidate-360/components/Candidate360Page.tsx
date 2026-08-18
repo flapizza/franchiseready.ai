@@ -6,6 +6,7 @@ import { ExecutiveSummary } from "./ExecutiveSummary";
 import { ReadinessScorecard } from "./ReadinessScorecard";
 import { CandidateRelationshipOverview } from "./CandidateRelationshipOverview";
 import { CandidateActivityTimeline } from "./CandidateActivityTimeline";
+import { CandidateEmailPanel } from "@/feature/communications/components/CandidateEmailPanel";
 
 type Props = {
   candidateId: string;
@@ -38,6 +39,8 @@ export async function Candidate360Page({
       {candidate.hasIntelligence && <ReadinessScorecard
         candidate={candidate}
       />}
+
+      <CandidateEmailPanel candidateId={candidate.id} candidateName={candidate.fullName} candidateEmail={candidate.email} sender={candidate.consultantSender} messages={candidate.emails} />
 
       <CandidateActivityTimeline candidate={candidate} />
 

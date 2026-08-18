@@ -32,6 +32,7 @@ No business model should have multiple competing definitions.
 | Task | CRM |
 | Meeting | CRM |
 | Activity | CRM |
+| Email Communication | Communications |
 
 ---
 

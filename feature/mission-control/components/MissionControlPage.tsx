@@ -22,6 +22,7 @@ const eventStyles: Record<IntelligenceEventType, string> = {
   "discovery-milestone": "bg-cyan-500",
   "risk-signal": "bg-rose-500",
   "referral-ready": "bg-emerald-500",
+  "email-engagement": "bg-teal-500",
 };
 
 type Props = {

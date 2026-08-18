@@ -2,6 +2,9 @@ export interface Candidate360State {
   id: string;
 
   fullName: string;
+  email: string;
+  consultantSender: { name: string; email: string | null };
+  emails: import("@/feature/communications/runtime/EmailCommunicationRuntime").EmailMessageView[];
 
   currentStage: string;
 
@@ -52,7 +55,7 @@ export interface Candidate360State {
   referrals?: { total: number; introduced: number; items: Array<{ brandName: string; statusLabel: string }> };
 }
 
-export type CandidateActivityIcon = "candidate" | "assessment" | "discovery" | "brand" | "referral" | "stage" | "activity";
+export type CandidateActivityIcon = "candidate" | "assessment" | "discovery" | "brand" | "referral" | "stage" | "activity" | "email";
 export type CandidateActivityTone = "slate" | "blue" | "teal" | "emerald" | "amber";
 
 export interface CandidateActivityState {

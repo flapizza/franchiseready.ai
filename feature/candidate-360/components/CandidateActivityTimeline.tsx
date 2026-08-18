@@ -1,9 +1,9 @@
-import { Award, Building2, CheckCircle2, ClipboardList, Compass, RefreshCw, Sparkles, UserPlus } from "lucide-react";
+import { Award, Building2, CheckCircle2, ClipboardList, Compass, Mail, RefreshCw, Sparkles, UserPlus } from "lucide-react";
 import type { Candidate360State, CandidateActivityIcon, CandidateActivityTone } from "../models/Candidate360State";
 
 const icons: Record<CandidateActivityIcon, typeof Sparkles> = {
   candidate: UserPlus, assessment: ClipboardList, discovery: Compass, brand: Building2,
-  referral: Award, stage: RefreshCw, activity: CheckCircle2,
+  referral: Award, stage: RefreshCw, activity: CheckCircle2, email: Mail,
 };
 const tones: Record<CandidateActivityTone, string> = {
   slate: "border-slate-200 bg-slate-50 text-slate-500", blue: "border-blue-200 bg-blue-50 text-blue-600",
