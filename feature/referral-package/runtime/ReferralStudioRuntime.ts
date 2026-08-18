@@ -25,6 +25,6 @@ export class ReferralStudioRuntime {
       readinessAdvisory: { recommended: handoff?.referralGatePassed ?? false, label: handoff?.referralGatePassed ? "Recommended" : "Needs Attention",
         explanation: handoff?.referralGatePassed ? "FranGroove recommends proceeding based on the current evidence." : "FranGroove recommends completing the remaining discovery items before introduction. The consultant may proceed using professional judgment.",
         considerations: handoff?.unresolvedReadinessConsiderations ?? [] },
-      summary: { recommended: opportunities.length, prepared: referrals.length, approved: referrals.filter((item) => item.status === "approved").length, introduced: referrals.filter((item) => item.status === "introduced").length } };
+      summary: { recommended: opportunities.length, prepared: referrals.length, approved: referrals.filter((item) => item.status === "approved").length, introduced: referrals.filter((item) => item.status === "sent" || item.status === "introduced").length } };
   }
 }

@@ -21,17 +21,20 @@ test("consultant manages independent referrals for multiple recommended brands",
   await prepared.locator("article").filter({ hasText: "ERA Group" }).getByRole("link", { name: "Review Package" }).click();
   await expect(page).toHaveURL(/referralId=referral%3Ajared-wirsig%3Aera-group/);
   await expect(page.getByRole("heading", { name: "ERA Group package" })).toBeVisible();
-  await page.getByRole("button", { name: "Approve Referral Package" }).click(); await expect(page.getByText("Referral package approved.")).toBeVisible();
-  await page.getByRole("button", { name: "Record Introduction" }).click(); await expect(page.getByText(/Introduction Recorded/).first()).toBeVisible();
+  await page.getByRole("button", { name: "Approve & Send Referral" }).click();
+  await expect(page.getByText("Referral Sent", { exact: true })).toBeVisible();
+  await expect(page.getByText("Demo delivery recorded; no external email was sent.")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Approve & Send Referral" })).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "Prepared Referrals" }).locator("..").locator("article").filter({ hasText: "Schooley Mitchell" }).getByRole("link", { name: "Review Package" })).toBeVisible();
 
   await page.goto("/crm/candidates/jared-wirsig");
   await expect(page.getByText("Referral Package Prepared — ERA Group", { exact: true })).toBeVisible();
   await expect(page.getByText("Referral Package Prepared — Schooley Mitchell", { exact: true })).toBeVisible();
-  await expect(page.getByText("Candidate Introduced — ERA Group", { exact: true })).toBeVisible();
-  await expect(page.getByText("2 Referrals · 1 Introduced", { exact: true })).toBeVisible();
+  await expect(page.getByText("Referral Package Approved — ERA Group", { exact: true })).toHaveCount(1);
+  await expect(page.getByText("Referral Sent — ERA Group", { exact: true })).toHaveCount(1);
+  await expect(page.getByText("2 Referrals · 1 Sent", { exact: true })).toBeVisible();
   await page.goto("/crm/candidates"); await page.getByPlaceholder("Search name, email, or location").fill("Jared Wirsig");
-  await expect(page.getByText("2 referrals · 1 introduced", { exact: true })).toBeVisible();
+  await expect(page.getByText("2 referrals · 1 sent", { exact: true })).toBeVisible();
 });
 
 test("consultant-selected outside brand gets a generic unscored package", async ({ page }) => {
@@ -43,9 +46,9 @@ test("consultant-selected outside brand gets a generic unscored package", async 
   await expect(page.getByText("Consultant-Selected Referral", { exact: true })).toBeVisible();
   await expect(page.getByText("FranGroove has not evaluated or scored this brand match.")).toBeVisible();
   await expect(page.getByText("Candidate Preferred Investment Range", { exact: false })).toBeVisible();
-  await page.getByRole("button", { name: "Approve Referral Package" }).click(); await page.getByRole("button", { name: "Record Introduction" }).click();
-  await expect(page.getByText(/Introduction Recorded/).first()).toBeVisible();
-  await page.goto("/crm/candidates/jared-wirsig"); await expect(page.getByText("Candidate Introduced — Summit Franchise Co", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Approve & Send Referral" }).click();
+  await expect(page.getByText("Referral Sent", { exact: true })).toBeVisible();
+  await page.goto("/crm/candidates/jared-wirsig"); await expect(page.getByText("Referral Sent — Summit Franchise Co", { exact: true })).toBeVisible();
 });
 
 test("Elena can direct an early referral without changing readiness, AI Match, unresolved evidence, or lifecycle", async ({ page }) => {
@@ -69,8 +72,8 @@ test("Elena can direct an early referral without changing readiness, AI Match, u
   await expect(page.getByRole("heading", { name: `${brandName} package` })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Validated Strengths" }).locator("..").getByText("Discovery buying signal", { exact: true })).toHaveCount(2);
   await expect(page.getByRole("heading", { name: "Supporting Evidence" }).locator("..").getByText("Discovery buying signal", { exact: true })).toHaveCount(2);
-  await page.getByRole("button", { name: "Approve Referral Package" }).click();
-  await page.getByRole("button", { name: "Record Introduction" }).click();
+  await page.getByRole("button", { name: "Approve & Send Referral" }).click();
+  await expect(page.getByText("Referral Sent", { exact: true })).toBeVisible();
 
   await page.goto("/crm/candidates/elena-rodriguez/strategy");
   await expect(page.locator(`article[aria-label="${brandName} recommendation"]`).getByText(aiMatch, { exact: true })).toBeVisible();
@@ -90,6 +93,12 @@ test("Review Package preserves Sarah Williams ownership and Strategy referral se
   await expect(page.getByRole("heading", { name: "ERA Group package" })).toBeVisible();
   await expect(page.getByTestId("package-referral:sarah-williams:era-group")).toBeVisible();
   await expect(page.getByText("Elena Rodriguez", { exact: true })).toHaveCount(0);
+  await page.getByRole("button", { name: "Approve & Send Referral" }).click();
+  await expect(page.getByText("Referral Sent", { exact: true })).toBeVisible();
+  await expect(page.getByText(/Sent to ERA Group on behalf of/)).toBeVisible();
+  await page.reload();
+  await expect(page.getByText("Referral Sent", { exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Approve & Send Referral" })).toHaveCount(0);
 
   await page.goto("/crm/candidates/sarah-williams/strategy");
   const presentation = page.getByLabel("Presentation Set");
@@ -104,5 +113,34 @@ test("invalid or cross-candidate package resolution remains in Referral Studio w
   await expect(page.getByRole("heading", { name: "Referral package could not be resolved" })).toBeVisible();
   await expect(page.getByText("does not exist or does not belong to this candidate", { exact: false })).toBeVisible();
   await expect(page).not.toHaveURL(/\/strategy/);
-  await expect(page.getByRole("button", { name: "Approve Referral Package" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Approve & Send Referral" })).toHaveCount(0);
+});
+
+test("failed approved delivery can retry without a second approval", async ({ page }) => {
+  await enterDemoAndReset(page);
+  await page.goto("/crm/candidates/jared-wirsig/referral");
+  await page.getByRole("checkbox", { name: /ERA Group/ }).check();
+  await page.getByRole("button", { name: "Prepare Referral" }).click();
+  const configured = await page.request.post("/crm/test-referral-delivery", { data: { referralId: "referral:jared-wirsig:era-group" } });
+  expect(configured.ok()).toBeTruthy();
+  await page.getByRole("button", { name: "Approve & Send Referral" }).click();
+  await expect(page.getByText("Delivery Failed", { exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Retry Delivery" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Approve & Send Referral" })).toHaveCount(0);
+  await page.getByRole("button", { name: "Retry Delivery" }).click();
+  await expect(page.getByText("Referral Sent", { exact: true })).toBeVisible();
+  await page.goto("/crm/candidates/jared-wirsig");
+  await expect(page.getByText("Referral Package Approved — ERA Group", { exact: true })).toHaveCount(1);
+  await expect(page.getByText("Referral Delivery Failed — ERA Group", { exact: true })).toHaveCount(1);
+  await expect(page.getByText("Referral Sent — ERA Group", { exact: true })).toHaveCount(1);
+});
+
+test("Awarded historical referral is read-only and does not trigger delivery", async ({ page }) => {
+  await enterDemoAndReset(page);
+  await page.goto("/crm/candidates/robert-king/referral");
+  await expect(page.getByText("Completed Referral History", { exact: true })).toBeVisible();
+  await expect(page.getByText("Sent", { exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: /Approve|Retry Delivery/ })).toHaveCount(0);
+  await page.reload();
+  await expect(page.getByText("Completed Referral History", { exact: true })).toBeVisible();
 });

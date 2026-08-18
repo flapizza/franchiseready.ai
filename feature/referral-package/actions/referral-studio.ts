@@ -33,12 +33,16 @@ export async function approveReferral(_state: ReferralActionState, formData: For
   const candidateId = String(formData.get("candidateId") ?? ""); const referralId = String(formData.get("referralId") ?? "");
   const result = await new CandidateReferralService().approve(candidateId, referralId);
   if (result.status !== "success") return { status: "error", message: result.message };
-  refresh(candidateId); return { status: "success", message: "Referral package approved.", selectedReferralId: referralId };
+  refresh(candidateId);
+  return { status: result.referral.delivery?.status === "failed" ? "error" : "success",
+    message: result.referral.delivery?.status === "failed" ? `Referral approved, but delivery failed: ${result.referral.delivery.failureReason ?? "Unknown delivery error."}` : "Referral approved and demo delivery completed.", selectedReferralId: referralId };
 }
 
-export async function introduceCandidate(_state: ReferralActionState, formData: FormData): Promise<ReferralActionState> {
+export async function retryReferralDelivery(_state: ReferralActionState, formData: FormData): Promise<ReferralActionState> {
   const candidateId = String(formData.get("candidateId") ?? ""); const referralId = String(formData.get("referralId") ?? "");
-  const result = await new CandidateReferralService().introduce(candidateId, referralId);
+  const result = await new CandidateReferralService().retryDelivery(candidateId, referralId);
   if (result.status !== "success") return { status: "error", message: result.message };
-  refresh(candidateId); return { status: "success", message: "Introduction recorded. Delivery remains under consultant control.", selectedReferralId: referralId };
+  refresh(candidateId);
+  return { status: result.referral.delivery?.status === "failed" ? "error" : "success",
+    message: result.referral.delivery?.status === "failed" ? `Delivery failed: ${result.referral.delivery.failureReason ?? "Unknown delivery error."}` : "Demo delivery completed.", selectedReferralId: referralId };
 }

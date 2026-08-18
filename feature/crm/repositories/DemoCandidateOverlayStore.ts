@@ -18,6 +18,7 @@ class DemoCandidateOverlayStore {
   private readonly activities = new Map<string, Activity[]>();
   private readonly referrals = new Map<string, CandidateBrandReferral>();
   private readonly strategies = new Map<string, StrategyBuilderRecord>();
+  private readonly referralDeliveryFailures = new Set<string>();
 
   getCandidates(): CandidateRecord[] { return structuredClone([...this.candidates.values()]); }
   getCandidate(id: string): CandidateRecord | null { const value = this.candidates.get(id); return value ? structuredClone(value) : null; }
@@ -29,16 +30,21 @@ class DemoCandidateOverlayStore {
   saveInvitation(invitation: AssessmentInvitation): void { this.invitations.set(invitation.id, structuredClone(invitation)); }
 
   getActivities(candidateId: string): Activity[] { return structuredClone(this.activities.get(candidateId) ?? []); }
-  addActivity(activity: Activity): void { this.activities.set(activity.candidateId, [...(this.activities.get(activity.candidateId) ?? []), structuredClone(activity)]); }
+  addActivity(activity: Activity): void {
+    const current = this.activities.get(activity.candidateId) ?? [];
+    if (!current.some((item) => item.id === activity.id)) this.activities.set(activity.candidateId, [...current, structuredClone(activity)]);
+  }
 
   getCandidateReferrals(candidateId: string): CandidateBrandReferral[] { return structuredClone([...this.referrals.values()].filter((item) => item.candidateId === candidateId)); }
   getCandidateReferral(referralId: string): CandidateBrandReferral | null { const value = this.referrals.get(referralId); return value ? structuredClone(value) : null; }
   saveCandidateReferral(referral: CandidateBrandReferral): void { this.referrals.set(referral.referralId, structuredClone(referral)); }
+  failNextReferralDelivery(referralId: string): void { this.referralDeliveryFailures.add(referralId); }
+  consumeReferralDeliveryFailure(referralId: string): boolean { return this.referralDeliveryFailures.delete(referralId); }
 
   getStrategy(candidateId: string): StrategyBuilderRecord | null { const value = this.strategies.get(candidateId); return value ? structuredClone(value) : null; }
   saveStrategy(strategy: StrategyBuilderRecord): void { this.strategies.set(strategy.candidateId, structuredClone(strategy)); }
 
-  reset(): void { this.candidates.clear(); this.invitations.clear(); this.activities.clear(); this.referrals.clear(); this.strategies.clear(); }
+  reset(): void { this.candidates.clear(); this.invitations.clear(); this.activities.clear(); this.referrals.clear(); this.strategies.clear(); this.referralDeliveryFailures.clear(); }
 }
 
 const demoGlobal = globalThis as typeof globalThis & {

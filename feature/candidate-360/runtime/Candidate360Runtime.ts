@@ -125,11 +125,11 @@ export class Candidate360Runtime {
       brandStrategy: brandStrategy?.available ? { recommendations: brandStrategy.recommendations.length, presented: brandStrategy.workflow.presented,
         strongInterest: brandStrategy.workflow.strongInterest, referralSelections: brandStrategy.workflow.referralSelections, statusLabel: brandStrategy.workflow.label } : undefined,
       referralAction: referrals.length
-        ? { label: candidate.pipelineStage === "awarded" ? "View Referral History" : approvedReferrals ? "Record Introduction" : awaitingApproval ? `Review ${awaitingApproval} Referral Package${awaitingApproval === 1 ? "" : "s"}` : "View Referrals", href: `/crm/candidates/${candidate.id}/referral` }
+        ? { label: candidate.pipelineStage === "awarded" ? "View Referral History" : approvedReferrals ? "Review Delivery Status" : awaitingApproval ? `Review ${awaitingApproval} Referral Package${awaitingApproval === 1 ? "" : "s"}` : "View Referrals", href: `/crm/candidates/${candidate.id}/referral` }
         : candidate.pipelineStage === "referral"
           ? { label: "Prepare Referral", href: `/crm/candidates/${candidate.id}/referral` }
           : undefined,
-      referrals: referrals.length ? { total: referrals.length, introduced: referrals.filter((item) => item.status === "introduced").length,
+      referrals: referrals.length ? { total: referrals.length, introduced: referrals.filter((item) => item.status === "sent" || item.status === "introduced").length,
         items: referrals.map((item) => ({ brandName: item.brandName, statusLabel: item.status.split("-").map((word) => word[0].toUpperCase() + word.slice(1)).join(" ") })) } : undefined,
     };
   }

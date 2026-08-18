@@ -87,7 +87,7 @@ export class CandidateCRMRuntime {
     const workflowAction = record.pipelineStage === "awarded"
       ? { actionLabel: referrals.length ? "View Referral History" : "Open Candidate", actionHref: referrals.length ? `/crm/candidates/${record.id}/referral` : `/crm/candidates/${record.id}`, actionKind: "navigate" as const }
       : referrals.length
-      ? { actionLabel: approvedReferrals.length ? `Record ${approvedReferrals[0].brandName} Introduction` : awaitingApproval ? `Review ${awaitingApproval} Referral Package${awaitingApproval === 1 ? "" : "s"}` : "View Referrals", actionHref: reviewReferral ? `/crm/candidates/${record.id}/referral?referralId=${encodeURIComponent(reviewReferral.referralId)}` : `/crm/candidates/${record.id}/referral`, actionKind: "navigate" as const }
+      ? { actionLabel: approvedReferrals.length ? `Review ${approvedReferrals[0].brandName} Delivery` : awaitingApproval ? `Review ${awaitingApproval} Referral Package${awaitingApproval === 1 ? "" : "s"}` : "View Referrals", actionHref: reviewReferral ? `/crm/candidates/${record.id}/referral?referralId=${encodeURIComponent(reviewReferral.referralId)}` : `/crm/candidates/${record.id}/referral`, actionKind: "navigate" as const }
       : record.pipelineStage === "referral"
       ? { actionLabel: "Prepare Referral", actionHref: `/crm/candidates/${record.id}/referral`, actionKind: "navigate" as const }
       : record.pipelineStage === "brand-matching"
@@ -117,7 +117,7 @@ export class CandidateCRMRuntime {
       readinessLabel: assessmentPending ? (record.pipelineStage === "lead" ? "Not Yet Evaluated" : "Assessment Pending") : `${record.intelligence!.overallReadiness}%`,
       bestBrand: demo ? brands.get(demo.recommendedBrands[0]?.brandId) ?? null : null,
       lastActivityLabel: formatDate(record.lastActivityAt),
-      nextAction: record.pipelineStage === "awarded" ? "Prepare Onboarding" : referrals.length ? `${referrals.length} referral${referrals.length === 1 ? "" : "s"} · ${referrals.filter((item) => item.status === "introduced").length} introduced` : demo?.nextBestAction ?? (record.pipelineStage === "lead" ? "Send Assessment Invitation" : record.pipelineStage === "assessment-started" ? "Complete Assessment" : "Review Candidate Intelligence"),
+      nextAction: record.pipelineStage === "awarded" ? "Prepare Onboarding" : referrals.length ? `${referrals.length} referral${referrals.length === 1 ? "" : "s"} · ${referrals.filter((item) => item.status === "sent" || item.status === "introduced").length} sent` : demo?.nextBestAction ?? (record.pipelineStage === "lead" ? "Send Assessment Invitation" : record.pipelineStage === "assessment-started" ? "Complete Assessment" : "Review Candidate Intelligence"),
       attention,
       attentionLabel: record.pipelineStage === "awarded" ? "Placement Complete" : attention === "needs-attention" ? "Needs Attention" : attention === "referral-ready" ? "Referral Ready" : "On Track",
       momentum: demo?.buyingMomentum ?? "steady",

@@ -1,7 +1,9 @@
 import type { CandidateReferralPackage } from "../models/CandidateReferralPackage";
 
-export interface ReferralDeliveryResult { recordedAt: string; externallyDelivered: false }
+export type ReferralDeliveryResult =
+  | { status: "sent"; attemptedAt: string; sentAt: string; externallyDelivered: false; provider: "demo" }
+  | { status: "failed"; attemptedAt: string; failedAt: string; reason: string; externallyDelivered: false; provider: "demo" };
 
 export interface ReferralDeliveryService {
-  recordIntroduction(referralPackage: CandidateReferralPackage): Promise<ReferralDeliveryResult>;
+  deliver(referralPackage: CandidateReferralPackage): Promise<ReferralDeliveryResult>;
 }

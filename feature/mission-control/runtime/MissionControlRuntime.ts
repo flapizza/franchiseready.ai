@@ -204,10 +204,10 @@ export class MissionControlRuntime {
     const bestBrand = brandsById.get(candidate.recommendedBrands[0]?.brandId);
     const isReferralReady = candidate.pipelineStage === "referral";
     const referralPackages = demoCandidateOverlayStore.getCandidateReferrals(candidate.id);
-    const introduced = referralPackages.filter((item) => item.status === "introduced").length;
+    const introduced = referralPackages.filter((item) => item.status === "sent" || item.status === "introduced").length;
     const approved = referralPackages.filter((item) => item.status === "approved").length;
     const primaryAction: MissionControlAction = isReferralReady
-      ? { label: introduced ? `View ${introduced} Introduction${introduced === 1 ? "" : "s"}` : approved ? `Record ${approved} Introduction${approved === 1 ? "" : "s"}` : referralPackages.length ? "Continue Referrals" : "Generate Referral Packages", href: `/crm/candidates/${candidate.id}/referral` }
+      ? { label: introduced ? `View ${introduced} Sent Referral${introduced === 1 ? "" : "s"}` : approved ? `Review ${approved} Delivery Failure${approved === 1 ? "" : "s"}` : referralPackages.length ? "Continue Referrals" : "Generate Referral Packages", href: `/crm/candidates/${candidate.id}/referral` }
       : {
           label: candidate.nextBestAction,
           href: candidateWorkspaceHref(candidate.id),
@@ -250,7 +250,7 @@ export class MissionControlRuntime {
           brandsById.get(candidate.recommendedBrands[0]?.brandId)?.name ??
           "Recommendation pending",
         confidence: candidate.confidence,
-        action: { label: demoCandidateOverlayStore.getCandidateReferrals(candidate.id).some((item) => item.status === "introduced") ? "View Introductions" : "Open Referral Studio", href: `/crm/candidates/${candidate.id}/referral` },
+        action: { label: demoCandidateOverlayStore.getCandidateReferrals(candidate.id).some((item) => item.status === "sent" || item.status === "introduced") ? "View Sent Referrals" : "Open Referral Studio", href: `/crm/candidates/${candidate.id}/referral` },
       }));
   }
 
@@ -275,13 +275,13 @@ export class MissionControlRuntime {
         referralCandidate.recommendedBrands[0]?.brandId,
       );
       const referralPackages = demoCandidateOverlayStore.getCandidateReferrals(referralCandidate.id);
-      const introduced = referralPackages.filter((item) => item.status === "introduced").length;
+      const introduced = referralPackages.filter((item) => item.status === "sent" || item.status === "introduced").length;
       const awaitingApproval = referralPackages.filter((item) => item.status === "ready-for-review").length;
       actions.push({
         id: `referral-${referralCandidate.id}`,
         candidateId: referralCandidate.id,
         candidateName: candidateName(referralCandidate),
-        signal: introduced ? `${introduced} Introduction${introduced === 1 ? "" : "s"} Recorded` : awaitingApproval ? `${awaitingApproval} Referral${awaitingApproval === 1 ? "" : "s"} Awaiting Approval` : "Ready for Introduction",
+        signal: introduced ? `${introduced} Referral${introduced === 1 ? "" : "s"} Sent` : awaitingApproval ? `${awaitingApproval} Referral${awaitingApproval === 1 ? "" : "s"} Awaiting Approval` : "Ready for Referral",
         recommendation: introduced ? "Review candidate referral activity" : awaitingApproval ? "Review prepared referral packages" : `Prepare ${brand?.name ?? "recommended brand"} referral opportunities`,
         action: { label: referralPackages.length ? "Open" : "Prepare", href: `/crm/candidates/${referralCandidate.id}/referral` },
         tone: "emerald",

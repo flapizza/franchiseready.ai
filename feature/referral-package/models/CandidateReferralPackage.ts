@@ -1,7 +1,7 @@
 import type { Evidence } from "@/feature/evidence/models/Evidence";
 import type { ReferralBrandHandoffState } from "@/feature/brand-strategy/models/CandidateBrandStrategyState";
 
-export type ReferralPackageStatus = "draft" | "ready-for-review" | "approved" | "introduced";
+export type ReferralPackageStatus = "draft" | "ready-for-review" | "approved" | "sent" | "introduced";
 
 export interface CandidateReferralPackage {
   id: string;

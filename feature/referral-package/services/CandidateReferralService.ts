@@ -6,7 +6,7 @@ import { DemoCandidateActivityRepository } from "@/feature/crm/repositories/Demo
 import { SeedCandidateRepository } from "@/feature/crm/repositories/SeedCandidateRepository";
 import { demoConsultant } from "@/feature/demo/data/demoConsultant";
 import { SeedDemoScenarioRepository } from "@/feature/demo/repositories/SeedDemoScenarioRepository";
-import type { CandidateBrandReferral, CandidateBrandReferralSource } from "../models/CandidateBrandReferral";
+import type { CandidateBrandReferral, CandidateBrandReferralSource, ReferralDeliveryState } from "../models/CandidateBrandReferral";
 import type { CandidateReferralPackage } from "../models/CandidateReferralPackage";
 import { DemoReferralDeliveryService } from "./DemoReferralDeliveryService";
 import { getConferenceReferralById, getConferenceReferralHistory } from "@/feature/demo/data/conferenceReferralHistory";
@@ -20,7 +20,7 @@ export class CandidateReferralService {
   private readonly scenarios = new SeedDemoScenarioRepository();
   private readonly activities = new DemoCandidateActivityRepository();
   private readonly strategy = new CandidateBrandStrategyRuntime(this.candidates, this.brands, this.scenarios);
-  private readonly delivery = new DemoReferralDeliveryService(this.activities);
+  private readonly delivery = new DemoReferralDeliveryService();
 
   getByCandidate(candidateId: string) {
     const overlay = demoCandidateOverlayStore.getCandidateReferrals(candidateId);
@@ -66,6 +66,7 @@ export class CandidateReferralService {
   async update(candidateId: string, referralId: string, editable: CandidateReferralPackage["editable"]): Promise<ReferralServiceResult> {
     const current = this.getOwned(candidateId, referralId);
     if (!current) return { status: "not-found", message: "Prepare the referral package first." };
+    if (current.status !== "ready-for-review") return { status: "blocked", message: "Approved and historical referral packages are read-only." };
     const updated = { ...current, updatedAt: new Date().toISOString(), referralPackage: { ...current.referralPackage, editable } };
     demoCandidateOverlayStore.saveCandidateReferral(updated);
     return { status: "success", referral: updated };
@@ -76,28 +77,58 @@ export class CandidateReferralService {
     if (!current) return { status: "not-found", message: "Prepare the referral package first." };
     const context = await this.context(current.candidateId);
     if ("message" in context) return context;
-    if (current.status === "introduced") return { status: "success", referral: current };
+    const latest = this.getOwned(candidateId, referralId);
+    if (!latest) return { status: "not-found", message: "Prepare the referral package first." };
+    const existingDelivery = this.deliveryState(latest);
+    if (existingDelivery.status !== "not-attempted") return { status: "success", referral: latest };
     const approvedAt = new Date().toISOString();
-    const updated: CandidateBrandReferral = { ...current, status: "approved", approvedAt, updatedAt: approvedAt,
-      referralPackage: { ...current.referralPackage, status: "approved", approvedAt } };
+    const updated: CandidateBrandReferral = { ...latest, status: "approved", approvedAt, updatedAt: approvedAt,
+      delivery: { ...existingDelivery, status: "pending", attemptCount: 1, attemptedAt: approvedAt },
+      referralPackage: { ...latest.referralPackage, status: "approved", approvedAt } };
     demoCandidateOverlayStore.saveCandidateReferral(updated);
     await this.record(updated, "Referral Package Approved", approvedAt);
-    return { status: "success", referral: updated };
+    return { status: "success", referral: await this.executeDelivery(updated) };
   }
 
-  async introduce(candidateId: string, referralId: string): Promise<ReferralServiceResult> {
+  async retryDelivery(candidateId: string, referralId: string): Promise<ReferralServiceResult> {
     const current = this.getOwned(candidateId, referralId);
     if (!current) return { status: "not-found", message: "Prepare the referral package first." };
-    if (current.status !== "approved") return { status: "not-approved", message: "Consultant approval is required before recording an introduction." };
+    const delivery = this.deliveryState(current);
+    if (!current.approvedAt) return { status: "not-approved", message: "Consultant approval is required before delivery." };
+    if (delivery.status !== "failed") return { status: "blocked", message: delivery.status === "sent" ? "This referral has already been sent." : "Only a failed delivery can be retried." };
     const context = await this.context(current.candidateId);
     if ("message" in context) return context;
-    const delivery = await this.delivery.recordIntroduction(current.referralPackage);
-    const updated: CandidateBrandReferral = { ...current, status: "introduced", introducedAt: delivery.recordedAt,
-      deliveryStatus: "recorded", updatedAt: delivery.recordedAt,
-      referralPackage: { ...current.referralPackage, status: "introduced", introducedAt: delivery.recordedAt,
-        candidate: { ...current.referralPackage.candidate } } };
-    demoCandidateOverlayStore.saveCandidateReferral(updated);
-    return { status: "success", referral: updated };
+    const latest = this.getOwned(candidateId, referralId);
+    if (!latest || this.deliveryState(latest).status !== "failed") return latest ? { status: "success", referral: latest } : { status: "not-found", message: "Referral package not found." };
+    const attemptedAt = new Date().toISOString();
+    const claimed: CandidateBrandReferral = { ...latest, updatedAt: attemptedAt,
+      delivery: { ...this.deliveryState(latest), status: "pending", attemptCount: this.deliveryState(latest).attemptCount + 1, attemptedAt, failedAt: null, failureReason: null } };
+    demoCandidateOverlayStore.saveCandidateReferral(claimed);
+    return { status: "success", referral: await this.executeDelivery(claimed) };
+  }
+
+  private async executeDelivery(referral: CandidateBrandReferral): Promise<CandidateBrandReferral> {
+    const result = await this.delivery.deliver(referral.referralPackage);
+    if (result.status === "failed") {
+      const failed: CandidateBrandReferral = { ...referral, status: "approved", updatedAt: result.failedAt,
+        delivery: { ...this.deliveryState(referral), status: "failed", attemptedAt: result.attemptedAt, failedAt: result.failedAt, failureReason: result.reason, externallyDelivered: result.externallyDelivered, provider: result.provider } };
+      demoCandidateOverlayStore.saveCandidateReferral(failed);
+      await this.recordDelivery(failed, "failed", result.failedAt, result.reason);
+      return failed;
+    }
+    const sent: CandidateBrandReferral = { ...referral, status: "sent", introducedAt: result.sentAt, deliveryStatus: "recorded", updatedAt: result.sentAt,
+      delivery: { ...this.deliveryState(referral), status: "sent", attemptedAt: result.attemptedAt, sentAt: result.sentAt, externallyDelivered: result.externallyDelivered, provider: result.provider },
+      referralPackage: { ...referral.referralPackage, status: "sent", introducedAt: result.sentAt } };
+    demoCandidateOverlayStore.saveCandidateReferral(sent);
+    await this.recordDelivery(sent, "sent", result.sentAt);
+    return sent;
+  }
+
+  private deliveryState(referral: CandidateBrandReferral): ReferralDeliveryState {
+    if (referral.delivery) return referral.delivery;
+    const sent = referral.status === "introduced" || referral.deliveryStatus === "recorded";
+    return { status: sent ? "sent" : "not-attempted", attemptCount: sent ? 1 : 0, attemptedAt: referral.introducedAt,
+      sentAt: referral.introducedAt, failedAt: null, failureReason: null, externallyDelivered: false, provider: "demo" };
   }
 
   private async context(candidateId: string): Promise<{ candidate: NonNullable<Awaited<ReturnType<SeedCandidateRepository["getById"]>>> & { intelligence: NonNullable<NonNullable<Awaited<ReturnType<SeedCandidateRepository["getById"]>>>["intelligence"]> }; handoff: ReferralStrategyHandoffState; discoveryFindings: string[] } | { status: "blocked" | "not-found"; message: string }> {
@@ -141,6 +172,7 @@ export class CandidateReferralService {
     const referral: CandidateBrandReferral = { referralId, candidateId: candidate.id, brandId: brand.brandId, brandName: brand.brandName, source,
       recommendationRank: handoff?.rank ?? null, recommendationScore: handoff?.recommendationScore ?? null, recommendationConfidence: handoff?.recommendationConfidence ?? null,
       packageId: pkg.id, status: "ready-for-review", referralPackage: pkg, createdAt: now, updatedAt: now, approvedAt: null, introducedAt: null, deliveryStatus: "not-recorded",
+      delivery: { status: "not-attempted", attemptCount: 0, attemptedAt: null, sentAt: null, failedAt: null, failureReason: null, externallyDelivered: false, provider: "demo" },
       decision: { consultantDirected: !context.handoff.referralGatePassed, aiReadinessStatus: context.handoff.referralReadiness,
         readinessPercentage: context.handoff.referralReadinessPercentage, lifecycleStage: candidate.pipelineStage,
         unresolvedConsiderations: context.handoff.unresolvedReadinessConsiderations, decidedAt: now } };
@@ -150,10 +182,20 @@ export class CandidateReferralService {
   }
 
   private async record(referral: CandidateBrandReferral, event: "Referral Package Prepared" | "Referral Package Approved", createdAt: string) {
-    await this.activities.add({ id: crypto.randomUUID(), candidateId: referral.candidateId, consultantId: referral.referralPackage.consultant.id,
+    await this.activities.add({ id: `referral:${event}:${referral.referralId}`, candidateId: referral.candidateId, consultantId: referral.referralPackage.consultant.id,
       type: "referral-generated", title: `${event} — ${referral.brandName}`, description: `${event} for ${referral.brandName}.`, createdAt,
       metadata: { referralId: referral.referralId, referralPackageId: referral.packageId, brandId: referral.brandId ?? "external",
         consultantDirected: referral.decision.consultantDirected, aiReadinessStatus: referral.decision.aiReadinessStatus,
         readinessPercentage: referral.decision.readinessPercentage, lifecycleStage: referral.decision.lifecycleStage } });
+  }
+
+  private async recordDelivery(referral: CandidateBrandReferral, outcome: "sent" | "failed", createdAt: string, reason?: string) {
+    const attempt = this.deliveryState(referral).attemptCount;
+    await this.activities.add({ id: `referral-delivery:${referral.referralId}:${attempt}:${outcome}`, candidateId: referral.candidateId,
+      consultantId: referral.referralPackage.consultant.id, type: outcome === "sent" ? "candidate-introduced" : "referral-generated",
+      title: outcome === "sent" ? `Referral Sent — ${referral.brandName}` : `Referral Delivery Failed — ${referral.brandName}`,
+      description: outcome === "sent" ? `FranGroove completed demo delivery to ${referral.brandName}; no external email was sent.` : reason,
+      createdAt, metadata: { referralId: referral.referralId, referralPackageId: referral.packageId, brandId: referral.brandId ?? "external",
+        deliveryStatus: outcome, deliveryAttempt: attempt, externallyDelivered: false } });
   }
 }
