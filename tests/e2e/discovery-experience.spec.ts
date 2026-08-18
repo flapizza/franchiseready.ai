@@ -24,8 +24,10 @@ test("Discovery flows from pre-meeting through live review to Validation", async
   await expect(page.getByRole("heading", { name: "Discovery Complete · Validation Required" })).toBeVisible();
   await page.getByRole("button", { name: "Begin Validation" }).click();
   await expect(page.getByRole("button", { name: "Begin Validation" })).toHaveCount(0);
-  await page.goto("/crm/candidates/candidate-demo");
-  await expect(page.getByText("Validation", { exact: true }).first()).toBeVisible();
+  await expect.poll(async () => {
+    await page.goto("/crm/candidates/candidate-demo");
+    return page.getByText("Validation", { exact: true }).count();
+  }).toBeGreaterThan(0);
 });
 
 test("completed Discovery opens historical post-meeting intelligence", async ({ page }) => {

@@ -4,13 +4,12 @@ import { SeedBrandRepository } from "@/feature/brand-library/repositories/SeedBr
 import { demoCandidateOverlayStore } from "@/feature/crm/repositories/DemoCandidateOverlayStore";
 import { DemoCandidateActivityRepository } from "@/feature/crm/repositories/DemoCandidateActivityRepository";
 import { SeedCandidateRepository } from "@/feature/crm/repositories/SeedCandidateRepository";
-import { createDemoCandidateLifecycleService } from "@/feature/crm/services/DemoCandidateLifecycleService";
 import { demoConsultant } from "@/feature/demo/data/demoConsultant";
 import { SeedDemoScenarioRepository } from "@/feature/demo/repositories/SeedDemoScenarioRepository";
 import type { CandidateBrandReferral, CandidateBrandReferralSource } from "../models/CandidateBrandReferral";
 import type { CandidateReferralPackage } from "../models/CandidateReferralPackage";
 import { DemoReferralDeliveryService } from "./DemoReferralDeliveryService";
-import { getConferenceReferralHistory } from "@/feature/demo/data/conferenceReferralHistory";
+import { getConferenceReferralById, getConferenceReferralHistory } from "@/feature/demo/data/conferenceReferralHistory";
 
 export type ReferralServiceResult = { status: "success"; referral: CandidateBrandReferral } | { status: "blocked" | "not-found" | "not-approved"; message: string };
 export type BulkReferralResult = { status: "success"; referrals: CandidateBrandReferral[] } | { status: "blocked" | "not-found"; message: string };
@@ -28,12 +27,22 @@ export class CandidateReferralService {
     return overlay.length ? overlay : getConferenceReferralHistory(candidateId);
   }
 
+  getById(referralId: string) {
+    return demoCandidateOverlayStore.getCandidateReferral(referralId) ?? getConferenceReferralById(referralId);
+  }
+
+  getOwned(candidateId: string, referralId: string) {
+    const referral = this.getById(referralId);
+    if (!referral || referral.candidateId !== candidateId || referral.referralPackage.candidateId !== candidateId || referral.referralPackage.referralId !== referralId) return null;
+    return referral;
+  }
+
   async prepareRecommended(candidateId: string, brandIds: string[]): Promise<BulkReferralResult> {
     const context = await this.context(candidateId);
     if ("message" in context) return context;
     const requested = [...new Set(brandIds)];
     const handoffs = requested.map((brandId) => context.handoff.recommendedBrands.find((item) => item.brandId === brandId));
-    if (handoffs.some((item) => !item || !item.financialCompatibility.compatible)) return { status: "blocked", message: "Only financially qualified Brand Strategy recommendations can be prepared." };
+    if (handoffs.some((item) => !item)) return { status: "blocked", message: "Only canonical Brand Strategy recommendations can be prepared through this action." };
     const referrals: CandidateBrandReferral[] = [];
     for (const handoff of handoffs as ReferralBrandHandoffState[]) referrals.push(await this.prepareOne(context, handoff, "recommended"));
     return { status: "success", referrals };
@@ -54,16 +63,16 @@ export class CandidateReferralService {
     return { status: "success", referral };
   }
 
-  async update(referralId: string, editable: CandidateReferralPackage["editable"]): Promise<ReferralServiceResult> {
-    const current = demoCandidateOverlayStore.getCandidateReferral(referralId);
+  async update(candidateId: string, referralId: string, editable: CandidateReferralPackage["editable"]): Promise<ReferralServiceResult> {
+    const current = this.getOwned(candidateId, referralId);
     if (!current) return { status: "not-found", message: "Prepare the referral package first." };
     const updated = { ...current, updatedAt: new Date().toISOString(), referralPackage: { ...current.referralPackage, editable } };
     demoCandidateOverlayStore.saveCandidateReferral(updated);
     return { status: "success", referral: updated };
   }
 
-  async approve(referralId: string): Promise<ReferralServiceResult> {
-    const current = demoCandidateOverlayStore.getCandidateReferral(referralId);
+  async approve(candidateId: string, referralId: string): Promise<ReferralServiceResult> {
+    const current = this.getOwned(candidateId, referralId);
     if (!current) return { status: "not-found", message: "Prepare the referral package first." };
     const context = await this.context(current.candidateId);
     if ("message" in context) return context;
@@ -76,23 +85,17 @@ export class CandidateReferralService {
     return { status: "success", referral: updated };
   }
 
-  async introduce(referralId: string): Promise<ReferralServiceResult> {
-    const current = demoCandidateOverlayStore.getCandidateReferral(referralId);
+  async introduce(candidateId: string, referralId: string): Promise<ReferralServiceResult> {
+    const current = this.getOwned(candidateId, referralId);
     if (!current) return { status: "not-found", message: "Prepare the referral package first." };
     if (current.status !== "approved") return { status: "not-approved", message: "Consultant approval is required before recording an introduction." };
     const context = await this.context(current.candidateId);
     if ("message" in context) return context;
-    const candidate = context.candidate;
-    if (candidate.pipelineStage === "brand-matching") {
-      const transition = await createDemoCandidateLifecycleService(this.candidates).transition({ candidateId: candidate.id, targetStage: "referral",
-        context: { kind: "referral-approved", reason: "The consultant approved a brand referral and recorded the first introduction.", metadata: { referralId } } });
-      if (transition.status !== "success") return { status: "blocked", message: "Canonical lifecycle transition was rejected." };
-    } else if (candidate.pipelineStage !== "referral") return { status: "blocked", message: "The candidate lifecycle is not eligible for introduction." };
     const delivery = await this.delivery.recordIntroduction(current.referralPackage);
     const updated: CandidateBrandReferral = { ...current, status: "introduced", introducedAt: delivery.recordedAt,
       deliveryStatus: "recorded", updatedAt: delivery.recordedAt,
       referralPackage: { ...current.referralPackage, status: "introduced", introducedAt: delivery.recordedAt,
-        candidate: { ...current.referralPackage.candidate, lifecycleStage: "referral" } } };
+        candidate: { ...current.referralPackage.candidate } } };
     demoCandidateOverlayStore.saveCandidateReferral(updated);
     return { status: "success", referral: updated };
   }
@@ -100,7 +103,8 @@ export class CandidateReferralService {
   private async context(candidateId: string): Promise<{ candidate: NonNullable<Awaited<ReturnType<SeedCandidateRepository["getById"]>>> & { intelligence: NonNullable<NonNullable<Awaited<ReturnType<SeedCandidateRepository["getById"]>>>["intelligence"]> }; handoff: ReferralStrategyHandoffState; discoveryFindings: string[] } | { status: "blocked" | "not-found"; message: string }> {
     const [candidate, strategy, scenario] = await Promise.all([this.candidates.getById(candidateId), this.strategy.load(candidateId), this.scenarios.getCandidateById(candidateId)]);
     if (!candidate || !strategy) return { status: "not-found", message: "Candidate not found." };
-    if (!candidate.intelligence || !strategy.referralStrategyHandoff?.referralGatePassed || !["brand-matching", "referral"].includes(candidate.pipelineStage)) return { status: "blocked", message: strategy.unavailableReason ?? "The canonical referral gate has not passed." };
+    if (!candidate.intelligence || !strategy.referralStrategyHandoff) return { status: "blocked", message: strategy.unavailableReason ?? "Candidate Intelligence and Brand Strategy context are required to prepare a referral package." };
+    if (candidate.pipelineStage === "awarded") return { status: "blocked", message: "Completed referral history is read-only." };
     return { candidate: { ...candidate, intelligence: candidate.intelligence }, handoff: strategy.referralStrategyHandoff, discoveryFindings: scenario?.discovery.detectedBuyingSignals ?? [] };
   }
 
@@ -136,7 +140,10 @@ export class CandidateReferralService {
       handoff, preparedAt: now, approvedAt: null, introducedAt: null };
     const referral: CandidateBrandReferral = { referralId, candidateId: candidate.id, brandId: brand.brandId, brandName: brand.brandName, source,
       recommendationRank: handoff?.rank ?? null, recommendationScore: handoff?.recommendationScore ?? null, recommendationConfidence: handoff?.recommendationConfidence ?? null,
-      packageId: pkg.id, status: "ready-for-review", referralPackage: pkg, createdAt: now, updatedAt: now, approvedAt: null, introducedAt: null, deliveryStatus: "not-recorded" };
+      packageId: pkg.id, status: "ready-for-review", referralPackage: pkg, createdAt: now, updatedAt: now, approvedAt: null, introducedAt: null, deliveryStatus: "not-recorded",
+      decision: { consultantDirected: !context.handoff.referralGatePassed, aiReadinessStatus: context.handoff.referralReadiness,
+        readinessPercentage: context.handoff.referralReadinessPercentage, lifecycleStage: candidate.pipelineStage,
+        unresolvedConsiderations: context.handoff.unresolvedReadinessConsiderations, decidedAt: now } };
     demoCandidateOverlayStore.saveCandidateReferral(referral);
     await this.record(referral, "Referral Package Prepared", now);
     return referral;
@@ -145,6 +152,8 @@ export class CandidateReferralService {
   private async record(referral: CandidateBrandReferral, event: "Referral Package Prepared" | "Referral Package Approved", createdAt: string) {
     await this.activities.add({ id: crypto.randomUUID(), candidateId: referral.candidateId, consultantId: referral.referralPackage.consultant.id,
       type: "referral-generated", title: `${event} — ${referral.brandName}`, description: `${event} for ${referral.brandName}.`, createdAt,
-      metadata: { referralId: referral.referralId, referralPackageId: referral.packageId, brandId: referral.brandId ?? "external" } });
+      metadata: { referralId: referral.referralId, referralPackageId: referral.packageId, brandId: referral.brandId ?? "external",
+        consultantDirected: referral.decision.consultantDirected, aiReadinessStatus: referral.decision.aiReadinessStatus,
+        readinessPercentage: referral.decision.readinessPercentage, lifecycleStage: referral.decision.lifecycleStage } });
   }
 }

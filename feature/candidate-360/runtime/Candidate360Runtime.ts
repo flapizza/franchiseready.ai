@@ -10,6 +10,7 @@ import { SeedDemoScenarioRepository } from "@/feature/demo/repositories/SeedDemo
 import { createDemoCandidateLifecycleService } from "@/feature/crm/services/DemoCandidateLifecycleService";
 import { demoCandidateOverlayStore } from "@/feature/crm/repositories/DemoCandidateOverlayStore";
 import { getConferenceReferralHistory } from "@/feature/demo/data/conferenceReferralHistory";
+import { CandidateBrandStrategyRuntime } from "@/feature/brand-strategy/runtime/CandidateBrandStrategyRuntime";
 
 import type { Candidate360State, CandidateActivityState } from "../models/Candidate360State";
 
@@ -71,6 +72,7 @@ export class Candidate360Runtime {
     const lifecycleAction = createDemoCandidateLifecycleService(this.candidates).getRecommendedAction(candidate);
     const overlayReferrals = demoCandidateOverlayStore.getCandidateReferrals(candidate.id);
     const referrals = overlayReferrals.length ? overlayReferrals : getConferenceReferralHistory(candidate.id);
+    const brandStrategy = ["brand-matching", "referral", "awarded"].includes(candidate.pipelineStage) ? await new CandidateBrandStrategyRuntime().load(candidate.id) : null;
     const awaitingApproval = referrals.filter((item) => item.status === "ready-for-review").length;
     const approvedReferrals = referrals.filter((item) => item.status === "approved").length;
     const assessmentStatus = candidate.pipelineStage === "assessment-started"
@@ -120,6 +122,8 @@ export class Candidate360Runtime {
       brandStrategyHref: ["brand-matching", "referral", "awarded"].includes(candidate.pipelineStage)
         ? `/crm/candidates/${candidate.id}/strategy`
         : undefined,
+      brandStrategy: brandStrategy?.available ? { recommendations: brandStrategy.recommendations.length, presented: brandStrategy.workflow.presented,
+        strongInterest: brandStrategy.workflow.strongInterest, referralSelections: brandStrategy.workflow.referralSelections, statusLabel: brandStrategy.workflow.label } : undefined,
       referralAction: referrals.length
         ? { label: candidate.pipelineStage === "awarded" ? "View Referral History" : approvedReferrals ? "Record Introduction" : awaitingApproval ? `Review ${awaitingApproval} Referral Package${awaitingApproval === 1 ? "" : "s"}` : "View Referrals", href: `/crm/candidates/${candidate.id}/referral` }
         : candidate.pipelineStage === "referral"

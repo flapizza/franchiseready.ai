@@ -6,18 +6,25 @@ import { CandidateBrandStrategyRuntime } from "@/feature/brand-strategy/runtime/
 export class ReferralStudioRuntime {
   constructor(private readonly service = new CandidateReferralService(), private readonly candidates = new SeedCandidateRepository(), private readonly strategy = new CandidateBrandStrategyRuntime()) {}
 
-  async load(candidateId: string): Promise<ReferralStudioState> {
+  async load(candidateId: string, requestedReferralId?: string): Promise<ReferralStudioState> {
     const candidate = await this.candidates.getById(candidateId);
     const strategy = await this.strategy.load(candidateId);
-    if (!candidate || !strategy) return { available: false, candidateId, candidateName: null, reason: "Candidate not found." };
+    if (!candidate || !strategy) return { available: false, candidateId, candidateName: null, kind: "candidate-not-found", reason: "Candidate not found." };
+    const requested = requestedReferralId ? this.service.getOwned(candidateId, requestedReferralId) : null;
+    if (requestedReferralId && !requested) return { available: false, candidateId, candidateName: `${candidate.firstName} ${candidate.lastName}`, kind: "package-not-found", reason: "This referral package does not exist or does not belong to this candidate." };
     const referrals = this.service.getByCandidate(candidateId);
     const historical = candidate.pipelineStage === "awarded" && referrals.length > 0;
-    if (!historical && (!strategy.referralStrategyHandoff?.referralGatePassed || !["brand-matching", "referral"].includes(candidate.pipelineStage))) return { available: false, candidateId, candidateName: `${candidate.firstName} ${candidate.lastName}`, reason: strategy.unavailableReason ?? "The canonical referral gate has not passed." };
     const handoff = strategy.referralStrategyHandoff;
-    if (!handoff) return { available: false, candidateId, candidateName: `${candidate.firstName} ${candidate.lastName}`, reason: "Historical Brand Strategy is unavailable." };
+    const canMutate = Boolean(handoff && !historical);
+    if (!handoff && !requested) return { available: false, candidateId, candidateName: `${candidate.firstName} ${candidate.lastName}`, kind: "package-not-found", reason: "Referral context is unavailable." };
     const byBrand = new Map(referrals.filter((item) => item.brandId).map((item) => [item.brandId, item]));
-    const opportunities = handoff.recommendedBrands.map((item) => ({ ...item, selectable: !historical && item.financialCompatibility.compatible, referral: byBrand.get(item.brandId) ?? null }));
-    return { available: true, candidate: { id: candidateId, name: handoff.candidateName, readiness: handoff.candidateReadiness, context: handoff.strategyContext },
-      opportunities, referrals, historical, summary: { recommended: opportunities.length, prepared: referrals.length, approved: referrals.filter((item) => item.status === "approved").length, introduced: referrals.filter((item) => item.status === "introduced").length } };
+    const opportunities = (handoff?.recommendedBrands ?? []).map((item) => ({ ...item, selectable: canMutate, referral: byBrand.get(item.brandId) ?? null }));
+    const packageCandidate = requested?.referralPackage.candidate;
+    return { available: true, candidate: { id: candidateId, name: handoff?.candidateName ?? packageCandidate!.name, readiness: handoff?.candidateReadiness ?? packageCandidate!.readiness, context: handoff?.strategyContext ?? "Historical referral package review." },
+      opportunities, referrals, historical, reviewOnly: historical || !canMutate, activeReferralId: requestedReferralId ?? null,
+      readinessAdvisory: { recommended: handoff?.referralGatePassed ?? false, label: handoff?.referralGatePassed ? "Recommended" : "Needs Attention",
+        explanation: handoff?.referralGatePassed ? "FranGroove recommends proceeding based on the current evidence." : "FranGroove recommends completing the remaining discovery items before introduction. The consultant may proceed using professional judgment.",
+        considerations: handoff?.unresolvedReadinessConsiderations ?? [] },
+      summary: { recommended: opportunities.length, prepared: referrals.length, approved: referrals.filter((item) => item.status === "approved").length, introduced: referrals.filter((item) => item.status === "introduced").length } };
   }
 }

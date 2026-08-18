@@ -82,11 +82,12 @@ export class CandidateCRMRuntime {
     const overlayReferrals = demoCandidateOverlayStore.getCandidateReferrals(record.id);
     const referrals = overlayReferrals.length ? overlayReferrals : getConferenceReferralHistory(record.id);
     const awaitingApproval = referrals.filter((item) => item.status === "ready-for-review").length;
+    const reviewReferral = referrals.find((item) => item.status === "ready-for-review");
     const approvedReferrals = referrals.filter((item) => item.status === "approved");
     const workflowAction = record.pipelineStage === "awarded"
       ? { actionLabel: referrals.length ? "View Referral History" : "Open Candidate", actionHref: referrals.length ? `/crm/candidates/${record.id}/referral` : `/crm/candidates/${record.id}`, actionKind: "navigate" as const }
       : referrals.length
-      ? { actionLabel: approvedReferrals.length ? `Record ${approvedReferrals[0].brandName} Introduction` : awaitingApproval ? `Review ${awaitingApproval} Referral Package${awaitingApproval === 1 ? "" : "s"}` : "View Referrals", actionHref: `/crm/candidates/${record.id}/referral`, actionKind: "navigate" as const }
+      ? { actionLabel: approvedReferrals.length ? `Record ${approvedReferrals[0].brandName} Introduction` : awaitingApproval ? `Review ${awaitingApproval} Referral Package${awaitingApproval === 1 ? "" : "s"}` : "View Referrals", actionHref: reviewReferral ? `/crm/candidates/${record.id}/referral?referralId=${encodeURIComponent(reviewReferral.referralId)}` : `/crm/candidates/${record.id}/referral`, actionKind: "navigate" as const }
       : record.pipelineStage === "referral"
       ? { actionLabel: "Prepare Referral", actionHref: `/crm/candidates/${record.id}/referral`, actionKind: "navigate" as const }
       : record.pipelineStage === "brand-matching"

@@ -45,6 +45,8 @@ export interface Candidate360State {
 
   brandStrategyHref?: string;
 
+  brandStrategy?: { recommendations: number; presented: number; strongInterest: number; referralSelections: number; statusLabel: string };
+
   referralAction?: { label: string; href: string };
 
   referrals?: { total: number; introduced: number; items: Array<{ brandName: string; statusLabel: string }> };

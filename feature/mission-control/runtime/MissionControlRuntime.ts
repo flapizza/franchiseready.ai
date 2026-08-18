@@ -304,12 +304,18 @@ export class MissionControlRuntime {
     }
 
     if (strategyCandidate) {
+      const strategy = demoCandidateOverlayStore.getStrategy(strategyCandidate.id);
+      const selected = strategy?.decisions.filter((item) => item.selectedForPresentation) ?? [];
+      const referralSelections = selected.filter((item) => item.shortlistDisposition === "refer").length;
+      const incompleteReactions = selected.filter((item) => !item.candidateReaction).length;
+      const recommendation = referralSelections ? "Final shortlist is ready; review referral selections." : selected.length === 0
+        ? "Build the consultant Presentation Set from AI recommendations." : incompleteReactions ? "Discuss selected brand options and capture candidate reactions." : "Finalize shortlist dispositions.";
       actions.push({
         id: `strategy-${strategyCandidate.id}`,
         candidateId: strategyCandidate.id,
         candidateName: candidateName(strategyCandidate),
-        signal: "Discovery Complete",
-        recommendation: strategyCandidate.nextBestAction,
+        signal: referralSelections ? "Ready for Referral" : selected.length ? "Strategy in Progress" : "Discovery Complete",
+        recommendation,
         action: { label: "Review", href: `/crm/candidates/${strategyCandidate.id}/strategy` },
         tone: "blue",
       });

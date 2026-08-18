@@ -4,6 +4,7 @@ import type { Activity } from "../models/Activity";
 import type { AssessmentInvitation } from "../models/AssessmentInvitation";
 import type { CandidateRecord } from "../models/CandidateRecord";
 import type { CandidateBrandReferral } from "@/feature/referral-package/models/CandidateBrandReferral";
+import type { StrategyBuilderRecord } from "@/feature/brand-strategy/models/StrategyBuilderRecord";
 
 /**
  * One deliberately isolated, process-local overlay for the conference demo.
@@ -16,6 +17,7 @@ class DemoCandidateOverlayStore {
   private readonly invitations = new Map<string, AssessmentInvitation>();
   private readonly activities = new Map<string, Activity[]>();
   private readonly referrals = new Map<string, CandidateBrandReferral>();
+  private readonly strategies = new Map<string, StrategyBuilderRecord>();
 
   getCandidates(): CandidateRecord[] { return structuredClone([...this.candidates.values()]); }
   getCandidate(id: string): CandidateRecord | null { const value = this.candidates.get(id); return value ? structuredClone(value) : null; }
@@ -33,7 +35,10 @@ class DemoCandidateOverlayStore {
   getCandidateReferral(referralId: string): CandidateBrandReferral | null { const value = this.referrals.get(referralId); return value ? structuredClone(value) : null; }
   saveCandidateReferral(referral: CandidateBrandReferral): void { this.referrals.set(referral.referralId, structuredClone(referral)); }
 
-  reset(): void { this.candidates.clear(); this.invitations.clear(); this.activities.clear(); this.referrals.clear(); }
+  getStrategy(candidateId: string): StrategyBuilderRecord | null { const value = this.strategies.get(candidateId); return value ? structuredClone(value) : null; }
+  saveStrategy(strategy: StrategyBuilderRecord): void { this.strategies.set(strategy.candidateId, structuredClone(strategy)); }
+
+  reset(): void { this.candidates.clear(); this.invitations.clear(); this.activities.clear(); this.referrals.clear(); this.strategies.clear(); }
 }
 
 const demoGlobal = globalThis as typeof globalThis & {
@@ -45,7 +50,7 @@ const demoGlobal = globalThis as typeof globalThis & {
  * the same deterministic process-local state boundary. */
 export const demoCandidateOverlayStore =
   demoGlobal.__frangrooveDemoCandidateOverlay &&
-  typeof demoGlobal.__frangrooveDemoCandidateOverlay.getCandidateReferrals === "function"
+  typeof demoGlobal.__frangrooveDemoCandidateOverlay.getStrategy === "function"
     ? demoGlobal.__frangrooveDemoCandidateOverlay
     : new DemoCandidateOverlayStore();
 

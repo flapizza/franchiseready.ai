@@ -24,21 +24,21 @@ export async function prepareOtherBrand(_state: ReferralActionState, formData: F
 
 export async function saveReferralDraft(_state: ReferralActionState, formData: FormData): Promise<ReferralActionState> {
   const candidateId = String(formData.get("candidateId") ?? ""); const referralId = String(formData.get("referralId") ?? "");
-  const result = await new CandidateReferralService().update(referralId, { subject: String(formData.get("subject") ?? ""), introductionMessage: String(formData.get("introductionMessage") ?? ""), consultantNotes: String(formData.get("consultantNotes") ?? "") });
+  const result = await new CandidateReferralService().update(candidateId, referralId, { subject: String(formData.get("subject") ?? ""), introductionMessage: String(formData.get("introductionMessage") ?? ""), consultantNotes: String(formData.get("consultantNotes") ?? "") });
   if (result.status !== "success") return { status: "error", message: result.message };
   refresh(candidateId); return { status: "success", message: "Consultant edits saved.", selectedReferralId: referralId };
 }
 
 export async function approveReferral(_state: ReferralActionState, formData: FormData): Promise<ReferralActionState> {
   const candidateId = String(formData.get("candidateId") ?? ""); const referralId = String(formData.get("referralId") ?? "");
-  const result = await new CandidateReferralService().approve(referralId);
+  const result = await new CandidateReferralService().approve(candidateId, referralId);
   if (result.status !== "success") return { status: "error", message: result.message };
   refresh(candidateId); return { status: "success", message: "Referral package approved.", selectedReferralId: referralId };
 }
 
 export async function introduceCandidate(_state: ReferralActionState, formData: FormData): Promise<ReferralActionState> {
   const candidateId = String(formData.get("candidateId") ?? ""); const referralId = String(formData.get("referralId") ?? "");
-  const result = await new CandidateReferralService().introduce(referralId);
+  const result = await new CandidateReferralService().introduce(candidateId, referralId);
   if (result.status !== "success") return { status: "error", message: result.message };
   refresh(candidateId); return { status: "success", message: "Introduction recorded. Delivery remains under consultant control.", selectedReferralId: referralId };
 }

@@ -9,6 +9,9 @@ import { SeedDemoScenarioRepository } from "@/feature/demo/repositories/SeedDemo
 import type { Evidence } from "@/feature/evidence/models/Evidence";
 import { ReferralReadinessEvaluator } from "@/feature/decision-engine/evaluators/ReferralReadinessEvaluator";
 import type { CandidateBrandRecommendationState, CandidateBrandStrategyState } from "../models/CandidateBrandStrategyState";
+import { demoCandidateOverlayStore } from "@/feature/crm/repositories/DemoCandidateOverlayStore";
+import { getConferenceReferralHistory } from "@/feature/demo/data/conferenceReferralHistory";
+import type { StrategyWorkflowStatus } from "../models/StrategyBuilderRecord";
 
 const STRATEGY_STAGES: readonly PipelineStage[] = ["brand-matching", "referral", "awarded"];
 
@@ -51,13 +54,14 @@ export class CandidateBrandStrategyRuntime {
         unavailableReason: !candidate.intelligence
           ? "Candidate Intelligence must be available before Brand Strategy can be generated."
           : `Brand Strategy becomes available after Discovery and Validation. Current stage: ${stageLabel(candidate.pipelineStage)}.`,
-        candidate: base, overallStrategy: "", leadRecommendation: null, recommendations: [], presentationOrder: [], openConcerns: [],
+        candidate: base, overallStrategy: "", leadRecommendation: null, recommendations: [], presentationOrder: [],
+        workflow: { status: "strategy-building", label: "Strategy Building", presented: 0, reactionsCaptured: 0, strongInterest: 0, referralSelections: 0, historical: false }, openConcerns: [],
         referralReadiness: null, referralDecision: null, lifecycleAction: null, referralHandoff: null, referralStrategyHandoff: null,
       };
     }
 
     const strategyCandidate = { ...candidate, intelligence: candidate.intelligence };
-    const recommendations = brands
+    const rankedRecommendations = brands
       .map((brand) => this.recommend(strategyCandidate, brand))
       .sort((left, right) => right.score - left.score)
       .map((recommendation, index) => ({
@@ -66,6 +70,22 @@ export class CandidateBrandStrategyRuntime {
           ? "Not Financially Qualified" as const
           : index === 0 ? "Top Recommendation" as const : index === 1 ? "Strong Alternative" as const : "Alternative" as const,
       }));
+    const persisted = demoCandidateOverlayStore.getStrategy(candidate.id);
+    const historicalReferrals = getConferenceReferralHistory(candidate.id);
+    const decisions = new Map(persisted?.decisions.map((item) => [item.brandId, item]) ?? []);
+    const discoveryEvidence: Evidence[] = [
+      ...(scenarioCandidate?.discovery.detectedBuyingSignals ?? []).map((description, index) => ({ id: `${candidate.id}-discovery-signal-${index}`, category: "motivation" as const, title: "Discovery buying signal", description, confidence: strategyCandidate.intelligence.timing.confidence, source: "meeting" as const, timestamp: candidate.updatedAt })),
+      ...(scenarioCandidate?.discovery.detectedRisks ?? []).map((description, index) => ({ id: `${candidate.id}-discovery-risk-${index}`, category: "culture" as const, title: "Discovery consideration", description, confidence: 82, source: "meeting" as const, timestamp: candidate.updatedAt })),
+    ];
+    const recommendations = rankedRecommendations.map((item) => {
+      const decision = decisions.get(item.brandId);
+      const historical = historicalReferrals.find((referral) => referral.brandId === item.brandId);
+      return { ...item, evidence: [...item.evidence, ...discoveryEvidence], selectedForPresentation: decision?.selectedForPresentation ?? Boolean(historical),
+        presentationOrder: decision?.presentationOrder ?? (historical ? item.rank : null),
+        candidateReaction: decision?.candidateReaction ?? (historical ? "strong-interest" as const : null),
+        consultantNotes: decision?.consultantNotes ?? "",
+        shortlistDisposition: decision?.shortlistDisposition ?? (historical ? "refer" as const : null) };
+    });
     const top = recommendations[0];
     if (!top) throw new Error("Brand Strategy requires at least one canonical brand.");
 
@@ -83,7 +103,9 @@ export class CandidateBrandStrategyRuntime {
     const gatePassed = referral.status === "ready";
     const overallStrategy = `${top.brandName} leads the presentation because its validated candidate-intelligence alignment and brand-profile fit are strongest. Present qualified alternatives as deliberate tradeoffs, not equivalent recommendations.`;
     const brandsById = new Map(brands.map((brand) => [brand.id, brand]));
-    const recommendedBrands = recommendations.map((item) => ({
+    const referralSelections = recommendations.filter((item) => item.shortlistDisposition === "refer");
+    const handoffRecommendations = persisted || historicalReferrals.length ? referralSelections : recommendations;
+    const recommendedBrands = handoffRecommendations.map((item) => ({
       brandId: item.brandId, brandName: item.brandName, category: item.category, rank: item.rank,
       recommendationConfidence: item.confidence, recommendationScore: item.score,
       candidateBrandRationale: item.rationale, supportingEvidence: item.evidence,
@@ -92,8 +114,14 @@ export class CandidateBrandStrategyRuntime {
     }));
     const referralContext = { candidateId: candidate.id, candidateName: base.fullName, candidateEmail: candidate.email,
       referralReadiness: referral.status, candidateReadiness: candidate.intelligence.overallReadiness,
-      referralGatePassed: gatePassed, strategyContext: overallStrategy };
+      referralGatePassed: gatePassed, referralReadinessPercentage: referral.percentage,
+      unresolvedReadinessConsiderations: referral.remainingRequirements, strategyContext: overallStrategy };
 
+    const selected = recommendations.filter((item) => item.selectedForPresentation).sort((a, b) => (a.presentationOrder ?? 999) - (b.presentationOrder ?? 999));
+    const reactionsCaptured = selected.filter((item) => item.candidateReaction).length;
+    const historical = candidate.pipelineStage === "awarded";
+    const workflowStatus: StrategyWorkflowStatus = historical ? "historical" : referralSelections.length ? "referral-selection-ready" : selected.some((item) => item.shortlistDisposition) ? "final-shortlist-ready" : reactionsCaptured ? "candidate-discussion" : selected.length ? "presentation-set-ready" : "strategy-building";
+    const labels: Record<StrategyWorkflowStatus, string> = { "strategy-building": "Build Presentation Set", "presentation-set-ready": "Ready to Present", "candidate-discussion": "Candidate Discussion", "final-shortlist-ready": "Finalize Shortlist", "referral-selection-ready": "Ready for Referral", historical: "Historical" };
     return {
       available: true, candidate: base,
       overallStrategy,
@@ -103,7 +131,9 @@ export class CandidateBrandStrategyRuntime {
         comparisonExplanation,
       },
       recommendations,
-      presentationOrder: recommendations.filter((item) => item.qualified).map((item) => item.brandName),
+      presentationOrder: selected.map((item) => item.brandName),
+      workflow: { status: workflowStatus, label: labels[workflowStatus], presented: selected.length, reactionsCaptured,
+        strongInterest: selected.filter((item) => item.candidateReaction === "strong-interest").length, referralSelections: referralSelections.length, historical },
       openConcerns,
       referralReadiness: {
         ...referral,
@@ -112,13 +142,13 @@ export class CandidateBrandStrategyRuntime {
       },
       referralDecision: {
         passed: gatePassed,
-        gateLabel: gatePassed ? "Passed" : "Not Yet Ready",
-        heading: gatePassed ? "Ready for Introduction" : "Not Yet Ready for Introduction",
+        gateLabel: gatePassed ? "Recommended" : "Needs Attention",
+        heading: gatePassed ? "Referral Readiness: Recommended" : "Referral Readiness: Needs Attention",
         explanation: gatePassed
           ? `${base.fullName} has satisfied the canonical readiness conditions for introduction. ${top.brandName} is the recommended lead opportunity.`
-          : `The canonical referral requirements have not yet been satisfied for ${base.fullName}.`,
+          : `FranGroove recommends completing the remaining discovery items before introduction. The consultant retains final authority for ${base.fullName}.`,
         unresolvedReasons: referral.remainingRequirements,
-        nextAction: gatePassed ? "Open Referral Studio to review brands for referral." : top.nextAction,
+        nextAction: gatePassed ? "Open Referral Studio to review brands for referral." : "Review the advisory considerations or prepare a referral anyway.",
       },
       lifecycleAction: gatePassed && candidate.pipelineStage === "brand-matching" ? { label: "Open Referral Studio" } : null,
       referralHandoff: {
@@ -182,6 +212,11 @@ export class CandidateBrandStrategyRuntime {
         explanation: qualified ? "Candidate meets both total investment and liquid-capital minimums." : "Treat this brand as unqualified until the capital gap is resolved.",
       },
       nextAction: qualified ? `Present ${brand.name} in the recommended sequence and capture candidate response.` : "Resolve financial qualification before presenting this brand.",
+      selectedForPresentation: false,
+      presentationOrder: null,
+      candidateReaction: null,
+      consultantNotes: "",
+      shortlistDisposition: null,
     };
   }
 

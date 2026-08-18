@@ -3,6 +3,7 @@ import type { CandidateWorkspaceKind, CandidateWorkspaceQueueState } from "../mo
 import { CandidateCRMRuntime } from "./CandidateCRMRuntime";
 import { CandidateWorkspaceEligibilityService } from "../services/CandidateWorkspaceEligibilityService";
 import type { CandidateWorkspaceView } from "../models/CandidateWorkspaceQueueState";
+import { demoCandidateOverlayStore } from "../repositories/DemoCandidateOverlayStore";
 
 const presentation = {
   discovery: {
@@ -28,7 +29,7 @@ const presentation = {
 function destination(kind: CandidateWorkspaceKind, candidate: CandidateCRMItem) {
   if (kind === "discovery") return `/crm/${candidate.id}/discovery`;
   if (kind === "strategy") return `/crm/candidates/${candidate.id}/strategy`;
-  return `/crm/candidates/${candidate.id}/referral`;
+  return candidate.actionHref.includes(`/crm/candidates/${candidate.id}/referral`) ? candidate.actionHref : `/crm/candidates/${candidate.id}/referral`;
 }
 
 export class CandidateWorkspaceQueueRuntime {
@@ -48,11 +49,21 @@ export class CandidateWorkspaceQueueRuntime {
         stageLabel: candidate.stageLabel,
         readinessLabel: candidate.readinessLabel,
         attentionLabel: candidate.attentionLabel,
-        summary: candidate.nextAction,
-        actionLabel: view === "completed" ? (kind === "discovery" ? "Review Discovery" : kind === "strategy" ? "Review Strategy" : "View Referral History") : kind === "discovery" ? "Open Discovery" : kind === "strategy" ? "Review Strategy" : "Open Referral Studio",
+        summary: kind === "strategy" ? this.strategySummary(candidate.id, view === "completed") : candidate.nextAction,
+        actionLabel: view === "completed" ? (kind === "discovery" ? "Review Discovery" : kind === "strategy" ? "Review Strategy" : "View Referral History") : kind === "discovery" ? "Open Discovery" : kind === "strategy" ? "Review Strategy" : candidate.actionHref.includes("referralId=") ? "Review Package" : "Open Referral Studio",
         href: destination(kind, candidate),
         candidateHref: candidate.href,
       })),
     };
+  }
+
+  private strategySummary(candidateId: string, historical: boolean) {
+    if (historical) return "Historical Strategy · presentation and referral decisions retained";
+    const strategy = demoCandidateOverlayStore.getStrategy(candidateId);
+    const selected = strategy?.decisions.filter((item) => item.selectedForPresentation) ?? [];
+    if (!selected.length) return "Build Presentation Set";
+    if (selected.some((item) => !item.candidateReaction)) return "Ready to Present · candidate reactions incomplete";
+    if (!selected.some((item) => item.shortlistDisposition)) return "Finalize Shortlist";
+    return selected.some((item) => item.shortlistDisposition === "refer") ? "Ready for Referral" : "Candidate Discussion";
   }
 }

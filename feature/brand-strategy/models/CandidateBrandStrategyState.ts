@@ -1,5 +1,6 @@
 import type { Evidence } from "@/feature/evidence/models/Evidence";
 import type { ReferralReadinessStatus } from "@/feature/decision-engine/models/ReferralReadiness";
+import type { BrandShortlistDisposition, CandidateBrandReaction, StrategyWorkflowStatus } from "./StrategyBuilderRecord";
 
 export interface BrandFitDimensionState {
   id: string;
@@ -38,6 +39,11 @@ export interface CandidateBrandRecommendationState {
     explanation: string;
   };
   nextAction: string;
+  selectedForPresentation: boolean;
+  presentationOrder: number | null;
+  candidateReaction: CandidateBrandReaction | null;
+  consultantNotes: string;
+  shortlistDisposition: BrandShortlistDisposition | null;
 }
 
 export interface ReferralBrandHandoffState {
@@ -62,6 +68,8 @@ export interface ReferralStrategyHandoffState {
   referralReadiness: ReferralReadinessStatus;
   candidateReadiness: number;
   referralGatePassed: boolean;
+  referralReadinessPercentage: number;
+  unresolvedReadinessConsiderations: string[];
   strategyContext: string;
   recommendedBrands: ReferralBrandHandoffState[];
 }
@@ -95,6 +103,15 @@ export interface CandidateBrandStrategyState {
   } | null;
   recommendations: CandidateBrandRecommendationState[];
   presentationOrder: string[];
+  workflow: {
+    status: StrategyWorkflowStatus;
+    label: string;
+    presented: number;
+    reactionsCaptured: number;
+    strongInterest: number;
+    referralSelections: number;
+    historical: boolean;
+  };
   openConcerns: string[];
   referralReadiness: {
     status: ReferralReadinessStatus;
@@ -105,8 +122,8 @@ export interface CandidateBrandStrategyState {
   } | null;
   referralDecision: {
     passed: boolean;
-    gateLabel: "Passed" | "Not Yet Ready";
-    heading: "Ready for Introduction" | "Not Yet Ready for Introduction";
+    gateLabel: "Recommended" | "Needs Attention";
+    heading: "Referral Readiness: Recommended" | "Referral Readiness: Needs Attention";
     explanation: string;
     unresolvedReasons: string[];
     nextAction: string;

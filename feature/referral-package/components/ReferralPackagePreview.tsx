@@ -254,10 +254,10 @@ function BulletList({
   return (
     <div className="space-y-4">
 
-      {items.map((item) => (
+      {items.map((item, index) => (
 
         <div
-          key={item}
+          key={`${index}:${item}`}
           className="flex items-start gap-4"
         >
 
