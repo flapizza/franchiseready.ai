@@ -86,6 +86,14 @@ export function MissionControlPage({ state }: Props) {
         </div>
       </section>
 
+      <SectionCard eyebrow="Accepted Work" title="Tasks Requiring Attention" subtitle={`${state.taskCounts.overdue} overdue · ${state.taskCounts.today} due today`}>
+        <div className="grid gap-3 lg:grid-cols-2">
+          {state.taskFocus.map((task) => <article key={task.taskId} className={`rounded-2xl border p-4 ${task.overdue ? "border-red-200 bg-red-50" : "border-slate-200 bg-white"}`}><div className="flex items-start justify-between gap-3"><div><p className="font-black text-slate-900">{task.title}</p><p className="mt-1 text-sm text-slate-600">{task.candidateName ?? "General task"} · {task.sourceLabel}</p></div><span className={`text-xs font-black uppercase ${task.overdue ? "text-red-700" : "text-blue-700"}`}>{task.overdue ? "Overdue" : "Today"}</span></div><p className="mt-3 text-xs font-bold text-slate-500">Due {task.dueLabel} · {task.priority}</p></article>)}
+          {state.taskFocus.length === 0 && <p className="text-sm font-bold text-slate-500">No accepted tasks require attention today.</p>}
+        </div>
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3"><p className="text-sm text-slate-600">{state.followUpRecommendations.length} separate AI follow-up recommendation{state.followUpRecommendations.length === 1 ? "" : "s"} available.</p><Link href="/crm/tasks" className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-black text-white">Open Tasks</Link></div>
+      </SectionCard>
+
       <CandidateSpotlight candidate={state.topOpportunity} />
 
       <div className="grid gap-6 xl:grid-cols-[1.5fr_0.9fr]">

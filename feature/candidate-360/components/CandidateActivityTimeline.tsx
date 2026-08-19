@@ -13,7 +13,7 @@ const tones: Record<CandidateActivityTone, string> = {
 
 export function CandidateActivityTimeline({ candidate }: { candidate: Candidate360State }) {
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <section data-candidate-final-section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
       <header className="flex items-end justify-between gap-4 border-b border-slate-200 px-6 py-5"><div><p className="text-xs font-bold uppercase tracking-[0.2em] text-teal-600">Relationship history</p><h2 className="mt-1 text-2xl font-black text-slate-900">Activity timeline</h2></div><span className="text-xs font-semibold text-slate-400">{candidate.activities.length} event{candidate.activities.length === 1 ? "" : "s"}</span></header>
       {candidate.activities.length ? <ol className="px-6 py-2">{candidate.activities.map((activity, index) => {
         const Icon = icons[activity.icon];

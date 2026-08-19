@@ -14,6 +14,7 @@ import type { CandidateAttention, CandidateCRMItem, CandidateCRMState } from "..
 import { demoConsultant } from "@/feature/demo/data/demoConsultant";
 import { DemoConsultantPipelineRepository } from "@/feature/pipeline/repositories/DemoConsultantPipelineRepository";
 import { PipelineConfigurationService } from "@/feature/pipeline/services/PipelineConfigurationService";
+import { DemoTaskRepository } from "@/feature/tasks/repositories/DemoTaskRepository";
 
 function formatDate(value: string): string {
   return new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" }).format(new Date(value));
@@ -37,15 +38,18 @@ export class CandidateCRMRuntime {
   ) {}
 
   public async load(): Promise<CandidateCRMState> {
-    const [records, scenario, brands, pipeline] = await Promise.all([
+    const [records, scenario, brands, pipeline, tasks] = await Promise.all([
       this.candidates.getAll(),
       this.scenarios.getScenario(),
       this.brands.getAll(),
       this.pipelineService.get(demoConsultant.id),
+      new DemoTaskRepository().getAll(demoConsultant.id),
     ]);
     const demoById = new Map(scenario.candidates.map((candidate) => [candidate.id, candidate]));
     const brandsById = new Map(brands.map((brand) => [brand.id, brand.name]));
-    const candidates = records.map((record) => this.toItem(record, demoById.get(record.id), brandsById, pipeline));
+    const openTasks = new Map<string, number>();
+    tasks.filter((task) => task.status === "open" && task.candidateId).forEach((task) => openTasks.set(task.candidateId!, (openTasks.get(task.candidateId!) ?? 0) + 1));
+    const candidates = records.map((record) => ({ ...this.toItem(record, demoById.get(record.id), brandsById, pipeline), openTaskCount: openTasks.get(record.id) ?? 0 }));
 
     return {
       candidates,
@@ -109,6 +113,7 @@ export class CandidateCRMRuntime {
       href: `/crm/candidates/${record.id}`,
       ...workflowAction,
       momentumLabel: demo?.buyingMomentum === "accelerating" ? "Accelerating" : demo?.buyingMomentum === "slowing" ? "Slowing" : "Steady",
+      openTaskCount: 0,
     };
   }
 }

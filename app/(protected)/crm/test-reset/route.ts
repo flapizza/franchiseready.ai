@@ -13,6 +13,7 @@ export async function POST() {
   demoCandidateOverlayStore.reset();
   revalidatePath("/crm");
   revalidatePath("/crm/candidates");
+  revalidatePath("/crm/tasks");
   revalidatePath("/settings/pipeline");
   return NextResponse.json({ status: "reset" });
 }

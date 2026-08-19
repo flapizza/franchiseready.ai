@@ -105,4 +105,7 @@ export interface MissionControlState {
   recommendedActions: RecommendedActionState[];
   introductionReady: IntroductionReadyState[];
   intelligenceFeed: IntelligenceEventState[];
+  taskFocus: import("@/feature/tasks/models/TaskWorkspaceState").TaskView[];
+  taskCounts: { overdue: number; today: number };
+  followUpRecommendations: import("@/feature/tasks/models/ConsultantTask").FollowUpRecommendation[];
 }

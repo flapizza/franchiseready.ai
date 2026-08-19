@@ -28,6 +28,7 @@ export interface CandidateCRMItem {
   actionHref: string;
   momentumLabel: string;
   actionKind: "navigate" | "lifecycle";
+  openTaskCount: number;
 }
 
 export interface CandidateCRMStage {

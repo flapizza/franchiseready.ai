@@ -41,6 +41,9 @@ test("consultant customizes pipeline while AI workspaces remain available", asyn
   await expect(page.locator('[data-pipeline-stage-id^="custom-"] [data-candidate-id="jared-wirsig"]')).toBeVisible();
   await page.goto("/crm/candidates/jared-wirsig");
   await expect(page.getByText("Meet the Team", { exact: true }).first()).toBeVisible();
+  await page.goto("/crm/tasks");
+  await expect(page.getByRole("heading", { name: "Tasks", exact: true })).toBeVisible();
+  await expect(page.getByText("Prepare for Discovery call")).toBeVisible();
   await page.goto("/settings/pipeline");
   await page.locator('[data-stage-id^="custom-"]').getByRole("button", { name: "Remove Stage" }).click();
   await expect(page.getByRole("alert").filter({ hasText: /contains 1 candidate/ })).toBeVisible();

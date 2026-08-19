@@ -7,6 +7,7 @@ import {
   Home,
   SearchCheck,
   Settings,
+  ListTodo,
   Users,
 } from "lucide-react";
 
@@ -17,15 +18,15 @@ import { NavigationItem } from "./NavigationItem";
 
 export function Sidebar() {
   return (
-    <aside className="flex h-screen w-72 flex-col border-r border-slate-800 bg-slate-950 text-white">
+    <aside data-app-sidebar className="flex h-full min-h-0 w-72 flex-col overflow-hidden border-r border-slate-800 bg-slate-950 text-white">
 
-      <div className="border-b border-slate-800 px-8 py-8">
+      <div className="border-b border-slate-800 px-8 py-5 [@media(min-height:900px)]:py-8">
 
         <BrandLockup theme="dark" />
 
       </div>
 
-      <nav className="flex-1 space-y-2 p-5">
+      <nav className="min-h-0 flex-1 space-y-1 p-4 [@media(min-height:900px)]:space-y-2 [@media(min-height:900px)]:p-5">
 
         <NavigationItem
           href={APP_ROUTES.missionControl}
@@ -41,7 +42,14 @@ export function Sidebar() {
           excludedSuffixes={["/strategy", "/presentation", "/referral"]}
         />
 
-        <p className="px-4 pt-5 text-[10px] font-bold uppercase tracking-[0.22em] text-slate-600">AI Workspaces</p>
+        <NavigationItem
+          href={APP_ROUTES.tasks}
+          label="Tasks"
+          icon={<ListTodo size={20} />}
+          exactMatch
+        />
+
+        <p className="px-4 pt-3 text-[10px] font-bold uppercase tracking-[0.22em] text-slate-600 [@media(min-height:900px)]:pt-5">AI Workspaces</p>
 
         <NavigationItem
           href={APP_ROUTES.discoveryCopilot}
@@ -70,7 +78,7 @@ export function Sidebar() {
           activeSuffixes={["/referral"]}
         />
 
-        <div className="pt-5">
+        <div className="pt-3 [@media(min-height:900px)]:pt-5">
         <NavigationItem
           href={APP_ROUTES.settings}
           label="Settings"
@@ -80,9 +88,9 @@ export function Sidebar() {
 
       </nav>
 
-      <div className="border-t border-slate-800 p-6">
+      <div className="shrink-0 border-t border-slate-800 p-3 [@media(min-height:900px)]:p-4">
 
-        <div className="rounded-2xl border border-teal-500/10 bg-gradient-to-br from-slate-900 to-slate-950 p-5">
+        <div className="rounded-2xl border border-teal-500/10 bg-gradient-to-br from-slate-900 to-slate-950 p-3 [@media(min-height:900px)]:p-4">
 
           <div className="flex items-center gap-3">
 
@@ -94,7 +102,7 @@ export function Sidebar() {
 
           </div>
 
-          <p className="mt-4 text-sm leading-7 text-slate-400">
+          <p className="mt-4 hidden text-sm leading-7 text-slate-400 [@media(min-height:1050px)]:block">
             FranGroove AI is continuously monitoring candidate
             conversations, buying signals, brand alignment,
             and next best actions across your pipeline.

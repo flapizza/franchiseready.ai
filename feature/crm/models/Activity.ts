@@ -16,7 +16,9 @@ export type ActivityType =
   | "meet-the-team"
   | "award"
   | "note-added"
+  | "task-created"
   | "task-completed"
+  | "task-cancelled"
   | "email-sent"
   | "status-changed";
 

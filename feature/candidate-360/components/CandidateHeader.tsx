@@ -9,7 +9,7 @@ export function CandidateHeader({
   candidate,
 }: Props) {
   return (
-    <section className="overflow-hidden rounded-3xl bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 shadow-2xl">
+    <section data-candidate-hero className="overflow-hidden rounded-3xl bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 shadow-2xl">
 
       <div className="p-10">
 

@@ -11,17 +11,17 @@ export function AppShell({
   children,
 }: Props) {
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-950">
+    <div data-app-shell className="flex h-full min-h-0 overflow-hidden bg-slate-100">
 
       <Sidebar />
 
-      <div className="flex min-w-0 flex-1 flex-col bg-slate-100">
+      <div data-workspace-column className="flex h-full min-h-0 min-w-0 flex-1 flex-col bg-slate-100">
 
         <TopBar />
 
-        <main className="min-h-0 flex-1 overflow-auto">
+        <main data-workspace-scroll className="min-h-0 flex-1 overflow-auto bg-slate-100">
 
-          <div className="mx-auto w-full max-w-[1800px] p-8">
+          <div data-workspace-frame className="mx-auto flex min-h-full w-full max-w-[1800px] flex-col bg-slate-100 p-8">
 
             {children}
 

@@ -10,6 +10,8 @@ import { EmailCommunicationRuntime } from "@/feature/communications/runtime/Emai
 import { demoConsultant } from "@/feature/demo/data/demoConsultant";
 import { DemoConsultantPipelineRepository } from "@/feature/pipeline/repositories/DemoConsultantPipelineRepository";
 import { PipelineConfigurationService } from "@/feature/pipeline/services/PipelineConfigurationService";
+import { TaskRuntime } from "@/feature/tasks/runtime/TaskRuntime";
+import { DemoTaskRepository } from "@/feature/tasks/repositories/DemoTaskRepository";
 
 import type {
   IntelligenceEventState,
@@ -26,7 +28,7 @@ const candidateName = (candidate: DemoCandidate) =>
   `${candidate.firstName} ${candidate.lastName}`;
 
 const candidateWorkspaceHref = (candidateId: string) =>
-  `/crm/${candidateId}`;
+  `/crm/candidates/${candidateId}`;
 
 const candidateBriefingHref = (candidateId: string) =>
   `/crm/${candidateId}/briefing`;
@@ -109,6 +111,7 @@ export class MissionControlRuntime {
       activeCandidates,
       brandsById,
     );
+    const taskState = await new TaskRuntime(new DemoTaskRepository(), this.candidateRepository).build(demoConsultant.id);
 
     return {
       consultantName: scenario.consultant.firstName,
@@ -170,6 +173,9 @@ export class MissionControlRuntime {
       ),
       introductionReady,
       intelligenceFeed: this.buildIntelligenceFeed(activeCandidates),
+      taskFocus: taskState.tasks.filter((task) => task.status === "open" && (task.overdue || task.dueToday || task.priority === "urgent")).slice(0, 5),
+      taskCounts: { overdue: taskState.counts.overdue, today: taskState.counts.today },
+      followUpRecommendations: taskState.recommendations.filter((item) => !item.acceptedTaskId).slice(0, 3),
     };
   }
 

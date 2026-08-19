@@ -34,7 +34,7 @@ export function TopBar() {
               ? { eyebrow: "Consultant Briefing", title: "Meeting Brief", description: "Prepare candidate context, objectives, and conversation guidance." }
         : { eyebrow: "FranGroove Workspace", title: `Welcome back, ${demoConsultant.firstName}.`, description: "Your consultant workspace is ready." };
   return (
-    <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 backdrop-blur">
+    <header data-app-topbar className="z-20 shrink-0 border-b border-slate-200 bg-white/95 backdrop-blur">
 
       <div className="flex h-24 items-center justify-between px-8">
 

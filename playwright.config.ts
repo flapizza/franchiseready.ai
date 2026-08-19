@@ -15,7 +15,10 @@ export default defineConfig({
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
   },
-  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+  projects: [
+    { name: "chromium", use: { ...devices["Desktop Chrome"] } },
+    { name: "firefox-layout", testMatch: /candidate-360-layout\.spec\.ts/, use: { ...devices["Desktop Firefox"] } },
+  ],
   webServer: {
     command: `node node_modules/next/dist/bin/next start -p ${E2E_PORT}`,
     url: `${E2E_BASE_URL}/login`,

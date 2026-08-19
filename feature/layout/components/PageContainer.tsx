@@ -14,7 +14,7 @@ export function PageContainer({
   children,
 }: Props) {
   return (
-    <main className="flex-1 overflow-auto bg-slate-100">
+    <main data-workspace-surface className="flex min-h-0 flex-1 flex-col bg-slate-100">
 
       {(title || subtitle) && (
 

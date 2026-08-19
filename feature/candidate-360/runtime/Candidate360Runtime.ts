@@ -37,7 +37,9 @@ const activityPresentation: Record<ActivityType, Pick<CandidateActivityState, "i
   "meet-the-team": { icon: "activity", tone: "teal" },
   award: { icon: "referral", tone: "emerald" },
   "note-added": { icon: "activity", tone: "slate" },
+  "task-created": { icon: "activity", tone: "blue" },
   "task-completed": { icon: "activity", tone: "emerald" },
+  "task-cancelled": { icon: "activity", tone: "amber" },
   "email-sent": { icon: "assessment", tone: "teal" },
   "status-changed": { icon: "stage", tone: "blue" },
 };
