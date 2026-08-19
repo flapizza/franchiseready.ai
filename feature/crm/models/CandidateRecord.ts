@@ -17,6 +17,12 @@ export type PipelineStage =
   | "opened"
   | "closed-lost";
 
+/** Stable FranGroove reasoning vocabulary. Consultant labels never replace it. */
+export type CanonicalLifecycleStage =
+  | "lead" | "qualification" | "assessment" | "discovery" | "brand-strategy"
+  | "validation" | "referral" | "franchisor-process" | "decision" | "awarded"
+  | "closed" | "other";
+
 export type CandidateStatus =
   | "active"
   | "on-hold"
@@ -42,6 +48,10 @@ export interface CandidateRecord {
   status: CandidateStatus;
 
   pipelineStage: PipelineStage;
+
+  /** Stable identity in the consultant's configured pipeline. Falls back to the
+   * recommended mapping for older persisted records. */
+  pipelineStageId?: string;
 
   healthScore: number;
 

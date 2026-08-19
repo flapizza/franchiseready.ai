@@ -7,6 +7,9 @@ import type { CandidateRepository } from "@/feature/crm/repositories/CandidateRe
 import { SeedCandidateRepository } from "@/feature/crm/repositories/SeedCandidateRepository";
 import { demoCandidateOverlayStore } from "@/feature/crm/repositories/DemoCandidateOverlayStore";
 import { EmailCommunicationRuntime } from "@/feature/communications/runtime/EmailCommunicationRuntime";
+import { demoConsultant } from "@/feature/demo/data/demoConsultant";
+import { DemoConsultantPipelineRepository } from "@/feature/pipeline/repositories/DemoConsultantPipelineRepository";
+import { PipelineConfigurationService } from "@/feature/pipeline/services/PipelineConfigurationService";
 
 import type {
   IntelligenceEventState,
@@ -27,16 +30,6 @@ const candidateWorkspaceHref = (candidateId: string) =>
 
 const candidateBriefingHref = (candidateId: string) =>
   `/crm/${candidateId}/briefing`;
-
-function stageLabel(stage: DemoCandidate["pipelineStage"]): string {
-  if (stage === "brand-matching") return "Brand Strategy Ready";
-  if (stage === "assessment-completed") return "Assessment Complete";
-
-  return stage
-    .split("-")
-    .map((word) => word[0].toUpperCase() + word.slice(1))
-    .join(" ");
-}
 
 function priorityScore(candidate: DemoCandidate): number {
   if (candidate.buyingMomentum === "slowing") return 120;
@@ -83,10 +76,12 @@ export class MissionControlRuntime {
   ) {}
 
   public async build(): Promise<MissionControlState> {
-    const [scenario, brands, candidateRecords] = await Promise.all([
+    const pipelineService = new PipelineConfigurationService(new DemoConsultantPipelineRepository(), this.candidateRepository);
+    const [scenario, brands, candidateRecords, pipeline] = await Promise.all([
       this.scenarioRepository.getScenario(),
       this.brandRepository.getAll(),
       this.candidateRepository.getAll(),
+      pipelineService.get(demoConsultant.id),
     ]);
 
     const recordsById = new Map(candidateRecords.map((candidate) => [candidate.id, candidate]));
@@ -165,7 +160,7 @@ export class MissionControlRuntime {
           candidateName: candidateName(candidate),
           time: meeting.time,
           objective: meeting.focus,
-          status: stageLabel(candidate.pipelineStage),
+          status: pipelineService.resolveStage(pipeline, candidate).displayName,
           briefingHref: candidateBriefingHref(candidate.id),
         }];
       }),

@@ -27,7 +27,7 @@ export class CandidateWorkspaceEligibilityService {
 
   isEligible(candidate: Pick<CandidateRecord, "pipelineStage">, workspace: CandidateWorkspace, view: CandidateWorkspaceView): boolean {
     return view === "all"
-      ? this.isActive(candidate, workspace) || this.isHistoricallyAvailable(candidate, workspace)
+      ? true
       : view === "active"
         ? this.isActive(candidate, workspace)
         : this.isHistoricallyAvailable(candidate, workspace);

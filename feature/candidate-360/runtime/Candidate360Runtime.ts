@@ -14,18 +14,10 @@ import { CandidateBrandStrategyRuntime } from "@/feature/brand-strategy/runtime/
 import { EmailCommunicationRuntime } from "@/feature/communications/runtime/EmailCommunicationRuntime";
 import { DemoEmailRepository } from "@/feature/communications/repositories/DemoEmailRepository";
 import { demoConsultant } from "@/feature/demo/data/demoConsultant";
+import { DemoConsultantPipelineRepository } from "@/feature/pipeline/repositories/DemoConsultantPipelineRepository";
+import { PipelineConfigurationService } from "@/feature/pipeline/services/PipelineConfigurationService";
 
 import type { Candidate360State, CandidateActivityState } from "../models/Candidate360State";
-
-function formatStage(stage: string): string {
-  if (stage === "lead") return "New Candidate";
-  if (stage === "assessment-started") return "Assessment Pending";
-  if (stage === "assessment-completed") return "Assessment Complete";
-  return stage
-    .split("-")
-    .map((word) => word[0].toUpperCase() + word.slice(1))
-    .join(" ");
-}
 
 const activityPresentation: Record<ActivityType, Pick<CandidateActivityState, "icon" | "tone">> = {
   "candidate-created": { icon: "candidate", tone: "blue" },
@@ -68,6 +60,9 @@ export class Candidate360Runtime {
     const candidate = await this.candidates.getById(candidateId);
 
     if (!candidate) return null;
+    const pipelineService = new PipelineConfigurationService(new DemoConsultantPipelineRepository(), this.candidates);
+    const pipeline = await pipelineService.get(candidate.consultantId);
+    const visibleStage = pipelineService.resolveStage(pipeline, candidate);
 
     const invitation = new AssessmentInvitationService(this.candidates).getForCandidate(candidate.id);
     const scenarioCandidate = await this.scenarios.getCandidateById(candidate.id);
@@ -75,7 +70,7 @@ export class Candidate360Runtime {
     const lifecycleAction = createDemoCandidateLifecycleService(this.candidates).getRecommendedAction(candidate);
     const overlayReferrals = demoCandidateOverlayStore.getCandidateReferrals(candidate.id);
     const referrals = overlayReferrals.length ? overlayReferrals : getConferenceReferralHistory(candidate.id);
-    const brandStrategy = ["brand-matching", "referral", "awarded"].includes(candidate.pipelineStage) ? await new CandidateBrandStrategyRuntime().load(candidate.id) : null;
+    const brandStrategy = candidate.intelligence ? await new CandidateBrandStrategyRuntime().load(candidate.id) : null;
     const awaitingApproval = referrals.filter((item) => item.status === "ready-for-review").length;
     const approvedReferrals = referrals.filter((item) => item.status === "approved").length;
     const assessmentStatus = candidate.pipelineStage === "assessment-started"
@@ -117,7 +112,10 @@ export class Candidate360Runtime {
       email: candidate.email,
       consultantSender: { name: demoConsultant.displayName, email: demoConsultant.email ?? null },
       emails,
-      currentStage: formatStage(candidate.pipelineStage),
+      currentStage: visibleStage.displayName,
+      currentStageId: visibleStage.stageId,
+      canonicalLifecycleStage: visibleStage.canonicalLifecycleStage,
+      pipelineStages: pipeline.stages.filter((stage) => stage.enabled).sort((a, b) => a.order - b.order).map((stage) => ({ stageId: stage.stageId, label: stage.displayName })),
       hasIntelligence: intelligence !== null,
       assessmentStatus,
       assessmentUrl: invitation?.assessmentUrl,
@@ -140,9 +138,7 @@ export class Candidate360Runtime {
       assessment,
       activities,
       lifecycleAction: lifecycleAction ? { label: lifecycleAction.label } : null,
-      brandStrategyHref: ["brand-matching", "referral", "awarded"].includes(candidate.pipelineStage)
-        ? `/crm/candidates/${candidate.id}/strategy`
-        : undefined,
+      brandStrategyHref: candidate.intelligence ? `/crm/candidates/${candidate.id}/strategy` : undefined,
       brandStrategy: brandStrategy?.available ? { recommendations: brandStrategy.recommendations.length, presented: brandStrategy.workflow.presented,
         strongInterest: brandStrategy.workflow.strongInterest, referralSelections: brandStrategy.workflow.referralSelections, statusLabel: brandStrategy.workflow.label,
         actionLabel: brandStrategy.workflow.referralSelections ? "Open Referral Studio" : brandStrategy.workflow.presented < brandStrategy.workflow.selected ? (brandStrategy.workflow.presented ? "Continue Brand Presentation" : "Start Brand Presentation") : "Review Final Shortlist",

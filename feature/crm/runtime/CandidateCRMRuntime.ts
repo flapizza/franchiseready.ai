@@ -1,5 +1,5 @@
 import { SeedBrandRepository } from "@/feature/brand-library/repositories/SeedBrandRepository";
-import type { CandidateRecord, PipelineStage } from "@/feature/crm/models/CandidateRecord";
+import type { CandidateRecord } from "@/feature/crm/models/CandidateRecord";
 import type { CandidateRepository } from "@/feature/crm/repositories/CandidateRepository";
 import { SeedCandidateRepository } from "@/feature/crm/repositories/SeedCandidateRepository";
 import type { DemoCandidate } from "@/feature/demo/models/DemoScenario";
@@ -11,30 +11,9 @@ import { demoCandidateOverlayStore } from "../repositories/DemoCandidateOverlayS
 import { getConferenceReferralHistory } from "@/feature/demo/data/conferenceReferralHistory";
 
 import type { CandidateAttention, CandidateCRMItem, CandidateCRMState } from "../models/CandidateCRMState";
-
-const STAGE_LABELS: Record<PipelineStage, string> = {
-  lead: "New Candidate",
-  "assessment-started": "Assessment Pending",
-  "assessment-completed": "Assessment Complete",
-  discovery: "Discovery",
-  education: "Education",
-  "brand-matching": "Brand Strategy",
-  validation: "Validation",
-  referral: "Referral / Introduction",
-  "fdd-delivered": "FDD Delivered",
-  funding: "Funding",
-  "meet-the-team": "Meet the Team",
-  awarded: "Awarded",
-  training: "Training",
-  opened: "Opened",
-  "closed-lost": "Closed Lost",
-};
-
-const STAGE_ORDER = Object.keys(STAGE_LABELS) as PipelineStage[];
-const PRIMARY_JOURNEY: readonly PipelineStage[] = [
-  "lead", "assessment-started", "assessment-completed", "discovery",
-  "brand-matching", "validation", "referral", "awarded",
-] as const;
+import { demoConsultant } from "@/feature/demo/data/demoConsultant";
+import { DemoConsultantPipelineRepository } from "@/feature/pipeline/repositories/DemoConsultantPipelineRepository";
+import { PipelineConfigurationService } from "@/feature/pipeline/services/PipelineConfigurationService";
 
 function formatDate(value: string): string {
   return new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" }).format(new Date(value));
@@ -54,27 +33,29 @@ export class CandidateCRMRuntime {
     private readonly scenarios: DemoScenarioRepository = new SeedDemoScenarioRepository(),
     private readonly brands = new SeedBrandRepository(),
     private readonly invitations = new AssessmentInvitationService(candidates),
+    private readonly pipelineService = new PipelineConfigurationService(new DemoConsultantPipelineRepository(), candidates),
   ) {}
 
   public async load(): Promise<CandidateCRMState> {
-    const [records, scenario, brands] = await Promise.all([
+    const [records, scenario, brands, pipeline] = await Promise.all([
       this.candidates.getAll(),
       this.scenarios.getScenario(),
       this.brands.getAll(),
+      this.pipelineService.get(demoConsultant.id),
     ]);
     const demoById = new Map(scenario.candidates.map((candidate) => [candidate.id, candidate]));
     const brandsById = new Map(brands.map((brand) => [brand.id, brand.name]));
-    const candidates = records.map((record) => this.toItem(record, demoById.get(record.id), brandsById));
-    const represented = new Set(candidates.map((candidate) => candidate.pipelineStage));
+    const candidates = records.map((record) => this.toItem(record, demoById.get(record.id), brandsById, pipeline));
 
     return {
       candidates,
-      stages: [...PRIMARY_JOURNEY, ...STAGE_ORDER.filter((stage) => represented.has(stage) && !PRIMARY_JOURNEY.includes(stage))]
-        .map((stage, sequence) => ({ stage, label: STAGE_LABELS[stage], sequence })),
+      stages: pipeline.stages.filter((stage) => stage.enabled).sort((a, b) => a.order - b.order)
+        .map((stage, sequence) => ({ stageId: stage.stageId, stage: stage.stageId, label: stage.displayName, sequence, canonicalLifecycleStage: stage.canonicalLifecycleStage, classification: stage.classification, colorToken: stage.colorToken })),
     };
   }
 
-  private toItem(record: CandidateRecord, demo: DemoCandidate | undefined, brands: Map<string, string>): CandidateCRMItem {
+  private toItem(record: CandidateRecord, demo: DemoCandidate | undefined, brands: Map<string, string>, pipeline: Awaited<ReturnType<PipelineConfigurationService["get"]>>): CandidateCRMItem {
+    const visibleStage = this.pipelineService.resolveStage(pipeline, record);
     const assessmentPending = !record.intelligence;
     const attention = attentionFor(demo);
     const invitation = this.invitations.getForCandidate(record.id);
@@ -111,8 +92,11 @@ export class CandidateCRMRuntime {
       email: record.email,
       location: [record.city, record.state].filter(Boolean).join(", "),
       status: record.status,
-      pipelineStage: record.pipelineStage,
-      stageLabel: STAGE_LABELS[record.pipelineStage],
+      pipelineStageId: visibleStage.stageId,
+      pipelineStage: visibleStage.stageId,
+      lifecycleStage: record.pipelineStage,
+      canonicalLifecycleStage: visibleStage.canonicalLifecycleStage,
+      stageLabel: visibleStage.displayName,
       readiness: record.intelligence?.overallReadiness ?? null,
       readinessLabel: assessmentPending ? (record.pipelineStage === "lead" ? "Not Yet Evaluated" : "Assessment Pending") : `${record.intelligence!.overallReadiness}%`,
       bestBrand: demo ? brands.get(demo.recommendedBrands[0]?.brandId) ?? null : null,

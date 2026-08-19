@@ -1,0 +1,13 @@
+# Configurable pipeline and lifecycle mapping
+
+The consultant pipeline and FranGroove lifecycle are separate domain concepts. `ConsultantPipelineStage` owns the stable visible stage ID, name, order, enabled state, classification, and mapping. `CanonicalLifecycleStage` is the broad vocabulary used for normalized reasoning and future analytics. The existing detailed `PipelineStage` remains an adapter for the established transition graph; it is not editable and custom labels never drive rules.
+
+Candidates store a stable `pipelineStageId` alongside the detailed lifecycle adapter. Reads resolve older candidates through the recommended mapping, so this is backward compatible. `CandidatePipelineStageService` exclusively owns visible-stage moves and records old/new IDs, names, canonical mappings, and time. Rename therefore needs no candidate rewrite. Disable is rejected while candidates occupy a stage. Reset restores recommended configuration and assignments without deleting activity history.
+
+`ConsultantPipelineRepository` is the persistence boundary. The demo adapter uses the existing process-local overlay. Future persistence maps naturally to `consultant_pipelines`, `consultant_pipeline_stages`, `candidate_pipeline_stage_assignments`, and `pipeline_stage_history`. A pipeline ID is present even though only one pipeline is currently exposed, leaving room for team defaults, inherited organization pipelines, candidate-type pipelines, and consultant overrides.
+
+AI context includes both the consultant label and mapped lifecycle. `other` deliberately means evidence-led conservative reasoning: actual intelligence, activity, engagement, and risk evidence take priority, with no lifecycle assumptions inferred from the label. Display order never changes lifecycle semantics or permissions. Discovery, Strategy, Referral, email, and notes remain consultant-controlled; lifecycle can provide an “earlier than typically recommended” advisory, not a hard stage gate.
+
+Mappings normalize future analytics: “Brand Presentation”, “Concept Review”, and “Opportunities Discussed” can all report under `brand-strategy`. The history fields preserve future time-in-visible-stage, time-in-lifecycle, conversion, aging, and stall calculations. Classification is independent (`active`, `won`, `lost`, `archived`), so terminal meaning is never inferred from the last column. Future lost reasons remain a separate outcome model.
+
+Stage entry is also the future automation boundary: a later service may create a task, recommend an email, schedule a reminder, prepare a meeting brief, generate follow-up, or alert after inactivity. Those automations should subscribe to recorded stage-entry events and remain independently configurable; they are not implemented here.

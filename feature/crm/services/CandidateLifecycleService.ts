@@ -3,6 +3,7 @@ import type { CandidateRecord, PipelineStage } from "../models/CandidateRecord";
 import type { CandidateRepository } from "../repositories/CandidateRepository";
 import type { CandidateActivityRepository } from "../repositories/CandidateActivityRepository";
 import { ReferralReadinessEvaluator } from "@/feature/decision-engine/evaluators/ReferralReadinessEvaluator";
+import { defaultStageIdForLegacy } from "@/feature/pipeline/data/defaultPipeline";
 
 export type CandidateTransitionKind =
   | "assessment-invited" | "assessment-completed" | "assessment-first-completed"
@@ -82,7 +83,7 @@ export class CandidateLifecycleService {
       metadata: request.context.metadata,
     };
     await this.candidates.save({
-      ...candidate, pipelineStage: request.targetStage,
+      ...candidate, pipelineStage: request.targetStage, pipelineStageId: defaultStageIdForLegacy(request.targetStage),
       status: request.targetStage === "awarded" ? "won" : candidate.status,
       updatedAt: occurredAt, lastActivityAt: occurredAt,
     });

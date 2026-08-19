@@ -41,7 +41,7 @@ export class CandidateWorkspaceQueueRuntime {
     return {
       ...copy,
       activeView: view,
-      candidates: crm.candidates.filter((candidate) => this.eligibility.isEligible(candidate, kind, view)).map((candidate) => ({
+      candidates: crm.candidates.filter((candidate) => this.eligibility.isEligible({ pipelineStage: candidate.lifecycleStage }, kind, view)).map((candidate) => ({
         id: candidate.id,
         name: candidate.fullName,
         initials: candidate.initials,

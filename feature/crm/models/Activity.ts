@@ -37,6 +37,12 @@ export interface Activity {
 
   previousStage?: import("./CandidateRecord").PipelineStage;
   newStage?: import("./CandidateRecord").PipelineStage;
+  previousPipelineStageId?: string;
+  newPipelineStageId?: string;
+  previousPipelineStageName?: string;
+  newPipelineStageName?: string;
+  previousCanonicalLifecycleStage?: import("./CandidateRecord").CanonicalLifecycleStage;
+  newCanonicalLifecycleStage?: import("./CandidateRecord").CanonicalLifecycleStage;
 
   metadata?: Record<string, string | number | boolean>;
 }

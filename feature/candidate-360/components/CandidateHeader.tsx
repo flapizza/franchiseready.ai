@@ -1,4 +1,5 @@
 import type { Candidate360State } from "../models/Candidate360State";
+import { CandidateStageControl } from "@/feature/pipeline/components/CandidateStageControl";
 
 type Props = {
   candidate: Candidate360State;
@@ -16,6 +17,8 @@ export function CandidateHeader({
 
           <div>
 
+            <CandidateStageControl candidateId={candidate.id} currentStageId={candidate.currentStageId} stages={candidate.pipelineStages} />
+
             <div className="inline-flex items-center gap-3 rounded-full bg-emerald-500/10 px-4 py-2">
 
               <div className="h-3 w-3 rounded-full bg-emerald-400" />
@@ -25,7 +28,6 @@ export function CandidateHeader({
               </span>
 
             </div>
-
             <h1 className="mt-7 text-5xl font-black tracking-tight text-white">
               {candidate.fullName}
             </h1>

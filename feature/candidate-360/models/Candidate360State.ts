@@ -7,6 +7,9 @@ export interface Candidate360State {
   emails: import("@/feature/communications/runtime/EmailCommunicationRuntime").EmailMessageView[];
 
   currentStage: string;
+  currentStageId: string;
+  canonicalLifecycleStage: import("@/feature/crm/models/CandidateRecord").CanonicalLifecycleStage;
+  pipelineStages: Array<{ stageId: string; label: string }>;
 
   hasIntelligence: boolean;
 

@@ -19,6 +19,7 @@ export const APP_ROUTES = {
   insights: "/crm/tasks",
   aiStudio: "/crm/reports",
   settings: "/settings/profile",
+  pipelineSettings: "/settings/pipeline",
   assessment: "/assessment",
   candidate: "/candidate",
   consultant: "/consultant",

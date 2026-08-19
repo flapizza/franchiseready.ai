@@ -49,5 +49,5 @@ test("sufficient evidence produces the Brand Strategy outcome without identity r
   await page.getByRole("button", { name: "Review Brand Strategy" }).click();
   await expect(page.getByRole("button", { name: "Review Brand Strategy" })).toHaveCount(0);
   await page.goto("/crm/candidates/michael-chen");
-  await expect(page.getByText("Brand Matching", { exact: true }).first()).toBeVisible();
+  await expect(page.getByText("Brand Strategy", { exact: true }).last()).toBeVisible();
 });

@@ -1,7 +1,7 @@
 import type { BrandProfile } from "@/feature/brand-library/models/BrandProfile";
 import type { BrandRepository } from "@/feature/brand-library/repositories/BrandRepository";
 import { SeedBrandRepository } from "@/feature/brand-library/repositories/SeedBrandRepository";
-import type { CandidateRecord, PipelineStage } from "@/feature/crm/models/CandidateRecord";
+import type { CandidateRecord } from "@/feature/crm/models/CandidateRecord";
 import type { CandidateRepository } from "@/feature/crm/repositories/CandidateRepository";
 import { SeedCandidateRepository } from "@/feature/crm/repositories/SeedCandidateRepository";
 import type { DemoScenarioRepository } from "@/feature/demo/repositories/DemoScenarioRepository";
@@ -15,13 +15,8 @@ import type { StrategyWorkflowStatus } from "../models/StrategyBuilderRecord";
 import type { CandidateBrandPresentationState, PresentationTalkingPoint } from "../models/CandidateBrandPresentationBrief";
 import { PresentationQuestionBuilder } from "./PresentationQuestionBuilder";
 import { BrandIntelligenceRuntime, presentationValue } from "@/feature/brand-library/runtime/BrandIntelligenceRuntime";
-
-const STRATEGY_STAGES: readonly PipelineStage[] = ["brand-matching", "referral", "awarded"];
-
-function stageLabel(stage: PipelineStage) {
-  if (stage === "brand-matching") return "Brand Strategy";
-  return stage.split("-").map((word) => word[0].toUpperCase() + word.slice(1)).join(" ");
-}
+import { DemoConsultantPipelineRepository } from "@/feature/pipeline/repositories/DemoConsultantPipelineRepository";
+import { PipelineConfigurationService } from "@/feature/pipeline/services/PipelineConfigurationService";
 
 function alignment(candidateValue: number, brandTarget: number) {
   return Math.max(0, 100 - Math.abs(candidateValue - brandTarget));
@@ -47,18 +42,18 @@ export class CandidateBrandStrategyRuntime {
       this.candidates.getById(candidateId), this.brands.getAll(), this.scenarios.getCandidateById(candidateId),
     ]);
     if (!candidate) return null;
+    const pipelineService = new PipelineConfigurationService(new DemoConsultantPipelineRepository(), this.candidates);
+    const visibleStage = pipelineService.resolveStage(await pipelineService.get(candidate.consultantId), candidate);
 
     const base = {
       id: candidate.id, fullName: `${candidate.firstName} ${candidate.lastName}`,
-      stageLabel: stageLabel(candidate.pipelineStage), readiness: candidate.intelligence?.overallReadiness ?? null,
+      stageLabel: visibleStage.displayName, readiness: candidate.intelligence?.overallReadiness ?? null,
       intelligenceSummary: candidate.intelligence?.executiveSummary ?? "Candidate Intelligence is not available.",
     };
-    if (!candidate.intelligence || !STRATEGY_STAGES.includes(candidate.pipelineStage)) {
+    if (!candidate.intelligence) {
       return {
         available: false,
-        unavailableReason: !candidate.intelligence
-          ? "Candidate Intelligence must be available before Brand Strategy can be generated."
-          : `Brand Strategy becomes available after Discovery and Validation. Current stage: ${stageLabel(candidate.pipelineStage)}.`,
+        unavailableReason: "Candidate Intelligence must be available before Brand Strategy can be generated.",
         candidate: base, overallStrategy: "", leadRecommendation: null, recommendations: [], presentationOrder: [],
         workflow: { status: "strategy-building", label: "Strategy Building", presented: 0, selected: 0, reactionsCaptured: 0, strongInterest: 0, referralSelections: 0, historical: false }, openConcerns: [],
         referralReadiness: null, referralDecision: null, lifecycleAction: null, referralHandoff: null, referralStrategyHandoff: null,

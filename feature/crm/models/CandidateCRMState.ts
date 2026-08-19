@@ -1,4 +1,4 @@
-import type { CandidateStatus, PipelineStage } from "./CandidateRecord";
+import type { CandidateStatus, CanonicalLifecycleStage, PipelineStage } from "./CandidateRecord";
 
 export type CandidateAttention = "needs-attention" | "on-track" | "referral-ready";
 
@@ -9,7 +9,10 @@ export interface CandidateCRMItem {
   email: string;
   location: string;
   status: CandidateStatus;
-  pipelineStage: PipelineStage;
+  pipelineStageId: string;
+  pipelineStage: string;
+  lifecycleStage: PipelineStage;
+  canonicalLifecycleStage: CanonicalLifecycleStage;
   stageLabel: string;
   readiness: number | null;
   readinessLabel: string;
@@ -28,9 +31,13 @@ export interface CandidateCRMItem {
 }
 
 export interface CandidateCRMStage {
-  stage: PipelineStage;
+  stageId: string;
+  stage: string;
   label: string;
   sequence: number;
+  canonicalLifecycleStage: CanonicalLifecycleStage;
+  classification: "active" | "won" | "lost" | "archived";
+  colorToken?: string;
 }
 
 export interface CandidateCRMState {

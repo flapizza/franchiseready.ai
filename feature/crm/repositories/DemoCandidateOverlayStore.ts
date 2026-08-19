@@ -7,6 +7,7 @@ import type { CandidateBrandReferral } from "@/feature/referral-package/models/C
 import type { StrategyBuilderRecord } from "@/feature/brand-strategy/models/StrategyBuilderRecord";
 import type { EmailMessage } from "@/feature/communications/models/EmailMessage";
 import type { EmailEngagementEvent } from "@/feature/communications/models/EmailEngagementEvent";
+import type { ConsultantPipelineConfiguration } from "@/feature/pipeline/models/ConsultantPipeline";
 
 /**
  * One deliberately isolated, process-local overlay for the conference demo.
@@ -26,10 +27,13 @@ class DemoCandidateOverlayStore {
   private readonly emailIdempotency = new Map<string, string>();
   private readonly emailDeliveryFailures = new Set<string>();
   private readonly emailCandidateDeliveryFailures = new Set<string>();
+  private readonly pipelines = new Map<string, ConsultantPipelineConfiguration>();
 
   getCandidates(): CandidateRecord[] { return structuredClone([...this.candidates.values()]); }
   getCandidate(id: string): CandidateRecord | null { const value = this.candidates.get(id); return value ? structuredClone(value) : null; }
   saveCandidate(candidate: CandidateRecord): void { this.candidates.set(candidate.id, structuredClone(candidate)); }
+  getPipeline(consultantId: string): ConsultantPipelineConfiguration | null { const value = this.pipelines.get(consultantId); return value ? structuredClone(value) : null; }
+  savePipeline(configuration: ConsultantPipelineConfiguration): void { this.pipelines.set(configuration.consultantId, structuredClone(configuration)); }
 
   getInvitation(id: string): AssessmentInvitation | null { const value = this.invitations.get(id); return value ? structuredClone(value) : null; }
   getInvitationByToken(token: string): AssessmentInvitation | null { const value = [...this.invitations.values()].find((item) => item.token === token); return value ? structuredClone(value) : null; }
@@ -62,7 +66,7 @@ class DemoCandidateOverlayStore {
   failNextCandidateEmailDelivery(candidateId: string): void { this.emailCandidateDeliveryFailures.add(candidateId); }
   consumeCandidateEmailDeliveryFailure(candidateId: string): boolean { return this.emailCandidateDeliveryFailures.delete(candidateId); }
 
-  reset(): void { this.candidates.clear(); this.invitations.clear(); this.activities.clear(); this.referrals.clear(); this.strategies.clear(); this.referralDeliveryFailures.clear(); this.emailMessages.clear(); this.emailEvents.clear(); this.emailIdempotency.clear(); this.emailDeliveryFailures.clear(); this.emailCandidateDeliveryFailures.clear(); }
+  reset(): void { this.candidates.clear(); this.pipelines.clear(); this.invitations.clear(); this.activities.clear(); this.referrals.clear(); this.strategies.clear(); this.referralDeliveryFailures.clear(); this.emailMessages.clear(); this.emailEvents.clear(); this.emailIdempotency.clear(); this.emailDeliveryFailures.clear(); this.emailCandidateDeliveryFailures.clear(); }
 }
 
 const demoGlobal = globalThis as typeof globalThis & {
