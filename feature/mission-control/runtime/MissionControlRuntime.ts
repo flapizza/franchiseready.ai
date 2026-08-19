@@ -8,10 +8,10 @@ import { SeedCandidateRepository } from "@/feature/crm/repositories/SeedCandidat
 import { demoCandidateOverlayStore } from "@/feature/crm/repositories/DemoCandidateOverlayStore";
 import { EmailCommunicationRuntime } from "@/feature/communications/runtime/EmailCommunicationRuntime";
 import { demoConsultant } from "@/feature/demo/data/demoConsultant";
-import { DemoConsultantPipelineRepository } from "@/feature/pipeline/repositories/DemoConsultantPipelineRepository";
-import { PipelineConfigurationService } from "@/feature/pipeline/services/PipelineConfigurationService";
 import { TaskRuntime } from "@/feature/tasks/runtime/TaskRuntime";
 import { DemoTaskRepository } from "@/feature/tasks/repositories/DemoTaskRepository";
+import { CalendarRuntime } from "@/feature/calendar/runtime/CalendarRuntime";
+import { DemoCalendarRepository } from "@/feature/calendar/repositories/DemoCalendarRepository";
 
 import type {
   IntelligenceEventState,
@@ -78,12 +78,10 @@ export class MissionControlRuntime {
   ) {}
 
   public async build(): Promise<MissionControlState> {
-    const pipelineService = new PipelineConfigurationService(new DemoConsultantPipelineRepository(), this.candidateRepository);
-    const [scenario, brands, candidateRecords, pipeline] = await Promise.all([
+    const [scenario, brands, candidateRecords] = await Promise.all([
       this.scenarioRepository.getScenario(),
       this.brandRepository.getAll(),
       this.candidateRepository.getAll(),
-      pipelineService.get(demoConsultant.id),
     ]);
 
     const recordsById = new Map(candidateRecords.map((candidate) => [candidate.id, candidate]));
@@ -112,11 +110,13 @@ export class MissionControlRuntime {
       brandsById,
     );
     const taskState = await new TaskRuntime(new DemoTaskRepository(), this.candidateRepository).build(demoConsultant.id);
+    const calendarState = await new CalendarRuntime(new DemoCalendarRepository(), this.candidateRepository).build(demoConsultant.id);
+    const todayMeetings = calendarState.events.filter((event) => event.dateKey === calendarState.todayKey && event.status === "scheduled");
 
     return {
       consultantName: scenario.consultant.firstName,
       dailyBrief: {
-        summary: `${activeCandidates.length} active candidates · ${scenario.meetings.length} meetings today · ${priorityCandidates.length} candidates need attention.`,
+        summary: `${activeCandidates.length} active candidates · ${todayMeetings.length} meetings today · ${priorityCandidates.length} candidates need attention.`,
         priorities: priorityCandidates.map((candidate) => ({
           candidateId: candidate.candidateId,
           candidateName: candidate.candidateName,
@@ -132,7 +132,7 @@ export class MissionControlRuntime {
           {
             id: "discovery-meetings",
             label: "Discovery Meetings",
-            value: scenario.meetings.length,
+            value: todayMeetings.length,
           },
           {
             id: "brand-strategy-ready",
@@ -150,23 +150,7 @@ export class MissionControlRuntime {
       },
       topOpportunity: this.buildTopOpportunity(topCandidate, brandsById),
       priorityCandidates,
-      agenda: scenario.meetings.flatMap((meeting) => {
-        const candidate = activeCandidates.find(
-          (item) => item.id === meeting.candidateId,
-        );
-
-        if (!candidate) return [];
-
-        return [{
-          id: meeting.id,
-          candidateId: candidate.id,
-          candidateName: candidateName(candidate),
-          time: meeting.time,
-          objective: meeting.focus,
-          status: pipelineService.resolveStage(pipeline, candidate).displayName,
-          briefingHref: candidateBriefingHref(candidate.id),
-        }];
-      }),
+      agenda: todayMeetings.map((meeting) => ({ id: meeting.id, candidateId: meeting.candidateId ?? "", candidateName: meeting.candidateName ?? "Consultant", time: meeting.timeLabel, objective: meeting.title, status: meeting.brief ? "Review Brief" : "Ready", briefingHref: `/crm/calendar?event=${meeting.id}` })),
       recommendedActions: this.buildRecommendedActions(
         activeCandidates,
         brandsById,

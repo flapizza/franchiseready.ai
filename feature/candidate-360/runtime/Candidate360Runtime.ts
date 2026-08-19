@@ -16,6 +16,8 @@ import { DemoEmailRepository } from "@/feature/communications/repositories/DemoE
 import { demoConsultant } from "@/feature/demo/data/demoConsultant";
 import { DemoConsultantPipelineRepository } from "@/feature/pipeline/repositories/DemoConsultantPipelineRepository";
 import { PipelineConfigurationService } from "@/feature/pipeline/services/PipelineConfigurationService";
+import { DemoCalendarRepository } from "@/feature/calendar/repositories/DemoCalendarRepository";
+import { formatEventDate, formatEventTime } from "@/feature/calendar/time/ConsultantTime";
 
 import type { Candidate360State, CandidateActivityState } from "../models/Candidate360State";
 
@@ -40,6 +42,10 @@ const activityPresentation: Record<ActivityType, Pick<CandidateActivityState, "i
   "task-created": { icon: "activity", tone: "blue" },
   "task-completed": { icon: "activity", tone: "emerald" },
   "task-cancelled": { icon: "activity", tone: "amber" },
+  "meeting-scheduled": { icon: "meeting", tone: "blue" },
+  "meeting-completed": { icon: "meeting", tone: "emerald" },
+  "meeting-cancelled": { icon: "meeting", tone: "amber" },
+  "meeting-no-show": { icon: "meeting", tone: "amber" },
   "email-sent": { icon: "assessment", tone: "teal" },
   "status-changed": { icon: "stage", tone: "blue" },
 };
@@ -62,6 +68,7 @@ export class Candidate360Runtime {
     const candidate = await this.candidates.getById(candidateId);
 
     if (!candidate) return null;
+    const nextMeeting = (await new DemoCalendarRepository().getEvents(candidate.consultantId)).filter((event) => event.candidateId === candidate.id && event.status === "scheduled" && Date.parse(event.endAt) >= Date.now()).sort((a, b) => Date.parse(a.startAt) - Date.parse(b.startAt))[0];
     const pipelineService = new PipelineConfigurationService(new DemoConsultantPipelineRepository(), this.candidates);
     const pipeline = await pipelineService.get(candidate.consultantId);
     const visibleStage = pipelineService.resolveStage(pipeline, candidate);
@@ -152,6 +159,7 @@ export class Candidate360Runtime {
           : undefined,
       referrals: referrals.length ? { total: referrals.length, introduced: referrals.filter((item) => item.status === "sent" || item.status === "introduced").length,
         items: referrals.map((item) => ({ brandName: item.brandName, statusLabel: item.status.split("-").map((word) => word[0].toUpperCase() + word.slice(1)).join(" ") })) } : undefined,
+      nextMeeting: nextMeeting ? { id: nextMeeting.id, title: nextMeeting.title, dateLabel: formatEventDate(nextMeeting.startAt, nextMeeting.timezone), timeLabel: formatEventTime(nextMeeting.startAt, nextMeeting.timezone), locationLabel: nextMeeting.location ?? (nextMeeting.meetingUrl ? "Online meeting" : "Location not set") } : undefined,
     };
   }
 

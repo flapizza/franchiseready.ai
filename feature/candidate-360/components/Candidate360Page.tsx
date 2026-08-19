@@ -8,6 +8,7 @@ import { CandidateRelationshipOverview } from "./CandidateRelationshipOverview";
 import { CandidateActivityTimeline } from "./CandidateActivityTimeline";
 import { CandidateEmailPanel } from "@/feature/communications/components/CandidateEmailPanel";
 import { CandidateTaskPanel } from "@/feature/tasks/components/CandidateTaskPanel";
+import { CandidateMeetingPanel } from "@/feature/calendar/components/CandidateMeetingPanel";
 import { TaskRuntime } from "@/feature/tasks/runtime/TaskRuntime";
 import { DemoTaskRepository } from "@/feature/tasks/repositories/DemoTaskRepository";
 import { SeedCandidateRepository } from "@/feature/crm/repositories/SeedCandidateRepository";
@@ -47,6 +48,8 @@ export async function Candidate360Page({
       />}
 
       <CandidateEmailPanel candidateId={candidate.id} candidateName={candidate.fullName} candidateEmail={candidate.email} sender={candidate.consultantSender} messages={candidate.emails} />
+
+      <CandidateMeetingPanel candidate={candidate} />
 
       <CandidateTaskPanel candidateId={candidate.id} candidateName={candidate.fullName} tasks={taskState.tasks} recommendations={taskState.recommendations} defaultDueAt={taskState.defaultDueAt} />
 

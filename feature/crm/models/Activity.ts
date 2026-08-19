@@ -19,6 +19,10 @@ export type ActivityType =
   | "task-created"
   | "task-completed"
   | "task-cancelled"
+  | "meeting-scheduled"
+  | "meeting-completed"
+  | "meeting-cancelled"
+  | "meeting-no-show"
   | "email-sent"
   | "status-changed";
 

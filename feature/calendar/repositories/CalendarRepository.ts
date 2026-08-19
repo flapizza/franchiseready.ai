@@ -1,0 +1,2 @@
+import type { ConsultantCalendarEvent, ConsultantReminder } from "../models/ConsultantCalendarEvent";
+export interface CalendarRepository { getEvents(consultantId: string): Promise<ConsultantCalendarEvent[]>; getEvent(id: string): Promise<ConsultantCalendarEvent | null>; saveEvent(event: ConsultantCalendarEvent): Promise<void>; getReminders(consultantId: string): Promise<ConsultantReminder[]>; saveReminder(reminder: ConsultantReminder): Promise<void>; }

@@ -13,6 +13,7 @@ export const APP_ROUTES = {
   candidates: "/crm/candidates",
   candidateIntelligence: "/crm/candidates",
   tasks: "/crm/tasks",
+  calendar: "/crm/calendar",
   discoveryCopilot: "/crm/discovery",
   brandStrategy: "/crm/strategy",
   brandLibrary: "/crm/brands",

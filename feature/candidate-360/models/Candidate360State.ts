@@ -56,9 +56,10 @@ export interface Candidate360State {
   referralAction?: { label: string; href: string };
 
   referrals?: { total: number; introduced: number; items: Array<{ brandName: string; statusLabel: string }> };
+  nextMeeting?: { id: string; title: string; dateLabel: string; timeLabel: string; locationLabel: string };
 }
 
-export type CandidateActivityIcon = "candidate" | "assessment" | "discovery" | "brand" | "referral" | "stage" | "activity" | "email";
+export type CandidateActivityIcon = "candidate" | "assessment" | "discovery" | "brand" | "referral" | "stage" | "activity" | "email" | "meeting";
 export type CandidateActivityTone = "slate" | "blue" | "teal" | "emerald" | "amber";
 
 export interface CandidateActivityState {

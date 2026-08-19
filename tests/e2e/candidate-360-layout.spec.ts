@@ -56,7 +56,7 @@ test("Candidate 360 keeps workspace background light through its final padding",
   await enterDemo(page);
   await page.goto("/crm/candidates/candidate-demo");
 
-  await expect(page.getByRole("heading", { name: "John Smith" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "John Smith", exact: true })).toBeVisible();
   const shell = page.locator("[data-app-shell]");
   const sidebar = page.locator("[data-app-sidebar]");
   const scroll = page.locator("[data-workspace-scroll]");

@@ -1,0 +1,4 @@
+import type { CalendarEventStatus } from "./ConsultantCalendarEvent";
+import type { MeetingBrief } from "../services/MeetingBriefService";
+export interface CalendarEventView { id: string; title: string; candidateId?: string; candidateName?: string; candidateHref?: string; startAt: string; endAt: string; dateKey: string; dateLabel: string; timeLabel: string; endTimeLabel: string; timezone: string; location?: string; meetingUrl?: string; description?: string; sourceLabel: string; status: CalendarEventStatus; relatedTaskCount: number; notes?: string; brief: MeetingBrief | null; followUpRecommendations: Array<{ id: string; label: string; href?: string; kind: "create-task" | "schedule" | "navigate" }>; reminderCount: number; }
+export interface CalendarWorkspaceState { timezone: string; todayKey: string; candidates: Array<{ id: string; name: string }>; events: CalendarEventView[]; }
