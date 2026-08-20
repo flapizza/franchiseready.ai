@@ -10,6 +10,8 @@ const adminEnvironmentSchema = publicEnvironmentSchema.extend({
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
 });
 
+const persistenceModeSchema = z.enum(["demo", "supabase"]);
+
 function parseEnvironment<T extends z.ZodType>(schema: T): z.output<T> {
   const result = schema.safeParse(process.env);
 
@@ -27,4 +29,28 @@ export function getPublicEnvironment() {
 
 export function getAdminEnvironment() {
   return parseEnvironment(adminEnvironmentSchema);
+}
+
+export type PersistenceMode = z.infer<typeof persistenceModeSchema>;
+
+export function getPersistenceMode(): PersistenceMode {
+  const configured = process.env.PERSISTENCE_MODE;
+  const implicitDemo =
+    process.env.NODE_ENV === "development" ||
+    process.env.PLAYWRIGHT_TEST_MODE === "true";
+  const result = persistenceModeSchema.safeParse(
+    configured ?? (implicitDemo ? "demo" : undefined),
+  );
+
+  if (!result.success) {
+    throw new Error(
+      "PERSISTENCE_MODE must be explicitly set to demo or supabase.",
+    );
+  }
+
+  if (process.env.NODE_ENV === "production" && result.data === "demo") {
+    throw new Error("Production cannot use demo persistence.");
+  }
+
+  return result.data;
 }
