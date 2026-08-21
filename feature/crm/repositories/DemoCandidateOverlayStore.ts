@@ -29,6 +29,7 @@ class DemoCandidateOverlayStore {
   private readonly emailIdempotency = new Map<string, string>();
   private readonly emailDeliveryFailures = new Set<string>();
   private readonly emailCandidateDeliveryFailures = new Set<string>();
+  private readonly dismissedEmailFollowUps = new Set<string>();
   private readonly pipelines = new Map<string, ConsultantPipelineConfiguration>();
   private readonly tasks = new Map<string, ConsultantTask>();
   private readonly dismissedTaskRecommendations = new Set<string>();
@@ -81,8 +82,10 @@ class DemoCandidateOverlayStore {
   consumeEmailDeliveryFailure(messageId: string): boolean { return this.emailDeliveryFailures.delete(messageId); }
   failNextCandidateEmailDelivery(candidateId: string): void { this.emailCandidateDeliveryFailures.add(candidateId); }
   consumeCandidateEmailDeliveryFailure(candidateId: string): boolean { return this.emailCandidateDeliveryFailures.delete(candidateId); }
+  isEmailFollowUpDismissed(messageId: string): boolean { return this.dismissedEmailFollowUps.has(messageId); }
+  dismissEmailFollowUp(messageId: string): void { this.dismissedEmailFollowUps.add(messageId); }
 
-  reset(): void { this.candidates.clear(); this.pipelines.clear(); this.tasks.clear(); this.dismissedTaskRecommendations.clear(); this.calendarEvents.clear(); this.reminders.clear(); this.invitations.clear(); this.activities.clear(); this.referrals.clear(); this.strategies.clear(); this.referralDeliveryFailures.clear(); this.emailMessages.clear(); this.emailEvents.clear(); this.emailIdempotency.clear(); this.emailDeliveryFailures.clear(); this.emailCandidateDeliveryFailures.clear(); }
+  reset(): void { this.candidates.clear(); this.pipelines.clear(); this.tasks.clear(); this.dismissedTaskRecommendations.clear(); this.calendarEvents.clear(); this.reminders.clear(); this.invitations.clear(); this.activities.clear(); this.referrals.clear(); this.strategies.clear(); this.referralDeliveryFailures.clear(); this.emailMessages.clear(); this.emailEvents.clear(); this.emailIdempotency.clear(); this.emailDeliveryFailures.clear(); this.emailCandidateDeliveryFailures.clear(); this.dismissedEmailFollowUps.clear(); }
 }
 
 const demoGlobal = globalThis as typeof globalThis & {

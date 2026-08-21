@@ -3,7 +3,7 @@ import { revalidatePath } from "next/cache";
 import { EmailMessageService } from "../services/EmailMessageService";
 
 export interface EmailActionState { status: "idle" | "success" | "error"; message?: string; messageId?: string }
-const refresh = (candidateId: string) => { revalidatePath(`/crm/candidates/${candidateId}`); revalidatePath("/crm"); };
+const refresh = (candidateId: string) => { revalidatePath(`/crm/candidates/${candidateId}`); revalidatePath("/crm/communications"); revalidatePath("/crm"); };
 
 export async function sendCandidateEmail(_state: EmailActionState, formData: FormData): Promise<EmailActionState> {
   const candidateId = String(formData.get("candidateId") ?? "");

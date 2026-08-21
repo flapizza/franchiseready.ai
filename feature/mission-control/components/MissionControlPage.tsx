@@ -239,6 +239,7 @@ export function MissionControlPage({ state }: Props) {
                 <p className="mt-1 text-sm leading-6 text-slate-600">
                   {event.explanation}
                 </p>
+                {event.href && <Link href={event.href} className="mt-2 inline-block text-xs font-black text-blue-700">Open Communications</Link>}
               </div>
             </article>
           ))}

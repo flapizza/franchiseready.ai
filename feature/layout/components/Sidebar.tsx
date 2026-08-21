@@ -11,6 +11,7 @@ import {
   CalendarDays,
   Users,
   Network,
+  MessagesSquare,
 } from "lucide-react";
 
 import { BrandLockup } from "@/feature/branding/components/BrandLockup";
@@ -61,6 +62,8 @@ export function Sidebar() {
         />
 
         <NavigationItem href={APP_ROUTES.calendar} label="Calendar" icon={<CalendarDays size={20} />} exactMatch />
+
+        <NavigationItem href={APP_ROUTES.communications} label="Communications" icon={<MessagesSquare size={20} />} exactMatch />
 
         <p className="px-4 pt-3 text-[10px] font-bold uppercase tracking-[0.22em] text-slate-600 [@media(min-height:900px)]:pt-5">AI Workspaces</p>
 

@@ -14,6 +14,7 @@ export async function POST() {
   revalidatePath("/crm");
   revalidatePath("/crm/candidates");
   revalidatePath("/crm/tasks");
+  revalidatePath("/crm/communications");
   revalidatePath("/settings/pipeline");
   return NextResponse.json({ status: "reset" });
 }

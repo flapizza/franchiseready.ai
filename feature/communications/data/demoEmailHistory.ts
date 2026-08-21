@@ -2,11 +2,11 @@ import type { EmailMessage } from "../models/EmailMessage";
 import type { EmailEngagementEvent } from "../models/EmailEngagementEvent";
 import { demoConsultant } from "@/feature/demo/data/demoConsultant";
 
-const message = (candidateId: string, subject: string, body: string, sentAt: string, links: Array<[string, string, string]> = []): EmailMessage => ({
+const message = (candidateId: string, subject: string, body: string, sentAt: string, links: Array<[string, string, string]> = [], delivery: Pick<EmailMessage, "deliveryStatus" | "deliveryFailureReason"> = { deliveryStatus: "delivered" }): EmailMessage => ({
   messageId: `email-seed-${candidateId}`, candidateId, consultantId: demoConsultant.id, threadId: `thread-${candidateId}`,
   direction: "outbound", sender: { name: demoConsultant.displayName, email: demoConsultant.email! },
   recipients: [{ kind: "to", name: candidateId.split("-").map((word) => word[0].toUpperCase() + word.slice(1)).join(" "), email: `${candidateId.replace("-", ".")}@example.com` }],
-  subject, body, bodyFormat: "plain-text", createdAt: sentAt, sentAt, deliveryStatus: "delivered", tracking: { trackOpens: true, trackLinks: true },
+  subject, body, bodyFormat: "plain-text", createdAt: sentAt, sentAt, ...delivery, tracking: { trackOpens: true, trackLinks: true },
   links: links.map(([linkId, originalUrl, displayLabel]) => ({ linkId, messageId: `email-seed-${candidateId}`, originalUrl, displayLabel })),
   sendIdempotencyKey: `seed-${candidateId}`, externallyDelivered: false, providerMessageId: `demo:seed:${candidateId}`,
 });
@@ -15,6 +15,7 @@ export const demoEmailMessages: EmailMessage[] = [
   message("sarah-williams", "ERA Group information and next steps", "Here are the ERA Group materials and a link to schedule our next call.", "2026-08-17T14:00:00.000Z", [["era", "https://www.eragroup.com", "ERA Group website"], ["schedule", "https://cal.example.com/jim", "Schedule Next Call"]]),
   message("mike-lavalle", "Discovery follow-up", "A quick follow-up from our Discovery conversation.", "2026-08-16T15:00:00.000Z"),
   message("elena-rodriguez", "Financing information", "Here is the financing information we discussed.", "2026-08-15T16:00:00.000Z", [["financing", "https://example.com/financing", "Financing Information"]]),
+  message("robert-king", "Introduction follow-up", "I wanted to make sure you received the introduction details.", "2026-08-14T15:30:00.000Z", [], { deliveryStatus: "failed", deliveryFailureReason: "Demo provider rejected the recipient address." }),
 ];
 
 export const demoEmailEvents: EmailEngagementEvent[] = [

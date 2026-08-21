@@ -94,6 +94,7 @@ export interface IntelligenceEventState {
   candidateName: string;
   explanation: string;
   dateLabel: string;
+  href?: string;
 }
 
 export interface MissionControlState {
