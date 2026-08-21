@@ -48,7 +48,11 @@ export function getPersistenceMode(): PersistenceMode {
     );
   }
 
-  if (process.env.NODE_ENV === "production" && result.data === "demo") {
+  if (
+    process.env.NODE_ENV === "production" &&
+    process.env.PLAYWRIGHT_TEST_MODE !== "true" &&
+    result.data === "demo"
+  ) {
     throw new Error("Production cannot use demo persistence.");
   }
 

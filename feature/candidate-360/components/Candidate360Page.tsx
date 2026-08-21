@@ -13,6 +13,7 @@ import { TaskRuntime } from "@/feature/tasks/runtime/TaskRuntime";
 import { DemoTaskRepository } from "@/feature/tasks/repositories/DemoTaskRepository";
 import { SeedCandidateRepository } from "@/feature/crm/repositories/SeedCandidateRepository";
 import { demoConsultant } from "@/feature/demo/data/demoConsultant";
+import { createCandidateRepository } from "@/feature/crm/repositories/candidate-repository-factory";
 
 type Props = {
   candidateId: string;
@@ -21,14 +22,16 @@ type Props = {
 export async function Candidate360Page({
   candidateId,
 }: Props) {
-  const runtime = new Candidate360Runtime();
+  const composition = await createCandidateRepository();
+  if (!composition) notFound();
+  const runtime = new Candidate360Runtime(composition.repository, undefined, undefined, composition.mode === "supabase");
 
   const candidate = await runtime.load(candidateId);
 
   if (!candidate) {
     notFound();
   }
-  const taskState = await new TaskRuntime(new DemoTaskRepository(), new SeedCandidateRepository()).forCandidate(demoConsultant.id, candidate.id);
+  const taskState = candidate.rootOnly ? null : await new TaskRuntime(new DemoTaskRepository(), new SeedCandidateRepository()).forCandidate(demoConsultant.id, candidate.id);
 
   return (
     <div data-candidate-360-workspace className="space-y-8">
@@ -47,11 +50,11 @@ export async function Candidate360Page({
         candidate={candidate}
       />}
 
-      <CandidateEmailPanel candidateId={candidate.id} candidateName={candidate.fullName} candidateEmail={candidate.email} sender={candidate.consultantSender} messages={candidate.emails} />
+      {!candidate.rootOnly && <CandidateEmailPanel candidateId={candidate.id} candidateName={candidate.fullName} candidateEmail={candidate.email} sender={candidate.consultantSender} messages={candidate.emails} />}
 
-      <CandidateMeetingPanel candidate={candidate} />
+      {!candidate.rootOnly && <CandidateMeetingPanel candidate={candidate} />}
 
-      <CandidateTaskPanel candidateId={candidate.id} candidateName={candidate.fullName} tasks={taskState.tasks} recommendations={taskState.recommendations} defaultDueAt={taskState.defaultDueAt} />
+      {taskState && <CandidateTaskPanel candidateId={candidate.id} candidateName={candidate.fullName} tasks={taskState.tasks} recommendations={taskState.recommendations} defaultDueAt={taskState.defaultDueAt} />}
 
       <CandidateActivityTimeline candidate={candidate} />
 

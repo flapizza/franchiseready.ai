@@ -19,5 +19,5 @@ export interface CandidateRepository {
 
   save(
     candidate: CandidateRecord,
-  ): Promise<void>;
+  ): Promise<CandidateRecord>;
 }

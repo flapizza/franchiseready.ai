@@ -36,8 +36,8 @@ export class CandidateIntakeService {
       status: "active", pipelineStage: "lead", healthScore: 0, createdAt: now, updatedAt: now, lastActivityAt: now,
       assessmentIds: [], intelligence: null, preferredTerritory: input.preferredTerritory?.trim(), leadSource: input.leadSource?.trim(), notes: input.notes?.trim(),
     };
-    await this.candidates.save(candidate);
-    demoCandidateOverlayStore.addActivity({ id: crypto.randomUUID(), candidateId: candidate.id, consultantId: input.consultantId, type: "candidate-created", title: "Candidate created", createdAt: now });
-    return { status: "created", candidate };
+    const saved = await this.candidates.save(candidate);
+    if (process.env.PERSISTENCE_MODE !== "supabase") demoCandidateOverlayStore.addActivity({ id: crypto.randomUUID(), candidateId: saved.id, consultantId: input.consultantId, type: "candidate-created", title: "Candidate created", createdAt: now });
+    return { status: "created", candidate: saved };
   }
 }

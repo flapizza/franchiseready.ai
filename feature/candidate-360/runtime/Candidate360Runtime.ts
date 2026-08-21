@@ -62,12 +62,14 @@ export class Candidate360Runtime {
       new SeedDemoScenarioRepository(),
     private readonly activityRepository: CandidateActivityRepository =
       new DemoCandidateActivityRepository(),
+    private readonly rootOnly = false,
   ) {}
 
   public async load(candidateId: string): Promise<Candidate360State | null> {
     const candidate = await this.candidates.getById(candidateId);
 
     if (!candidate) return null;
+    if (this.rootOnly) return this.loadRootOnly(candidate);
     const nextMeeting = (await new DemoCalendarRepository().getEvents(candidate.consultantId)).filter((event) => event.candidateId === candidate.id && event.status === "scheduled" && Date.parse(event.endAt) >= Date.now()).sort((a, b) => Date.parse(a.startAt) - Date.parse(b.startAt))[0];
     const pipelineService = new PipelineConfigurationService(new DemoConsultantPipelineRepository(), this.candidates);
     const pipeline = await pipelineService.get(candidate.consultantId);
@@ -160,6 +162,24 @@ export class Candidate360Runtime {
       referrals: referrals.length ? { total: referrals.length, introduced: referrals.filter((item) => item.status === "sent" || item.status === "introduced").length,
         items: referrals.map((item) => ({ brandName: item.brandName, statusLabel: item.status.split("-").map((word) => word[0].toUpperCase() + word.slice(1)).join(" ") })) } : undefined,
       nextMeeting: nextMeeting ? { id: nextMeeting.id, title: nextMeeting.title, dateLabel: formatEventDate(nextMeeting.startAt, nextMeeting.timezone), timeLabel: formatEventTime(nextMeeting.startAt, nextMeeting.timezone), locationLabel: nextMeeting.location ?? (nextMeeting.meetingUrl ? "Online meeting" : "Location not set") } : undefined,
+    };
+  }
+
+  private loadRootOnly(candidate: CandidateRecord): Candidate360State {
+    const stage = candidate.pipelineStageId ?? candidate.pipelineStage;
+    return {
+      rootOnly: true, id: candidate.id, fullName: `${candidate.firstName} ${candidate.lastName}`, email: candidate.email,
+      consultantSender: { name: "FranGroove", email: null }, emails: [], currentStage: stage.replaceAll("-", " "),
+      currentStageId: stage, canonicalLifecycleStage: candidate.pipelineStage === "lead" ? "lead" : "other",
+      pipelineStages: [{ stageId: stage, label: stage.replaceAll("-", " ") }], hasIntelligence: false,
+      assessmentStatus: "not-completed", readinessScore: null, buyingConfidence: null, recommendationConfidence: null,
+      executiveSummary: "Candidate root information is available. Assessment, intelligence, communications, tasks, meetings, and activity persistence will be added in later packs.",
+      financialReadiness: null, leadershipReadiness: null, lifestyleAlignment: null, coachability: null,
+      nextBestAction: "Continue candidate qualification", knownInformation: [
+        { label: "Email", value: candidate.email, icon: "email" },
+        { label: "Phone", value: candidate.phone || "Not provided", icon: "phone" },
+      ], assessment: { label: "Not persisted", detail: "Assessment data is not yet part of production persistence.", invitationSent: false, actionLabel: "Unavailable" },
+      activities: [], lifecycleAction: null,
     };
   }
 

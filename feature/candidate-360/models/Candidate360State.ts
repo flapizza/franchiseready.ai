@@ -1,4 +1,5 @@
 export interface Candidate360State {
+  rootOnly?: boolean;
   id: string;
 
   fullName: string;

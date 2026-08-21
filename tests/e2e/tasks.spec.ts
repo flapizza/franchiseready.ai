@@ -76,6 +76,7 @@ test("recommendations remain advisory, accept once with provenance, and dismiss 
   await expect(page.locator(`[data-recommendation-id="${firstId}"]`)).toHaveCount(0);
   const dismiss = page.locator("[data-recommendation-id]").first(); const dismissId = await dismiss.getAttribute("data-recommendation-id");
   await dismiss.getByRole("button", { name: "Dismiss" }).click();
+  await expect(page.locator(`[data-recommendation-id="${dismissId}"]`)).toHaveCount(0);
   await page.reload();
   await expect(page.locator(`[data-recommendation-id="${dismissId}"]`)).toHaveCount(0);
   expect(errors, errors.join("\n")).toEqual([]);

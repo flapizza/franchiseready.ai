@@ -54,7 +54,8 @@ export class SeedCandidateRepository
 
   async save(
     candidate: CandidateRecord,
-  ): Promise<void> {
+  ): Promise<CandidateRecord> {
     demoCandidateOverlayStore.saveCandidate(candidate);
+    return candidate;
   }
 }

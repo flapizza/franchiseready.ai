@@ -76,3 +76,18 @@ working upstream image is available.
 ## Current validation boundary
 
 Static TypeScript, lint, production build, and Playwright validation can run without the local Supabase stack because existing application domains remain explicit demo adapters. Runtime migration and RLS validation requires both the Supabase CLI and Docker. If either is unavailable, report database tests as not executed rather than inferred from application tests.
+
+As of August 21, 2026, this workstation has a local environmental blocker in
+the pinned Supabase CLI 2.114.0 initialization path. Both the standard and
+database-only start commands invoke the Realtime schema migrator; its
+`sudo -E -u nobody /app/bin/migrate` startup fails because the image's
+`libapparmor.so.1` has an invalid ELF header. PostgreSQL is removed before
+migrations or pgTAP can run. Pack 002 database runtime validation and type
+regeneration therefore remain unexecuted here; application validation does not
+substitute for those results.
+
+## Persistence Pack 002 candidate boundary
+
+`candidates` is the first production domain aggregate. It stores only tenant-bound root facts, a stable opaque `cand_...` routing ID, current membership assignment, creator membership, status, and the existing stable pipeline stage identifier. Candidate access is enforced by RLS through `can_access_candidate(uuid)`, which reuses active membership and recursive reporting-hierarchy authorization. Assignment changes are append-only in `candidate_assignment_history`.
+
+Production candidate list, intake, and `/crm/candidates/[candidateId]` resolution use the user-scoped Supabase repository. They never fall back to seed candidates. Candidate 360 is intentionally root-only in Supabase mode: assessment, intelligence, email, meetings, tasks, activity, strategy, and referral modules are hidden until their own persistence packs. Demo mode retains the complete seeded experience.

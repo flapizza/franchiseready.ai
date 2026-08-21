@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 type DateTimeValue = { date: string; time: string };
 const timeOptions = Array.from({ length: 96 }, (_, index) => {
@@ -19,6 +19,11 @@ export function MeetingDateTimeFields({ initialStart, initialEnd, editing = fals
   const [end, setEnd] = useState<DateTimeValue>(initialEnd ?? { date: "", time: "" });
   const [endOverridden, setEndOverridden] = useState(editing);
   const error = useMemo(() => start.date && start.time && end.date && end.time && milliseconds(end) <= milliseconds(start) ? "End date and time must be after start date and time." : "", [start, end]);
+  const endTimeRef = useRef<HTMLSelectElement>(null);
+
+  useEffect(() => {
+    endTimeRef.current?.setCustomValidity(error);
+  }, [error]);
 
   function updateStart(next: DateTimeValue) {
     if (next.date && next.time) {
@@ -35,7 +40,7 @@ export function MeetingDateTimeFields({ initialStart, initialEnd, editing = fals
     <label className="font-bold">Start Date<input aria-label="Start Date" type="date" required value={start.date} onChange={(event) => updateStart({ ...start, date: event.target.value })} className={selectClass} /></label>
     <label className="font-bold">Start Time<select aria-label="Start Time" required value={start.time} onChange={(event) => updateStart({ ...start, time: event.target.value })} className={selectClass}><option value="">Choose a time</option>{timeOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label>
     <label className="font-bold">End Date<input aria-label="End Date" type="date" required value={end.date} onChange={(event) => { setEndOverridden(true); setEnd({ ...end, date: event.target.value }); }} className={selectClass} /></label>
-    <label className="font-bold">End Time<select aria-label="End Time" required value={end.time} onChange={(event) => { setEndOverridden(true); setEnd({ ...end, time: event.target.value }); }} className={selectClass}><option value="">Choose a time</option>{timeOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label>
+    <label className="font-bold">End Time<select ref={endTimeRef} aria-label="End Time" aria-invalid={Boolean(error)} required value={end.time} onChange={(event) => { setEndOverridden(true); setEnd({ ...end, time: event.target.value }); }} className={selectClass}><option value="">Choose a time</option>{timeOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label>
     <input type="hidden" name="startAt" value={start.date && start.time ? `${start.date}T${start.time}` : ""} />
     <input type="hidden" name="endAt" value={end.date && end.time ? `${end.date}T${end.time}` : ""} />
     {error && <p role="alert" className="text-sm font-bold text-red-700 md:col-span-2">{error}</p>}

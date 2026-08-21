@@ -17,7 +17,7 @@ export function CandidateHeader({
 
           <div>
 
-            <CandidateStageControl candidateId={candidate.id} currentStageId={candidate.currentStageId} stages={candidate.pipelineStages} />
+            {!candidate.rootOnly && <CandidateStageControl candidateId={candidate.id} currentStageId={candidate.currentStageId} stages={candidate.pipelineStages} />}
 
             <div className="inline-flex items-center gap-3 rounded-full bg-emerald-500/10 px-4 py-2">
 
