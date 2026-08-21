@@ -10,6 +10,7 @@ export const AUTH_ROUTES = {
 
 export const APP_ROUTES = {
   missionControl: "/crm",
+  teamMissionControl: "/crm/team",
   candidates: "/crm/candidates",
   candidateIntelligence: "/crm/candidates",
   tasks: "/crm/tasks",

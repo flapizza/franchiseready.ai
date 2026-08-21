@@ -19,6 +19,7 @@ export default defineConfig({
     { name: "chromium", use: { ...devices["Desktop Chrome"] } },
     { name: "firefox-layout", testMatch: /candidate-360-layout\.spec\.ts/, use: { ...devices["Desktop Firefox"] } },
     { name: "firefox-calendar", testMatch: /calendar\.spec\.ts/, use: { ...devices["Desktop Firefox"] } },
+    { name: "firefox-team", testMatch: /team-mission-control\.spec\.ts/, use: { ...devices["Desktop Firefox"] } },
   ],
   webServer: {
     command: `node node_modules/next/dist/bin/next start -p ${E2E_PORT}`,

@@ -10,12 +10,15 @@ import {
   ListTodo,
   CalendarDays,
   Users,
+  Network,
 } from "lucide-react";
 
 import { BrandLockup } from "@/feature/branding/components/BrandLockup";
 import { APP_ROUTES } from "@/lib/auth/constants";
 
 import { NavigationItem } from "./NavigationItem";
+import { demoTeamViewer } from "@/feature/team-mission-control/repositories/DemoTeamOperationsRepository";
+import { roleHasCapability } from "@/feature/identity/auth/capabilities";
 
 export function Sidebar() {
   return (
@@ -27,7 +30,7 @@ export function Sidebar() {
 
       </div>
 
-      <nav className="min-h-0 flex-1 space-y-1 p-4 [@media(min-height:900px)]:space-y-2 [@media(min-height:900px)]:p-5">
+      <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto p-4 [@media(min-height:900px)]:space-y-2 [@media(min-height:900px)]:p-5">
 
         <NavigationItem
           href={APP_ROUTES.missionControl}
@@ -42,6 +45,13 @@ export function Sidebar() {
           icon={<Users size={20} />}
           excludedSuffixes={["/strategy", "/presentation", "/referral"]}
         />
+
+        {roleHasCapability(demoTeamViewer.role, "hierarchy:view_descendants") && <NavigationItem
+          href={APP_ROUTES.teamMissionControl}
+          label="Team Command Center"
+          icon={<Network size={20} />}
+          exactMatch
+        />}
 
         <NavigationItem
           href={APP_ROUTES.tasks}
@@ -91,7 +101,7 @@ export function Sidebar() {
 
       </nav>
 
-      <div className="shrink-0 border-t border-slate-800 p-3 [@media(min-height:900px)]:p-4">
+      <div className="hidden shrink-0 border-t border-slate-800 p-4 [@media(min-height:900px)]:block">
 
         <div className="rounded-2xl border border-teal-500/10 bg-gradient-to-br from-slate-900 to-slate-950 p-3 [@media(min-height:900px)]:p-4">
 

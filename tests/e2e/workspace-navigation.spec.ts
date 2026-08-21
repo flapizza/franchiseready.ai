@@ -20,10 +20,7 @@ test("primary workspace navigation uses valid queues and correct active states",
     { name: "Referral Studio", path: "/crm/referrals", heading: "Referral Studio" },
   ]) {
     const destination = new RegExp(`${workspace.path}$`);
-    await Promise.all([
-      page.waitForURL(destination),
-      page.getByRole("navigation").getByRole("link", { name: workspace.name }).click(),
-    ]);
+    await page.getByRole("navigation").getByRole("link", { name: workspace.name }).click();
     await expect(page).toHaveURL(destination);
     await expect(page.getByRole("heading", { name: workspace.heading }).last()).toBeVisible();
     await expect(navigation.getByRole("link", { name: workspace.name })).toHaveAttribute("aria-current", "page");
