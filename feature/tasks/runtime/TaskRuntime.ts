@@ -5,7 +5,7 @@ import type { TaskFilter, TaskView, TaskWorkspaceState } from "../models/TaskWor
 import { FollowUpRecommendationService } from "../services/FollowUpRecommendationService";
 
 const priorityRank = { urgent: 0, high: 1, normal: 2, low: 3 } as const;
-const sourceLabel: Record<ConsultantTask["source"], string> = { consultant: "Created by you", "ai-recommendation": "FranGroove recommendation", "email-engagement": "Email engagement", discovery: "Discovery", "brand-presentation": "Brand Presentation", referral: "Referral Studio", lifecycle: "Lifecycle", system: "System" };
+const sourceLabel: Record<ConsultantTask["source"], string> = { consultant: "Created by you", "ai-recommendation": "FranGroove recommendation", "email-engagement": "Email engagement", "engagement-playbook": "Engagement Playbook", discovery: "Discovery", "brand-presentation": "Brand Presentation", referral: "Referral Studio", lifecycle: "Lifecycle", system: "System" };
 
 function localDay(value: Date): string {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York", year: "numeric", month: "2-digit", day: "2-digit" }).format(value);

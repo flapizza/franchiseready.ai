@@ -21,6 +21,7 @@ export default defineConfig({
     { name: "firefox-calendar", testMatch: /calendar\.spec\.ts/, use: { ...devices["Desktop Firefox"] } },
     { name: "firefox-team", testMatch: /team-mission-control\.spec\.ts/, use: { ...devices["Desktop Firefox"] } },
     { name: "firefox-communications", testMatch: /communications-workspace\.spec\.ts/, use: { ...devices["Desktop Firefox"] } },
+    { name: "firefox-playbook", testMatch: /engagement-playbook\.spec\.ts/, use: { ...devices["Desktop Firefox"] } },
   ],
   webServer: {
     command: `node node_modules/next/dist/bin/next start -p ${E2E_PORT}`,

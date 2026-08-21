@@ -14,6 +14,8 @@ import { DemoTaskRepository } from "@/feature/tasks/repositories/DemoTaskReposit
 import { SeedCandidateRepository } from "@/feature/crm/repositories/SeedCandidateRepository";
 import { demoConsultant } from "@/feature/demo/data/demoConsultant";
 import { createCandidateRepository } from "@/feature/crm/repositories/candidate-repository-factory";
+import { CandidateEngagementPlaybookService } from "@/feature/engagement-playbook/services/CandidateEngagementPlaybookService";
+import { CandidatePlaybookSummary } from "@/feature/engagement-playbook/components/CandidatePlaybookSummary";
 
 type Props = {
   candidateId: string;
@@ -32,6 +34,7 @@ export async function Candidate360Page({
     notFound();
   }
   const taskState = candidate.rootOnly ? null : await new TaskRuntime(new DemoTaskRepository(), new SeedCandidateRepository()).forCandidate(demoConsultant.id, candidate.id);
+  const playbook = candidate.rootOnly ? null : await new CandidateEngagementPlaybookService().build(candidate.id);
 
   return (
     <div data-candidate-360-workspace className="space-y-8">
@@ -41,6 +44,8 @@ export async function Candidate360Page({
       />
 
       <CandidateRelationshipOverview candidate={candidate} />
+
+      {playbook && <CandidatePlaybookSummary playbook={playbook} />}
 
       {candidate.hasIntelligence && <ExecutiveSummary
         candidate={candidate}

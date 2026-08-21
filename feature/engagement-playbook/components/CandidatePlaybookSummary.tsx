@@ -1,0 +1,9 @@
+import Link from "next/link";
+import { ArrowRight, Route } from "lucide-react";
+import type { CandidateEngagementPlaybook } from "../models/CandidateEngagementPlaybook";
+
+export function CandidatePlaybookSummary({ playbook }: { playbook: CandidateEngagementPlaybook }) {
+  const current = playbook.steps.find((item) => item.stepId === playbook.currentStepId);
+  if (!current) return null;
+  return <section aria-labelledby="playbook-summary-heading" className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"><div className="grid lg:grid-cols-[1.4fr_1fr]"><div className="bg-slate-950 p-6 text-white"><div className="flex items-center gap-2 text-xs font-black uppercase tracking-[.2em] text-teal-300"><Route size={16} />Engagement Playbook</div><h2 id="playbook-summary-heading" className="mt-3 text-2xl font-black">{current.title}</h2><p className="mt-2 text-sm leading-6 text-slate-300">{current.rationale}</p><div className="mt-4 flex flex-wrap items-center gap-3"><span className="rounded-full bg-white/10 px-3 py-1 text-xs font-black">{current.recommendedTiming}</span><Link href={`/crm/candidates/${playbook.candidateId}/playbook`} className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-black">Open Full Playbook <ArrowRight size={15} /></Link></div></div><div className="p-6"><p className="text-xs font-black uppercase tracking-[.18em] text-slate-400">Plan progress</p><p className="mt-2 text-3xl font-black text-slate-950">{playbook.progress.completed}/{playbook.progress.total}</p><p className="text-sm text-slate-500">steps resolved</p><ol className="mt-4 space-y-2 text-sm">{playbook.steps.filter((item) => item.order > current.order).slice(0, 3).map((item) => <li key={item.stepId} className="flex gap-3"><span className="font-black text-slate-400">{item.order}</span><span className="font-bold text-slate-700">{item.title}</span></li>)}</ol></div></div></section>;
+}

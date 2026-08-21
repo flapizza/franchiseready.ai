@@ -15,6 +15,7 @@ export async function POST() {
   revalidatePath("/crm/candidates");
   revalidatePath("/crm/tasks");
   revalidatePath("/crm/communications");
+  revalidatePath("/crm/candidates/[candidateId]/playbook", "page");
   revalidatePath("/settings/pipeline");
   return NextResponse.json({ status: "reset" });
 }

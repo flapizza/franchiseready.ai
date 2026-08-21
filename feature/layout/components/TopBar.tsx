@@ -12,6 +12,8 @@ export function TopBar() {
   const pathname = usePathname();
   const context = pathname === "/crm/referrals"
     ? { eyebrow: "Consultant Workspace", title: "Referral Studio", description: "Manage candidates ready for referral preparation and introduction." }
+    : /^\/crm\/candidates\/[^/]+\/playbook$/.test(pathname)
+    ? { eyebrow: "Candidate Strategy", title: "Engagement Playbook", description: "Review evidence-backed next steps and choose what happens." }
     : pathname === "/crm/communications"
     ? { eyebrow: "Consultant Workspace", title: "Communications", description: "Review replies, engagement, delivery issues, and candidate follow-up." }
     : pathname === "/crm/team"

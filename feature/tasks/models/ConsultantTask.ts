@@ -1,6 +1,6 @@
 export type TaskStatus = "open" | "completed" | "cancelled";
 export type TaskPriority = "low" | "normal" | "high" | "urgent";
-export type TaskSource = "consultant" | "ai-recommendation" | "email-engagement" | "discovery" | "brand-presentation" | "referral" | "lifecycle" | "system";
+export type TaskSource = "consultant" | "ai-recommendation" | "email-engagement" | "engagement-playbook" | "discovery" | "brand-presentation" | "referral" | "lifecycle" | "system";
 
 export interface ConsultantTask {
   taskId: string;

@@ -12,6 +12,7 @@ import { TaskRuntime } from "@/feature/tasks/runtime/TaskRuntime";
 import { DemoTaskRepository } from "@/feature/tasks/repositories/DemoTaskRepository";
 import { CalendarRuntime } from "@/feature/calendar/runtime/CalendarRuntime";
 import { DemoCalendarRepository } from "@/feature/calendar/repositories/DemoCalendarRepository";
+import { CandidateEngagementPlaybookService } from "@/feature/engagement-playbook/services/CandidateEngagementPlaybookService";
 
 import type {
   IntelligenceEventState,
@@ -105,6 +106,12 @@ export class MissionControlRuntime {
     const priorityCandidates = this.buildPriorityCandidates(
       activeCandidates.filter((candidate) => candidate.id !== topCandidate.id),
     );
+    const playbooks = new Map((await Promise.all(activeCandidates.map(async (candidate) => [candidate.id, await new CandidateEngagementPlaybookService().build(candidate.id)] as const))));
+    priorityCandidates.forEach((candidate) => {
+      const playbook = playbooks.get(candidate.candidateId);
+      const current = playbook?.steps.find((step) => step.stepId === playbook.currentStepId);
+      if (current) candidate.recommendedAction = current.title;
+    });
     const introductionReady = this.buildIntroductionReady(
       activeCandidates,
       brandsById,
@@ -148,7 +155,7 @@ export class MissionControlRuntime {
           },
         ],
       },
-      topOpportunity: this.buildTopOpportunity(topCandidate, brandsById),
+      topOpportunity: (() => { const opportunity = this.buildTopOpportunity(topCandidate, brandsById); const playbook = playbooks.get(topCandidate.id); const current = playbook?.steps.find((step) => step.stepId === playbook.currentStepId); if (current) opportunity.primaryAction = { label: current.title, href: `/crm/candidates/${topCandidate.id}/playbook` }; return opportunity; })(),
       priorityCandidates,
       agenda: todayMeetings.map((meeting) => ({ id: meeting.id, candidateId: meeting.candidateId ?? "", candidateName: meeting.candidateName ?? "Consultant", time: meeting.timeLabel, objective: meeting.title, status: meeting.brief ? "Review Brief" : "Ready", briefingHref: `/crm/calendar?event=${meeting.id}` })),
       recommendedActions: this.buildRecommendedActions(

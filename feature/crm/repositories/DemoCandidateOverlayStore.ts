@@ -10,6 +10,7 @@ import type { EmailEngagementEvent } from "@/feature/communications/models/Email
 import type { ConsultantPipelineConfiguration } from "@/feature/pipeline/models/ConsultantPipeline";
 import type { ConsultantTask } from "@/feature/tasks/models/ConsultantTask";
 import type { ConsultantCalendarEvent, ConsultantReminder } from "@/feature/calendar/models/ConsultantCalendarEvent";
+import type { EngagementStepDecision } from "@/feature/engagement-playbook/models/CandidateEngagementPlaybook";
 
 /**
  * One deliberately isolated, process-local overlay for the conference demo.
@@ -35,6 +36,7 @@ class DemoCandidateOverlayStore {
   private readonly dismissedTaskRecommendations = new Set<string>();
   private readonly calendarEvents = new Map<string, ConsultantCalendarEvent>();
   private readonly reminders = new Map<string, ConsultantReminder>();
+  private readonly engagementPlaybookDecisions = new Map<string, EngagementStepDecision>();
 
   getCandidates(): CandidateRecord[] { return structuredClone([...this.candidates.values()]); }
   getCandidate(id: string): CandidateRecord | null { const value = this.candidates.get(id); return value ? structuredClone(value) : null; }
@@ -51,6 +53,8 @@ class DemoCandidateOverlayStore {
   saveCalendarEvent(event: ConsultantCalendarEvent): void { this.calendarEvents.set(event.id, structuredClone(event)); }
   getReminders(consultantId: string): ConsultantReminder[] { return structuredClone([...this.reminders.values()].filter((item) => item.consultantId === consultantId)); }
   saveReminder(reminder: ConsultantReminder): void { this.reminders.set(reminder.id, structuredClone(reminder)); }
+  getEngagementPlaybookDecisions(candidateId: string): EngagementStepDecision[] { return structuredClone([...this.engagementPlaybookDecisions.values()].filter((item) => item.candidateId === candidateId)); }
+  saveEngagementPlaybookDecision(decision: EngagementStepDecision): void { this.engagementPlaybookDecisions.set(`${decision.candidateId}:${decision.stepId}`, structuredClone(decision)); }
 
   getInvitation(id: string): AssessmentInvitation | null { const value = this.invitations.get(id); return value ? structuredClone(value) : null; }
   getInvitationByToken(token: string): AssessmentInvitation | null { const value = [...this.invitations.values()].find((item) => item.token === token); return value ? structuredClone(value) : null; }
@@ -85,7 +89,7 @@ class DemoCandidateOverlayStore {
   isEmailFollowUpDismissed(messageId: string): boolean { return this.dismissedEmailFollowUps.has(messageId); }
   dismissEmailFollowUp(messageId: string): void { this.dismissedEmailFollowUps.add(messageId); }
 
-  reset(): void { this.candidates.clear(); this.pipelines.clear(); this.tasks.clear(); this.dismissedTaskRecommendations.clear(); this.calendarEvents.clear(); this.reminders.clear(); this.invitations.clear(); this.activities.clear(); this.referrals.clear(); this.strategies.clear(); this.referralDeliveryFailures.clear(); this.emailMessages.clear(); this.emailEvents.clear(); this.emailIdempotency.clear(); this.emailDeliveryFailures.clear(); this.emailCandidateDeliveryFailures.clear(); this.dismissedEmailFollowUps.clear(); }
+  reset(): void { this.candidates.clear(); this.pipelines.clear(); this.tasks.clear(); this.dismissedTaskRecommendations.clear(); this.calendarEvents.clear(); this.reminders.clear(); this.engagementPlaybookDecisions.clear(); this.invitations.clear(); this.activities.clear(); this.referrals.clear(); this.strategies.clear(); this.referralDeliveryFailures.clear(); this.emailMessages.clear(); this.emailEvents.clear(); this.emailIdempotency.clear(); this.emailDeliveryFailures.clear(); this.emailCandidateDeliveryFailures.clear(); this.dismissedEmailFollowUps.clear(); }
 }
 
 const demoGlobal = globalThis as typeof globalThis & {

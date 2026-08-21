@@ -5,5 +5,5 @@ export default async function CommunicationsPage({ searchParams }: { searchParam
   const params = await searchParams;
   const value = (key: string) => typeof params[key] === "string" ? params[key] as string : undefined;
   const state = await new CommunicationsWorkspaceRuntime().build({ filter: value("filter"), query: value("q"), messageId: value("message") });
-  return <CommunicationsWorkspacePage state={state} />;
+  return <CommunicationsWorkspacePage state={state} initialCompose={value("compose") === "1"} initialCandidateId={value("candidate")} initialIdempotencyKey={crypto.randomUUID()} />;
 }
