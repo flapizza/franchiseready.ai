@@ -19,7 +19,7 @@ export type AssessmentEvidence = { id: string; questionId: string; category: Evi
 export type AssessmentTension = { title: string; explanation: string; evidenceRefs: string[]; priority: "high" | "normal" };
 export type DiscoveryPriority = { title: string; whyItMatters: string; suggestedQuestion: string; evidenceRefs: string[]; priority: "high" | "normal"; confidence: number };
 export type OpportunityCharacteristic = { characteristic: string; disposition: "Attractive" | "Acceptable" | "Validate" | "Potential Constraint"; reason: string };
-export type OwnershipProfile = { primary: string; supporting: string[]; confidence: number; motivations: string[]; operatingPreferences: string[]; strengths: string[]; characteristics: string[]; consultantQuestions: string[] };
+export type OwnershipProfile = { primary: string; supporting: string[]; confidence: number; confidenceState: "High Confidence" | "Moderate Confidence" | "Explore During Discovery"; motivations: string[]; operatingPreferences: string[]; strengths: string[]; characteristics: string[]; consultantQuestions: string[] };
 export type ConferenceAnalysis = {
   version: "franchise-ownership-v1"; evidence: AssessmentEvidence[];
   dimensions: Record<string, number>; tensions: AssessmentTension[]; discoveryPriorities: DiscoveryPriority[];
