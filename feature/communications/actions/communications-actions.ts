@@ -8,6 +8,7 @@ import { DemoCandidateActivityRepository } from "@/feature/crm/repositories/Demo
 import { DemoTaskRepository } from "@/feature/tasks/repositories/DemoTaskRepository";
 import { TaskService } from "@/feature/tasks/services/TaskService";
 import { DemoEmailRepository } from "../repositories/DemoEmailRepository";
+import { demoLocalIso } from "@/feature/calendar/time/ConsultantTime";
 
 export interface CommunicationsActionState { status: "idle" | "success" | "error"; message?: string; taskId?: string }
 
@@ -26,7 +27,7 @@ export async function createCommunicationFollowUpTask(_state: CommunicationsActi
       description: reason,
       candidateId,
       priority: message.deliveryStatus === "failed" ? "high" : "normal",
-      dueAt: "2026-08-22T16:00:00.000Z",
+      dueAt: demoLocalIso(1, 16),
     }, { source: "email-engagement", sourceReferenceId: `communication-follow-up:${messageId}`, recommendedReason: reason });
     refresh();
     return { status: "success", message: "Follow-up task created.", taskId: task.taskId };

@@ -12,6 +12,13 @@ const adminEnvironmentSchema = publicEnvironmentSchema.extend({
 
 const persistenceModeSchema = z.enum(["demo", "supabase"]);
 
+const googleOAuthEnvironmentSchema = z.object({
+  GOOGLE_CLIENT_ID: z.string().min(1),
+  GOOGLE_CLIENT_SECRET: z.string().min(1),
+  GOOGLE_OAUTH_REDIRECT_URI: z.url(),
+  GOOGLE_TOKEN_ENCRYPTION_KEY: z.string().min(1),
+});
+
 function parseEnvironment<T extends z.ZodType>(schema: T): z.output<T> {
   const result = schema.safeParse(process.env);
 
@@ -29,6 +36,18 @@ export function getPublicEnvironment() {
 
 export function getAdminEnvironment() {
   return parseEnvironment(adminEnvironmentSchema);
+}
+
+export function getGoogleOAuthEnvironment() {
+  const environment = parseEnvironment(googleOAuthEnvironmentSchema);
+  const key = Buffer.from(environment.GOOGLE_TOKEN_ENCRYPTION_KEY, "base64");
+  if (key.length !== 32) {
+    throw new Error("Invalid authentication environment configuration: GOOGLE_TOKEN_ENCRYPTION_KEY");
+  }
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("Google OAuth credential encryption requires a managed KMS cipher in production.");
+  }
+  return environment;
 }
 
 export type PersistenceMode = z.infer<typeof persistenceModeSchema>;

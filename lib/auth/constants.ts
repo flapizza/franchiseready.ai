@@ -53,6 +53,7 @@ export const AUTH_ROUTES_ONLY = [
 
 export const PROTECTED_ROUTE_PREFIXES = [
   APP_ROUTES.missionControl,
+  "/settings",
   APP_ROUTES.settings,
   APP_ROUTES.assessment,
   APP_ROUTES.onboarding,

@@ -10,6 +10,7 @@ import { TaskService } from "@/feature/tasks/services/TaskService";
 import type { EngagementStepStatus } from "../models/CandidateEngagementPlaybook";
 import { DemoEngagementPlaybookRepository } from "../repositories/DemoEngagementPlaybookRepository";
 import { CandidateEngagementPlaybookService } from "../services/CandidateEngagementPlaybookService";
+import { demoLocalIso } from "@/feature/calendar/time/ConsultantTime";
 
 export interface PlaybookActionState { status: "idle" | "success" | "error"; message?: string; taskId?: string }
 
@@ -38,8 +39,11 @@ export async function createPlaybookTask(_state: PlaybookActionState, formData: 
   const value = await context(formData);
   if (!value) return { status: "error", message: "Playbook step is no longer available." };
   try {
+    const suggestedOffset = value.step.suggestedDueAt
+      ? Math.max(0, Math.round((Date.parse(value.step.suggestedDueAt) - Date.parse(value.playbook.generatedAt)) / 86_400_000))
+      : 0;
     const task = await new TaskService(new DemoTaskRepository(), new SeedCandidateRepository(), new DemoCandidateActivityRepository()).create(demoConsultant.id, {
-      title: value.step.title, description: value.step.description, dueAt: value.step.suggestedDueAt ?? "2026-08-24T14:00:00.000Z", priority: "normal", candidateId: value.candidateId,
+      title: value.step.title, description: value.step.description, dueAt: demoLocalIso(suggestedOffset, 14), priority: "normal", candidateId: value.candidateId,
     }, { source: "engagement-playbook", sourceReferenceId: value.step.stepId, recommendedReason: value.step.rationale });
     new DemoEngagementPlaybookRepository().saveDecision({ candidateId: value.candidateId, stepId: value.step.stepId, evidenceFingerprint: value.playbook.evidenceFingerprint, status: "accepted", decidedAt: new Date().toISOString(), relatedTaskId: task.taskId, relatedMessageId: value.step.relatedMessageId });
     refresh(value.candidateId);
