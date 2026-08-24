@@ -16,6 +16,10 @@ import { demoConsultant } from "@/feature/demo/data/demoConsultant";
 import { createCandidateRepository } from "@/feature/crm/repositories/candidate-repository-factory";
 import { CandidateEngagementPlaybookService } from "@/feature/engagement-playbook/services/CandidateEngagementPlaybookService";
 import { CandidatePlaybookSummary } from "@/feature/engagement-playbook/components/CandidatePlaybookSummary";
+import { resolveAuthenticatedWorkspaceContext } from "@/feature/identity/data/workspace-context";
+import { ConnectedEmailAccountRepository } from "@/feature/connected-email/repositories/ConnectedEmailAccountRepository";
+import { ProductionEmailRepository } from "@/feature/communications/repositories/ProductionEmailRepository";
+import type { EmailMessageView } from "@/feature/communications/runtime/EmailCommunicationRuntime";
 
 type Props = {
   candidateId: string;
@@ -35,6 +39,24 @@ export async function Candidate360Page({
   }
   const taskState = candidate.rootOnly ? null : await new TaskRuntime(new DemoTaskRepository(), new SeedCandidateRepository()).forCandidate(demoConsultant.id, candidate.id);
   const playbook = candidate.rootOnly ? null : await new CandidateEngagementPlaybookService().build(candidate.id);
+  let productionEmail: { accountId?: string; sender: { name: string; email: string | null }; messages: EmailMessageView[] } | null = null;
+  if (composition.mode === "supabase") {
+    const context = await resolveAuthenticatedWorkspaceContext();
+    if (context) {
+      const accounts = await new ConnectedEmailAccountRepository().listOwn(context);
+      const account = accounts.find((item) => item.provider === "google" && item.status === "connected");
+      const rows = await new ProductionEmailRepository(context).listByCandidate(candidate.id);
+      productionEmail = { accountId: account?.publicId, sender: { name: account?.displayName ?? "FranGroove", email: account?.emailAddress ?? null },
+        messages: rows.map((row) => ({ messageId: row.public_id, subject: row.subject,
+          from: `${row.sender_name ?? row.sender_email} <${row.sender_email}>`,
+          to: row.email_recipients.filter((recipient) => recipient.kind === "to").map((recipient) => `${recipient.display_name ?? recipient.email_address} <${recipient.email_address}>`).join(", "),
+          sentAt: row.sent_at ?? undefined, sentLabel: row.sent_at ? new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(new Date(row.sent_at)) : undefined,
+          deliveryStatus: row.status === "provider-accepted" ? "sent" : row.status === "failed-confirmed" ? "failed" : row.status,
+          failureReason: row.status === "failed-confirmed" ? "Gmail confirmed that this attempt failed." : undefined,
+          body: row.text_body, externallyDelivered: row.status === "provider-accepted", openCount: 0, replyCount: 0, links: [],
+          engagementLabel: "Not tracked", engagementReasons: [] })) };
+    }
+  }
 
   return (
     <div data-candidate-360-workspace className="space-y-8">
@@ -55,7 +77,9 @@ export async function Candidate360Page({
         candidate={candidate}
       />}
 
-      {!candidate.rootOnly && <CandidateEmailPanel candidateId={candidate.id} candidateName={candidate.fullName} candidateEmail={candidate.email} sender={candidate.consultantSender} messages={candidate.emails} />}
+      {productionEmail ? <CandidateEmailPanel candidateId={candidate.id} candidateName={candidate.fullName} candidateEmail={candidate.email}
+        sender={productionEmail.sender} messages={productionEmail.messages} accountId={productionEmail.accountId} externalDelivery />
+        : !candidate.rootOnly && <CandidateEmailPanel candidateId={candidate.id} candidateName={candidate.fullName} candidateEmail={candidate.email} sender={candidate.consultantSender} messages={candidate.emails} />}
 
       {!candidate.rootOnly && <CandidateMeetingPanel candidate={candidate} />}
 

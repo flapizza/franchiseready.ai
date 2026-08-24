@@ -13,3 +13,4 @@ export type LooseQuery = PromiseLike<LooseQueryResult> & {
 };
 
 export type LooseSupabaseClient = { from(name: string): LooseQuery };
+export type LooseRpcClient = LooseSupabaseClient & { rpc(name: string, parameters?: Record<string, unknown>): LooseQuery };

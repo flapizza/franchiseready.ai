@@ -20,5 +20,5 @@ export interface CommunicationsWorkspaceState {
   query: string;
   counts: Record<CommunicationsFilter, number>;
   candidates: Array<{ id: string; name: string; email: string }>;
-  sender: { name: string; email: string | null };
+  sender: { name: string; email: string | null; accountId?: string; externalDelivery?: boolean };
 }

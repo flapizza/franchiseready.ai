@@ -32,7 +32,11 @@ export function CommunicationsWorkspacePage({ state, initialCompose = false, ini
   const [replying, setReplying] = useState(false);
   const [idempotencyKey, setIdempotencyKey] = useState(initialIdempotencyKey);
   const [candidateId, setCandidateId] = useState(initialCandidateId ?? state.selected?.candidateId ?? state.candidates[0]?.id ?? "");
-  const [sendState, sendAction, sending] = useActionState(sendCandidateEmail, emailInitial);
+  const submitEmail = async (current: EmailActionState, formData: FormData) => {
+    if (state.sender.accountId) formData.set("accountId", state.sender.accountId);
+    return sendCandidateEmail(current, formData);
+  };
+  const [sendState, sendAction, sending] = useActionState(submitEmail, emailInitial);
   const [retryState, retryAction, retrying] = useActionState(retryCandidateEmail, emailInitial);
   const [taskState, taskAction, tasking] = useActionState(createCommunicationFollowUpTask, actionInitial);
   const [dismissState, dismissAction, dismissing] = useActionState(dismissCommunicationFollowUp, actionInitial);

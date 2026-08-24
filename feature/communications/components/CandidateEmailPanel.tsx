@@ -22,17 +22,20 @@ function statusLabel(status: EmailMessageView["deliveryStatus"]): string {
   return status[0].toUpperCase() + status.slice(1);
 }
 
-export function CandidateEmailPanel({ candidateId, candidateName, candidateEmail, sender, messages }: {
+export function CandidateEmailPanel({ candidateId, candidateName, candidateEmail, sender, messages, accountId, externalDelivery = false }: {
   candidateId: string;
   candidateName: string;
   candidateEmail: string;
   sender: { name: string; email: string | null };
   messages: EmailMessageView[];
+  accountId?: string;
+  externalDelivery?: boolean;
 }) {
   const [composing, setComposing] = useState(false);
   const [key, setKey] = useState("");
   const composeButton = useRef<HTMLButtonElement>(null);
   const submitEmail = async (state: EmailActionState, formData: FormData) => {
+    if (accountId) formData.set("accountId", accountId);
     const result = await sendCandidateEmail(state, formData);
     if (result.status === "success") {
       setComposing(false);
@@ -44,12 +47,13 @@ export function CandidateEmailPanel({ candidateId, candidateName, candidateEmail
   const [sendState, sendAction, sending] = useActionState(submitEmail, initial);
   const [, retryAction, retrying] = useActionState(retryCandidateEmail, initial);
   const latest = messages[0];
+  const deliveryLabel = externalDelivery ? "Connected Gmail delivery" : "Conference demo delivery";
   const closeComposer = () => {
     setComposing(false);
     requestAnimationFrame(() => composeButton.current?.focus());
   };
 
-  return <section aria-labelledby="email-heading" className="rounded-2xl border border-slate-200 bg-white shadow-sm">
+  return <section aria-labelledby="email-heading" data-delivery-mode={deliveryLabel} className="rounded-2xl border border-slate-200 bg-white shadow-sm">
     <header className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 px-6 py-4">
       <div><p className="text-xs font-bold uppercase tracking-[0.2em] text-blue-600">Communications</p><div className="mt-1 flex flex-wrap items-baseline gap-x-5 gap-y-1"><h2 id="email-heading" className="text-2xl font-black text-slate-900">Email</h2>{latest && <p className="text-sm text-slate-500"><strong className="text-slate-700">Last Email</strong> {latest.sentLabel ?? "Not sent"} <span aria-hidden="true">·</span> <strong className="text-slate-700">Engagement</strong> {engagementSummary(latest)}</p>}</div></div>
       <button ref={composeButton} type="button" aria-expanded={composing} aria-controls="candidate-email-composer" onClick={() => { setKey(crypto.randomUUID()); setComposing(true); }} className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-black text-white transition hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-200"><Mail size={16} />Compose Email</button>
