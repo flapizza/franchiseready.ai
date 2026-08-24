@@ -3,6 +3,7 @@ import { revalidatePath } from "next/cache";
 import { getConferenceDemoUser } from "@/lib/auth/demo-session";
 import { isConferenceDemoAccessEnabled } from "@/lib/auth/demo-access";
 import { demoCandidateOverlayStore } from "@/feature/crm/repositories/DemoCandidateOverlayStore";
+import { conferenceAssessmentStore } from "@/feature/assessment-engine/conference/ConferenceAssessmentStore";
 
 export async function POST() {
   if (!isConferenceDemoAccessEnabled()) {
@@ -11,6 +12,7 @@ export async function POST() {
   const user = await getConferenceDemoUser();
   if (!user) return new NextResponse("Forbidden", { status: 403 });
   demoCandidateOverlayStore.reset();
+  conferenceAssessmentStore.clear();
   revalidatePath("/crm");
   revalidatePath("/crm/candidates");
   revalidatePath("/crm/tasks");
