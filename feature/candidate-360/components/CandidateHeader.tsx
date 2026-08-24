@@ -9,11 +9,11 @@ export function CandidateHeader({
   candidate,
 }: Props) {
   return (
-    <section data-candidate-hero className="overflow-hidden rounded-3xl bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 shadow-2xl">
+    <section data-candidate-hero className="overflow-hidden rounded-3xl bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 shadow-xl">
 
-      <div className="p-10">
+      <div className={candidate.rootOnly ? "p-10" : "p-6 lg:p-8"}>
 
-        <div className="flex flex-wrap items-start justify-between gap-10">
+        <div className={`flex flex-wrap justify-between ${candidate.rootOnly ? "items-start gap-10" : "items-end gap-6"}`}>
 
           <div>
 
@@ -28,28 +28,30 @@ export function CandidateHeader({
               </span>
 
             </div>
-            <h1 className="mt-7 text-5xl font-black tracking-tight text-white">
+            <h1 className={`${candidate.rootOnly ? "mt-7 text-5xl" : "mt-5 text-4xl"} font-black tracking-tight text-white`}>
               {candidate.fullName}
             </h1>
 
-            <p className="mt-5 max-w-3xl text-lg leading-8 text-slate-300">
+            <p className={`${candidate.rootOnly ? "mt-5 text-lg leading-8" : "mt-3 text-base leading-7"} max-w-3xl text-slate-300`}>
               {candidate.executiveSummary}
             </p>
 
           </div>
 
-          {candidate.hasIntelligence && <div className="grid gap-5 sm:grid-cols-2">
+          {candidate.hasIntelligence && <div className="grid gap-3 sm:grid-cols-2">
 
             <ScoreCard
               label="Buying Confidence"
               value={candidate.buyingConfidence}
               color="emerald"
+              compact={!candidate.rootOnly}
             />
 
             <ScoreCard
               label="Candidate Readiness"
               value={candidate.recommendationConfidence}
               color="blue"
+              compact={!candidate.rootOnly}
             />
 
           </div>}
@@ -66,10 +68,12 @@ function ScoreCard({
   label,
   value,
   color,
+  compact,
 }: {
   label: string;
   value: number | null;
   color: "emerald" | "blue";
+  compact: boolean;
 }) {
   const colors = {
     emerald: {
@@ -90,13 +94,13 @@ function ScoreCard({
 
   return (
     <div
-      className={`min-w-[220px] rounded-2xl border ${theme.ring} ${theme.background} p-6 backdrop-blur`}
+      className={`${compact ? "min-w-[180px] px-5 py-4" : "min-w-[220px] p-6"} rounded-2xl border ${theme.ring} ${theme.background} backdrop-blur`}
     >
       <div className={`text-sm font-semibold uppercase tracking-widest ${theme.text}`}>
         {label}
       </div>
 
-      <div className={`mt-4 text-6xl font-black ${theme.value}`}>
+      <div className={`${compact ? "mt-2 text-4xl" : "mt-4 text-6xl"} font-black ${theme.value}`}>
         {value ?? "—"}{value === null ? "" : "%"}
       </div>
     </div>
