@@ -22,6 +22,14 @@ export interface CandidateReferralPackage {
   conversationFocus: string[];
   evidence: Evidence[];
   editable: { subject: string; introductionMessage: string; consultantNotes: string };
+  handoffStatus?: "draft" | "reviewed" | "ready";
+  evidenceUpdatedAt?: string;
+  evidenceFingerprint?: string;
+  evidenceStale?: boolean;
+  candidateObjectives?: string[];
+  candidateQuestions?: string[];
+  recommendedFranchisorFocus?: string[];
+  provenance?: Array<{ label: string; source: "Assessment" | "Candidate Intelligence" | "Discovery" | "Brand Strategy" | "Brand Presentation" | "Financial Profile" | "Consultant Note" }>;
   handoff: ReferralBrandHandoffState | null;
   preparedAt: string;
   approvedAt: string | null;

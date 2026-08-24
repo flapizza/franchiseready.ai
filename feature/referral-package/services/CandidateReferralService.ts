@@ -10,6 +10,7 @@ import type { CandidateBrandReferral, CandidateBrandReferralSource, ReferralDeli
 import type { CandidateReferralPackage } from "../models/CandidateReferralPackage";
 import { DemoReferralDeliveryService } from "./DemoReferralDeliveryService";
 import { getConferenceReferralById, getConferenceReferralHistory } from "@/feature/demo/data/conferenceReferralHistory";
+import { CandidateHandoffPackageService } from "./CandidateHandoffPackageService";
 
 export type ReferralServiceResult = { status: "success"; referral: CandidateBrandReferral } | { status: "blocked" | "not-found" | "not-approved"; message: string };
 export type BulkReferralResult = { status: "success"; referrals: CandidateBrandReferral[] } | { status: "blocked" | "not-found"; message: string };
@@ -21,6 +22,7 @@ export class CandidateReferralService {
   private readonly activities = new DemoCandidateActivityRepository();
   private readonly strategy = new CandidateBrandStrategyRuntime(this.candidates, this.brands, this.scenarios);
   private readonly delivery = new DemoReferralDeliveryService();
+  private readonly handoffPackages = new CandidateHandoffPackageService();
 
   getByCandidate(candidateId: string) {
     const overlay = demoCandidateOverlayStore.getCandidateReferrals(candidateId);
@@ -68,6 +70,30 @@ export class CandidateReferralService {
     if (!current) return { status: "not-found", message: "Prepare the referral package first." };
     if (current.status !== "ready-for-review") return { status: "blocked", message: "Approved and historical referral packages are read-only." };
     const updated = { ...current, updatedAt: new Date().toISOString(), referralPackage: { ...current.referralPackage, editable } };
+    demoCandidateOverlayStore.saveCandidateReferral(updated);
+    return { status: "success", referral: updated };
+  }
+
+  async markHandoffReady(candidateId: string, referralId: string): Promise<ReferralServiceResult> {
+    const current = this.getOwned(candidateId, referralId);
+    if (!current) return { status: "not-found", message: "Prepare the handoff package first." };
+    if (current.status !== "ready-for-review") return { status: "blocked", message: "Historical handoff packages are read-only." };
+    const now = new Date().toISOString();
+    const updated = { ...current, updatedAt: now, referralPackage: { ...current.referralPackage, handoffStatus: "ready" as const } };
+    demoCandidateOverlayStore.saveCandidateReferral(updated);
+    return { status: "success", referral: updated };
+  }
+
+  async refreshHandoff(candidateId: string, referralId: string): Promise<ReferralServiceResult> {
+    const current = this.getOwned(candidateId, referralId);
+    if (!current) return { status: "not-found", message: "Prepare the handoff package first." };
+    const context = await this.context(candidateId);
+    if ("message" in context) return context;
+    const handoff = current.brandId ? context.handoff.recommendedBrands.find((item) => item.brandId === current.brandId) ?? null : null;
+    const generated = this.handoffPackages.compose(context.candidate, handoff);
+    const now = new Date().toISOString();
+    const updated = { ...current, updatedAt: now, referralPackage: { ...current.referralPackage, ...generated,
+      preparedAt: now, handoffStatus: "reviewed" as const, editable: { ...current.referralPackage.editable } } };
     demoCandidateOverlayStore.saveCandidateReferral(updated);
     return { status: "success", referral: updated };
   }
@@ -149,6 +175,7 @@ export class CandidateReferralService {
     brand: { brandId: string | null; brandName: string; category: string; contact: { name: string; email: string; title: string } | null }, source: CandidateBrandReferralSource, handoff: ReferralBrandHandoffState | null) {
     const { candidate } = context;
     const now = new Date().toISOString();
+    const generatedHandoff = this.handoffPackages.compose(candidate, handoff);
     const strengths = handoff ? handoff.supportingEvidence.filter((item) => item.category !== "financial").map((item) => item.title) : [
       `Leadership readiness: ${candidate.intelligence.competencies.leadership}%`, `Coachability: ${candidate.intelligence.behavioral.coachability}%`, `Communication readiness: ${candidate.intelligence.competencies.communication}%`];
     const contactName = brand.contact?.name ?? `${brand.brandName} Franchise Development`;
@@ -168,7 +195,7 @@ export class CandidateReferralService {
       concerns: handoff?.knownConcerns ?? candidate.intelligence.discoveryPriorities,
       conversationFocus: handoff ? [...handoff.presentationContext.emphasize, handoff.presentationContext.suggestedTransition] : candidate.intelligence.discoveryPriorities,
       evidence: handoff?.supportingEvidence ?? [], editable: { subject: `Introduction: ${context.handoff.candidateName} — ${brand.brandName}`, introductionMessage: intro, consultantNotes: "" },
-      handoff, preparedAt: now, approvedAt: null, introducedAt: null };
+      ...generatedHandoff, handoffStatus: "draft", handoff, preparedAt: now, approvedAt: null, introducedAt: null };
     const referral: CandidateBrandReferral = { referralId, candidateId: candidate.id, brandId: brand.brandId, brandName: brand.brandName, source,
       recommendationRank: handoff?.rank ?? null, recommendationScore: handoff?.recommendationScore ?? null, recommendationConfidence: handoff?.recommendationConfidence ?? null,
       packageId: pkg.id, status: "ready-for-review", referralPackage: pkg, createdAt: now, updatedAt: now, approvedAt: null, introducedAt: null, deliveryStatus: "not-recorded",

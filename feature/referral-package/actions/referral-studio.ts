@@ -29,6 +29,20 @@ export async function saveReferralDraft(_state: ReferralActionState, formData: F
   refresh(candidateId); return { status: "success", message: "Consultant edits saved.", selectedReferralId: referralId };
 }
 
+export async function markHandoffReady(_state: ReferralActionState, formData: FormData): Promise<ReferralActionState> {
+  const candidateId = String(formData.get("candidateId") ?? ""); const referralId = String(formData.get("referralId") ?? "");
+  const result = await new CandidateReferralService().markHandoffReady(candidateId, referralId);
+  if (result.status !== "success") return { status: "error", message: result.message };
+  refresh(candidateId); return { status: "success", message: "Candidate Handoff Package marked ready.", selectedReferralId: referralId };
+}
+
+export async function refreshHandoffPackage(_state: ReferralActionState, formData: FormData): Promise<ReferralActionState> {
+  const candidateId = String(formData.get("candidateId") ?? ""); const referralId = String(formData.get("referralId") ?? "");
+  const result = await new CandidateReferralService().refreshHandoff(candidateId, referralId);
+  if (result.status !== "success") return { status: "error", message: result.message };
+  refresh(candidateId); return { status: "success", message: "Handoff evidence refreshed; consultant edits were preserved.", selectedReferralId: referralId };
+}
+
 export async function approveReferral(_state: ReferralActionState, formData: FormData): Promise<ReferralActionState> {
   const candidateId = String(formData.get("candidateId") ?? ""); const referralId = String(formData.get("referralId") ?? "");
   const result = await new CandidateReferralService().approve(candidateId, referralId);

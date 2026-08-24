@@ -56,3 +56,14 @@ body {
   background: var(--fr-brand-soft);
   color: var(--fr-ink);
 }
+
+@media print {
+  @page { margin: 0.55in; size: letter; }
+  html, body { position: static; height: auto; overflow: visible; background: white; }
+  body * { visibility: hidden !important; }
+  .handoff-document, .handoff-document * { visibility: visible !important; }
+  .handoff-document { position: absolute; inset: 0; width: 100%; max-width: none; margin: 0; padding: 0; color: #0f172a; box-shadow: none; }
+  .handoff-controls { display: none !important; }
+  .handoff-avoid-break { break-inside: avoid; page-break-inside: avoid; }
+  .handoff-document section { orphans: 3; widows: 3; }
+}

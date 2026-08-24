@@ -2,6 +2,7 @@ import type { ReferralStudioState } from "../models/ReferralStudioState";
 import { CandidateReferralService } from "../services/CandidateReferralService";
 import { SeedCandidateRepository } from "@/feature/crm/repositories/SeedCandidateRepository";
 import { CandidateBrandStrategyRuntime } from "@/feature/brand-strategy/runtime/CandidateBrandStrategyRuntime";
+import { handoffEvidenceFingerprint } from "../services/CandidateHandoffPackageService";
 
 export class ReferralStudioRuntime {
   constructor(private readonly service = new CandidateReferralService(), private readonly candidates = new SeedCandidateRepository(), private readonly strategy = new CandidateBrandStrategyRuntime()) {}
@@ -12,7 +13,12 @@ export class ReferralStudioRuntime {
     if (!candidate || !strategy) return { available: false, candidateId, candidateName: null, kind: "candidate-not-found", reason: "Candidate not found." };
     const requested = requestedReferralId ? this.service.getOwned(candidateId, requestedReferralId) : null;
     if (requestedReferralId && !requested) return { available: false, candidateId, candidateName: `${candidate.firstName} ${candidate.lastName}`, kind: "package-not-found", reason: "This referral package does not exist or does not belong to this candidate." };
-    const referrals = this.service.getByCandidate(candidateId);
+    const referrals = this.service.getByCandidate(candidateId).map((referral) => {
+      const brandHandoff = strategy.referralStrategyHandoff?.recommendedBrands.find((item) => item.brandId === referral.brandId) ?? null;
+      const fingerprint = candidate.intelligence ? handoffEvidenceFingerprint(candidate, brandHandoff) : undefined;
+      return { ...referral, referralPackage: { ...referral.referralPackage,
+        evidenceStale: Boolean(referral.referralPackage.evidenceFingerprint && fingerprint !== referral.referralPackage.evidenceFingerprint) } };
+    });
     const historical = candidate.pipelineStage === "awarded" && referrals.length > 0;
     const handoff = strategy.referralStrategyHandoff;
     const canMutate = Boolean(handoff && !historical);

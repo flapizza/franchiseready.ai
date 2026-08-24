@@ -10,5 +10,6 @@ export default async function CommunicationsPage({ searchParams }: { searchParam
   const input = { filter: value("filter"), query: value("q"), messageId: value("message") };
   const context = getPersistenceMode() === "supabase" ? await resolveAuthenticatedWorkspaceContext() : null;
   const state = context ? await new ProductionCommunicationsWorkspaceRuntime(context).build(input) : await new CommunicationsWorkspaceRuntime().build(input);
-  return <CommunicationsWorkspacePage state={state} initialCompose={value("compose") === "1"} initialCandidateId={value("candidate")} initialIdempotencyKey={crypto.randomUUID()} />;
+  return <CommunicationsWorkspacePage state={state} initialCompose={value("compose") === "1"} initialCandidateId={value("candidate")}
+    initialIdempotencyKey={crypto.randomUUID()} initialSubject={value("subject")} initialBody={value("body")} initialHandoffId={value("handoff")} />;
 }
