@@ -309,7 +309,7 @@ export class MissionControlRuntime {
         candidateName: candidateName(strategyCandidate),
         signal: referralSelections ? "Ready for Referral" : selected.length && presented === selected.length ? "Review Candidate Reactions" : presented ? "Presentation In Progress" : selected.length ? "Ready to Present" : "Discovery Complete",
         recommendation,
-        action: { label: "Review", href: `/crm/candidates/${strategyCandidate.id}/strategy` },
+        action: { label: "Open Candidate Journey", href: candidateWorkspaceHref(strategyCandidate.id) },
         tone: "blue",
       });
     }

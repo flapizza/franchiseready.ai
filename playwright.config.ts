@@ -23,6 +23,7 @@ export default defineConfig({
     { name: "firefox-communications", testMatch: /communications-workspace\.spec\.ts/, use: { ...devices["Desktop Firefox"] } },
     { name: "firefox-playbook", testMatch: /engagement-playbook\.spec\.ts/, use: { ...devices["Desktop Firefox"] } },
     { name: "firefox-handoff", testMatch: /candidate-handoff\.spec\.ts/, use: { ...devices["Desktop Firefox"] } },
+    { name: "firefox-continuity", testMatch: /ifpg-demo-continuity\.spec\.ts/, use: { ...devices["Desktop Firefox"] } },
   ],
   webServer: {
     command: `node node_modules/next/dist/bin/next start -p ${E2E_PORT}`,

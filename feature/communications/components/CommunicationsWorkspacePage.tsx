@@ -27,7 +27,7 @@ function queryHref(state: CommunicationsWorkspaceState, changes: { filter?: Comm
   return `/crm/communications${query ? `?${query}` : ""}`;
 }
 
-export function CommunicationsWorkspacePage({ state, initialCompose = false, initialCandidateId, initialIdempotencyKey = "", initialSubject = "", initialBody = "", initialHandoffId }: { state: CommunicationsWorkspaceState; initialCompose?: boolean; initialCandidateId?: string; initialIdempotencyKey?: string; initialSubject?: string; initialBody?: string; initialHandoffId?: string }) {
+export function CommunicationsWorkspacePage({ state, initialCompose = false, initialCandidateId, initialIdempotencyKey = "", initialSubject = "", initialBody = "", initialHandoffId, initialBrandName }: { state: CommunicationsWorkspaceState; initialCompose?: boolean; initialCandidateId?: string; initialIdempotencyKey?: string; initialSubject?: string; initialBody?: string; initialHandoffId?: string; initialBrandName?: string }) {
   const [composing, setComposing] = useState(initialCompose);
   const [replying, setReplying] = useState(false);
   const [idempotencyKey, setIdempotencyKey] = useState(initialIdempotencyKey);
@@ -49,6 +49,7 @@ export function CommunicationsWorkspacePage({ state, initialCompose = false, ini
   };
 
   return <main className="space-y-5 p-5 lg:p-7" data-communications-workspace>
+    {initialHandoffId && initialCandidateId && <aside aria-label="Handoff draft context" className="relative z-[60] flex flex-wrap items-center justify-between gap-3 rounded-xl border border-teal-200 bg-teal-50 px-4 py-3 text-sm shadow-lg"><p><strong>Candidate Handoff draft</strong> · {selectedCandidate?.name ?? "Selected candidate"}{initialBrandName ? ` → ${initialBrandName}` : ""}</p><Link href={`/crm/candidates/${initialCandidateId}/referral?referralId=${encodeURIComponent(initialHandoffId)}`} className="font-black text-teal-800">Return to Candidate Handoff Package</Link></aside>}
     <header className="flex flex-wrap items-end justify-between gap-5">
       <div><p className="text-xs font-black uppercase tracking-[.22em] text-teal-600">Consultant communications center</p><h2 className="mt-1 text-4xl font-black tracking-tight text-slate-950">Unified Communications</h2><p className="mt-2 max-w-3xl text-sm text-slate-600">Email engagement, replies, delivery issues, and the follow-up decisions tied to each candidate.</p></div>
       <button type="button" onClick={() => openComposer(false)} className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-black text-white focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-200"><Mail size={17} />Compose Email</button>

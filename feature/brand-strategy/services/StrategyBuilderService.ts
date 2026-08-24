@@ -95,14 +95,15 @@ export class StrategyBuilderService {
 
   async completePresentation(candidateId: string): Promise<StrategyBuilderResult> {
     const strategy = await this.runtime.load(candidateId);
-    if (!strategy?.available || strategy.workflow.historical || strategy.workflow.selected === 0 || strategy.workflow.presented !== strategy.workflow.selected) return { status: "invalid", message: "Present every selected brand before completing the presentation." };
-    const now = new Date().toISOString();
     const current = demoCandidateOverlayStore.getStrategy(candidateId);
     if (!current) return { status: "invalid", message: "Presentation state was not found." };
+    const selected = current.decisions.filter((decision) => decision.selectedForPresentation);
+    if (!strategy?.available || strategy.workflow.historical || selected.length === 0 || selected.some((decision) => !decision.presentedAt)) return { status: "invalid", message: "Present every selected brand before completing the presentation." };
+    const now = new Date().toISOString();
     if (!current.presentationCompletedAt) {
       demoCandidateOverlayStore.saveStrategy({ ...current, presentationCompletedAt: now, updatedAt: now });
       await this.activities.add({ id: `strategy:${candidateId}:presentation-completed`, candidateId, consultantId: demoConsultant.id,
-        type: "brand-presented", title: "Brand Presentation Completed", description: `${strategy.workflow.presented} brands presented; final shortlist is ready for consultant review.`, createdAt: now });
+        type: "brand-presented", title: "Brand Presentation Completed", description: `${selected.length} brands presented; final shortlist is ready for consultant review.`, createdAt: now });
     }
     return { status: "success", message: "Brand Presentation completed." };
   }
