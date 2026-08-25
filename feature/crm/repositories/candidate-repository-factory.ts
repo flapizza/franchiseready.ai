@@ -4,8 +4,7 @@ import { getPersistenceMode } from "@/lib/env";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { resolveAuthenticatedWorkspaceContext } from "@/feature/identity/data/workspace-context";
 import { SeedCandidateRepository } from "./SeedCandidateRepository";
-import { SupabaseCandidateRepository, type CandidateDatabase } from "./SupabaseCandidateRepository";
-import type { SupabaseClient } from "@supabase/supabase-js";
+import { SupabaseCandidateRepository } from "./SupabaseCandidateRepository";
 
 export async function createCandidateRepository() {
   if (getPersistenceMode() === "demo") {
@@ -14,5 +13,5 @@ export async function createCandidateRepository() {
   const workspace = await resolveAuthenticatedWorkspaceContext();
   if (!workspace) return null;
   const client = await createServerSupabaseClient();
-  return { mode: "supabase" as const, repository: new SupabaseCandidateRepository(client as unknown as SupabaseClient<CandidateDatabase>, workspace), workspace };
+  return { mode: "supabase" as const, repository: new SupabaseCandidateRepository(client, workspace), workspace };
 }

@@ -4,6 +4,8 @@ Status: Packs 001-003 implemented through versioned migrations; later domain pac
 
 Production Pack 003 adds tenant-owned assessment sessions, immutable submissions, and versioned analyses. Authenticated consultants operate through candidate hierarchy authorization. Public candidate access is limited to a single hashed, expiring, revocable token through narrow server-mediated RPCs. Production Candidate 360 consumes only persisted assessment intelligence; conference fixtures remain isolated. Assessment-originated Discovery priorities and Opportunity Characteristics are now durable inputs, while Discovery refinement and production Brand Strategy matching remain later persistence domains.
 
+Production Pack 004 adds durable consultant Discovery sessions, structured observations, private notes, and versioned current-intelligence snapshots. Current intelligence composes rather than overwrites assessment evidence, retains Opportunity Characteristic provenance, and exposes explainable Brand Strategy readiness. Candidate 360 and the existing Discovery route consume this production projection; demo Discovery remains fixture-backed and independent.
+
 ## 1. Executive assessment
 
 FranGroove has good persistence seams in Candidates, Pipeline, Tasks, Calendar, and Brand Library, but it does not yet have production business persistence. Supabase currently provides authentication/session scaffolding only. Business state is assembled from deterministic TypeScript fixtures plus one process-local `globalThis` overlay. A restart loses mutations; multiple application processes can disagree; and authorization is mostly a demo-consultant equality check rather than database-enforced tenancy.

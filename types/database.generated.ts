@@ -1,4 +1,4 @@
-﻿export type Json =
+export type Json =
   | string
   | number
   | boolean
@@ -9,6 +9,962 @@
 export type Database = {
   public: {
     Tables: {
+      assessment_analyses: {
+        Row: {
+          analysis_snapshot: Json
+          analysis_version: number
+          generated_at: string
+          id: string
+          instrument_version: string
+          organization_id: string
+          session_id: string
+          submission_id: string
+          superseded_at: string | null
+        }
+        Insert: {
+          analysis_snapshot: Json
+          analysis_version: number
+          generated_at?: string
+          id?: string
+          instrument_version: string
+          organization_id: string
+          session_id: string
+          submission_id: string
+          superseded_at?: string | null
+        }
+        Update: {
+          analysis_snapshot?: Json
+          analysis_version?: number
+          generated_at?: string
+          id?: string
+          instrument_version?: string
+          organization_id?: string
+          session_id?: string
+          submission_id?: string
+          superseded_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assessment_analyses_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessment_analyses_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "assessment_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessment_analyses_session_id_organization_id_fkey"
+            columns: ["session_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "assessment_sessions"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "assessment_analyses_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "assessment_submissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessment_analyses_submission_id_organization_id_fkey"
+            columns: ["submission_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "assessment_submissions"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      assessment_sessions: {
+        Row: {
+          candidate_id: string
+          completed_at: string | null
+          created_at: string
+          created_by_membership_id: string
+          current_section: number
+          expires_at: string
+          id: string
+          instrument_version: string
+          last_saved_at: string | null
+          organization_id: string
+          owning_membership_id: string
+          progress_snapshot: Json | null
+          public_id: string
+          revoked_at: string | null
+          started_at: string | null
+          status: Database["public"]["Enums"]["assessment_session_status"]
+          submitted_at: string | null
+          token_hash: string
+          updated_at: string
+        }
+        Insert: {
+          candidate_id: string
+          completed_at?: string | null
+          created_at?: string
+          created_by_membership_id: string
+          current_section?: number
+          expires_at: string
+          id?: string
+          instrument_version?: string
+          last_saved_at?: string | null
+          organization_id: string
+          owning_membership_id: string
+          progress_snapshot?: Json | null
+          public_id?: string
+          revoked_at?: string | null
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["assessment_session_status"]
+          submitted_at?: string | null
+          token_hash: string
+          updated_at?: string
+        }
+        Update: {
+          candidate_id?: string
+          completed_at?: string | null
+          created_at?: string
+          created_by_membership_id?: string
+          current_section?: number
+          expires_at?: string
+          id?: string
+          instrument_version?: string
+          last_saved_at?: string | null
+          organization_id?: string
+          owning_membership_id?: string
+          progress_snapshot?: Json | null
+          public_id?: string
+          revoked_at?: string | null
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["assessment_session_status"]
+          submitted_at?: string | null
+          token_hash?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assessment_sessions_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessment_sessions_candidate_id_organization_id_fkey"
+            columns: ["candidate_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "candidates"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "assessment_sessions_created_by_membership_id_organization__fkey"
+            columns: ["created_by_membership_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization_memberships"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "assessment_sessions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessment_sessions_owning_membership_id_organization_id_fkey"
+            columns: ["owning_membership_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization_memberships"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      assessment_submissions: {
+        Row: {
+          id: string
+          instrument_version: string
+          intake_snapshot: Json
+          organization_id: string
+          response_snapshot: Json
+          session_id: string
+          submitted_at: string
+        }
+        Insert: {
+          id?: string
+          instrument_version: string
+          intake_snapshot: Json
+          organization_id: string
+          response_snapshot: Json
+          session_id: string
+          submitted_at?: string
+        }
+        Update: {
+          id?: string
+          instrument_version?: string
+          intake_snapshot?: Json
+          organization_id?: string
+          response_snapshot?: Json
+          session_id?: string
+          submitted_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assessment_submissions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessment_submissions_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: true
+            referencedRelation: "assessment_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessment_submissions_session_id_organization_id_fkey"
+            columns: ["session_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "assessment_sessions"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      candidate_assignment_history: {
+        Row: {
+          candidate_id: string
+          changed_at: string
+          changed_by_membership_id: string
+          id: string
+          new_membership_id: string
+          organization_id: string
+          previous_membership_id: string
+          reason: string | null
+        }
+        Insert: {
+          candidate_id: string
+          changed_at?: string
+          changed_by_membership_id: string
+          id?: string
+          new_membership_id: string
+          organization_id: string
+          previous_membership_id: string
+          reason?: string | null
+        }
+        Update: {
+          candidate_id?: string
+          changed_at?: string
+          changed_by_membership_id?: string
+          id?: string
+          new_membership_id?: string
+          organization_id?: string
+          previous_membership_id?: string
+          reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidate_assignment_history_actor_fk"
+            columns: ["changed_by_membership_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization_memberships"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "candidate_assignment_history_candidate_fk"
+            columns: ["candidate_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "candidates"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "candidate_assignment_history_new_fk"
+            columns: ["new_membership_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization_memberships"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "candidate_assignment_history_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidate_assignment_history_previous_fk"
+            columns: ["previous_membership_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization_memberships"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      candidates: {
+        Row: {
+          archived_at: string | null
+          assigned_membership_id: string
+          created_at: string
+          created_by_membership_id: string
+          email: string
+          first_name: string
+          id: string
+          last_name: string
+          organization_id: string
+          phone: string | null
+          pipeline_stage_id: string
+          preferred_name: string | null
+          public_id: string
+          status: Database["public"]["Enums"]["candidate_status"]
+          updated_at: string
+        }
+        Insert: {
+          archived_at?: string | null
+          assigned_membership_id: string
+          created_at?: string
+          created_by_membership_id: string
+          email: string
+          first_name: string
+          id?: string
+          last_name: string
+          organization_id: string
+          phone?: string | null
+          pipeline_stage_id?: string
+          preferred_name?: string | null
+          public_id?: string
+          status?: Database["public"]["Enums"]["candidate_status"]
+          updated_at?: string
+        }
+        Update: {
+          archived_at?: string | null
+          assigned_membership_id?: string
+          created_at?: string
+          created_by_membership_id?: string
+          email?: string
+          first_name?: string
+          id?: string
+          last_name?: string
+          organization_id?: string
+          phone?: string | null
+          pipeline_stage_id?: string
+          preferred_name?: string | null
+          public_id?: string
+          status?: Database["public"]["Enums"]["candidate_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidates_assignee_same_organization_fk"
+            columns: ["assigned_membership_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization_memberships"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "candidates_creator_same_organization_fk"
+            columns: ["created_by_membership_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization_memberships"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "candidates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      connected_email_accounts: {
+        Row: {
+          connected_at: string | null
+          created_at: string
+          disconnected_at: string | null
+          display_name: string | null
+          email_address: string
+          granted_scopes: string[]
+          id: string
+          last_token_refresh_at: string | null
+          organization_id: string
+          owner_membership_id: string
+          provider: Database["public"]["Enums"]["email_provider"]
+          provider_account_id: string
+          public_id: string
+          status: Database["public"]["Enums"]["connected_email_account_status"]
+          updated_at: string
+        }
+        Insert: {
+          connected_at?: string | null
+          created_at?: string
+          disconnected_at?: string | null
+          display_name?: string | null
+          email_address: string
+          granted_scopes?: string[]
+          id?: string
+          last_token_refresh_at?: string | null
+          organization_id: string
+          owner_membership_id: string
+          provider: Database["public"]["Enums"]["email_provider"]
+          provider_account_id: string
+          public_id?: string
+          status?: Database["public"]["Enums"]["connected_email_account_status"]
+          updated_at?: string
+        }
+        Update: {
+          connected_at?: string | null
+          created_at?: string
+          disconnected_at?: string | null
+          display_name?: string | null
+          email_address?: string
+          granted_scopes?: string[]
+          id?: string
+          last_token_refresh_at?: string | null
+          organization_id?: string
+          owner_membership_id?: string
+          provider?: Database["public"]["Enums"]["email_provider"]
+          provider_account_id?: string
+          public_id?: string
+          status?: Database["public"]["Enums"]["connected_email_account_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "connected_email_accounts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "connected_email_accounts_owner_same_organization_fk"
+            columns: ["owner_membership_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization_memberships"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      connected_email_credentials: {
+        Row: {
+          access_token_expires_at: string | null
+          cipher_provider: string
+          cipher_version: number
+          connected_email_account_id: string
+          created_at: string
+          encrypted_payload: string
+          updated_at: string
+        }
+        Insert: {
+          access_token_expires_at?: string | null
+          cipher_provider: string
+          cipher_version: number
+          connected_email_account_id: string
+          created_at?: string
+          encrypted_payload: string
+          updated_at?: string
+        }
+        Update: {
+          access_token_expires_at?: string | null
+          cipher_provider?: string
+          cipher_version?: number
+          connected_email_account_id?: string
+          created_at?: string
+          encrypted_payload?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "connected_email_credentials_connected_email_account_id_fkey"
+            columns: ["connected_email_account_id"]
+            isOneToOne: true
+            referencedRelation: "connected_email_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      discovery_intelligence: {
+        Row: {
+          brand_strategy_readiness: string
+          candidate_id: string
+          current_snapshot: Json
+          generated_at: string
+          id: string
+          organization_id: string
+          session_id: string
+          superseded_at: string | null
+          version: number
+        }
+        Insert: {
+          brand_strategy_readiness: string
+          candidate_id: string
+          current_snapshot: Json
+          generated_at?: string
+          id?: string
+          organization_id: string
+          session_id: string
+          superseded_at?: string | null
+          version?: number
+        }
+        Update: {
+          brand_strategy_readiness?: string
+          candidate_id?: string
+          current_snapshot?: Json
+          generated_at?: string
+          id?: string
+          organization_id?: string
+          session_id?: string
+          superseded_at?: string | null
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discovery_intelligence_candidate_id_organization_id_fkey"
+            columns: ["candidate_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "candidates"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "discovery_intelligence_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "discovery_intelligence_session_id_organization_id_fkey"
+            columns: ["session_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "discovery_sessions"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      discovery_observations: {
+        Row: {
+          candidate_id: string
+          candidate_statement: string
+          consultant_significance: string
+          created_at: string
+          created_by_membership_id: string
+          finding: string
+          follow_up_needed: boolean
+          id: string
+          organization_id: string
+          session_id: string
+          source: string
+          status: Database["public"]["Enums"]["discovery_finding_status"]
+          topic_key: string
+          topic_label: string
+          updated_at: string
+        }
+        Insert: {
+          candidate_id: string
+          candidate_statement?: string
+          consultant_significance?: string
+          created_at?: string
+          created_by_membership_id: string
+          finding: string
+          follow_up_needed?: boolean
+          id?: string
+          organization_id: string
+          session_id: string
+          source?: string
+          status: Database["public"]["Enums"]["discovery_finding_status"]
+          topic_key: string
+          topic_label: string
+          updated_at?: string
+        }
+        Update: {
+          candidate_id?: string
+          candidate_statement?: string
+          consultant_significance?: string
+          created_at?: string
+          created_by_membership_id?: string
+          finding?: string
+          follow_up_needed?: boolean
+          id?: string
+          organization_id?: string
+          session_id?: string
+          source?: string
+          status?: Database["public"]["Enums"]["discovery_finding_status"]
+          topic_key?: string
+          topic_label?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discovery_observations_candidate_id_organization_id_fkey"
+            columns: ["candidate_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "candidates"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "discovery_observations_created_by_membership_id_organizati_fkey"
+            columns: ["created_by_membership_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization_memberships"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "discovery_observations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "discovery_observations_session_id_organization_id_fkey"
+            columns: ["session_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "discovery_sessions"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      discovery_sessions: {
+        Row: {
+          assessment_session_id: string
+          candidate_id: string
+          completed_at: string | null
+          consultant_membership_id: string
+          consultant_notes: string
+          created_at: string
+          id: string
+          next_steps: string
+          occurred_at: string | null
+          organization_id: string
+          public_id: string
+          scheduled_at: string | null
+          started_at: string | null
+          status: Database["public"]["Enums"]["discovery_session_status"]
+          summary: string
+          updated_at: string
+        }
+        Insert: {
+          assessment_session_id: string
+          candidate_id: string
+          completed_at?: string | null
+          consultant_membership_id: string
+          consultant_notes?: string
+          created_at?: string
+          id?: string
+          next_steps?: string
+          occurred_at?: string | null
+          organization_id: string
+          public_id?: string
+          scheduled_at?: string | null
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["discovery_session_status"]
+          summary?: string
+          updated_at?: string
+        }
+        Update: {
+          assessment_session_id?: string
+          candidate_id?: string
+          completed_at?: string | null
+          consultant_membership_id?: string
+          consultant_notes?: string
+          created_at?: string
+          id?: string
+          next_steps?: string
+          occurred_at?: string | null
+          organization_id?: string
+          public_id?: string
+          scheduled_at?: string | null
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["discovery_session_status"]
+          summary?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discovery_sessions_assessment_session_id_organization_id_fkey"
+            columns: ["assessment_session_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "assessment_sessions"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "discovery_sessions_candidate_id_organization_id_fkey"
+            columns: ["candidate_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "candidates"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "discovery_sessions_consultant_membership_id_organization_i_fkey"
+            columns: ["consultant_membership_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization_memberships"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "discovery_sessions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_delivery_attempts: {
+        Row: {
+          attempt_number: number
+          completed_at: string | null
+          created_at: string
+          email_message_id: string
+          error_code: string | null
+          id: string
+          provider_message_id: string | null
+          provider_request_started_at: string
+          provider_thread_id: string | null
+          retryable: boolean
+          status: Database["public"]["Enums"]["email_attempt_status"]
+        }
+        Insert: {
+          attempt_number: number
+          completed_at?: string | null
+          created_at?: string
+          email_message_id: string
+          error_code?: string | null
+          id?: string
+          provider_message_id?: string | null
+          provider_request_started_at?: string
+          provider_thread_id?: string | null
+          retryable?: boolean
+          status: Database["public"]["Enums"]["email_attempt_status"]
+        }
+        Update: {
+          attempt_number?: number
+          completed_at?: string | null
+          created_at?: string
+          email_message_id?: string
+          error_code?: string | null
+          id?: string
+          provider_message_id?: string | null
+          provider_request_started_at?: string
+          provider_thread_id?: string | null
+          retryable?: boolean
+          status?: Database["public"]["Enums"]["email_attempt_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_delivery_attempts_email_message_id_fkey"
+            columns: ["email_message_id"]
+            isOneToOne: false
+            referencedRelation: "email_messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_messages: {
+        Row: {
+          candidate_id: string
+          connected_email_account_id: string
+          created_at: string
+          direction: string
+          id: string
+          internet_message_id: string
+          organization_id: string
+          owner_membership_id: string
+          provenance: string
+          provider: Database["public"]["Enums"]["email_provider"]
+          provider_message_id: string | null
+          provider_thread_id: string | null
+          public_id: string
+          send_idempotency_key: string
+          sender_email: string
+          sender_name: string | null
+          sent_at: string | null
+          status: Database["public"]["Enums"]["outbound_email_status"]
+          subject: string
+          text_body: string
+          updated_at: string
+        }
+        Insert: {
+          candidate_id: string
+          connected_email_account_id: string
+          created_at?: string
+          direction?: string
+          id?: string
+          internet_message_id: string
+          organization_id: string
+          owner_membership_id: string
+          provenance?: string
+          provider: Database["public"]["Enums"]["email_provider"]
+          provider_message_id?: string | null
+          provider_thread_id?: string | null
+          public_id?: string
+          send_idempotency_key: string
+          sender_email: string
+          sender_name?: string | null
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["outbound_email_status"]
+          subject: string
+          text_body: string
+          updated_at?: string
+        }
+        Update: {
+          candidate_id?: string
+          connected_email_account_id?: string
+          created_at?: string
+          direction?: string
+          id?: string
+          internet_message_id?: string
+          organization_id?: string
+          owner_membership_id?: string
+          provenance?: string
+          provider?: Database["public"]["Enums"]["email_provider"]
+          provider_message_id?: string | null
+          provider_thread_id?: string | null
+          public_id?: string
+          send_idempotency_key?: string
+          sender_email?: string
+          sender_name?: string | null
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["outbound_email_status"]
+          subject?: string
+          text_body?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_messages_account_owner_fk"
+            columns: [
+              "connected_email_account_id",
+              "organization_id",
+              "owner_membership_id",
+            ]
+            isOneToOne: false
+            referencedRelation: "connected_email_accounts"
+            referencedColumns: ["id", "organization_id", "owner_membership_id"]
+          },
+          {
+            foreignKeyName: "email_messages_candidate_same_organization_fk"
+            columns: ["candidate_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "candidates"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "email_messages_connected_email_account_id_fkey"
+            columns: ["connected_email_account_id"]
+            isOneToOne: false
+            referencedRelation: "connected_email_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_messages_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_messages_owner_same_organization_fk"
+            columns: ["owner_membership_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization_memberships"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      email_oauth_transactions: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          organization_id: string
+          owner_membership_id: string
+          pkce_verifier_hash: string
+          provider: Database["public"]["Enums"]["email_provider"]
+          return_path: string
+          state_hash: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          id?: string
+          organization_id: string
+          owner_membership_id: string
+          pkce_verifier_hash: string
+          provider: Database["public"]["Enums"]["email_provider"]
+          return_path: string
+          state_hash: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          organization_id?: string
+          owner_membership_id?: string
+          pkce_verifier_hash?: string
+          provider?: Database["public"]["Enums"]["email_provider"]
+          return_path?: string
+          state_hash?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_oauth_transactions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_oauth_transactions_owner_same_organization_fk"
+            columns: ["owner_membership_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization_memberships"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      email_recipients: {
+        Row: {
+          display_name: string | null
+          email_address: string
+          email_message_id: string
+          id: string
+          kind: Database["public"]["Enums"]["email_recipient_kind"]
+          recipient_order: number
+        }
+        Insert: {
+          display_name?: string | null
+          email_address: string
+          email_message_id: string
+          id?: string
+          kind: Database["public"]["Enums"]["email_recipient_kind"]
+          recipient_order?: number
+        }
+        Update: {
+          display_name?: string | null
+          email_address?: string
+          email_message_id?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["email_recipient_kind"]
+          recipient_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_recipients_email_message_id_fkey"
+            columns: ["email_message_id"]
+            isOneToOne: false
+            referencedRelation: "email_messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       membership_reporting_history: {
         Row: {
           changed_at: string
@@ -182,19 +1138,162 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      begin_outbound_email_send: {
+        Args: {
+          idempotency_key: string
+          proposed_body: string
+          proposed_internet_message_id: string
+          proposed_message_public_id: string
+          proposed_subject: string
+          target_account_public_id: string
+          target_candidate_public_id: string
+        }
+        Returns: {
+          candidate_id: string
+          connected_email_account_id: string
+          created_at: string
+          direction: string
+          id: string
+          internet_message_id: string
+          organization_id: string
+          owner_membership_id: string
+          provenance: string
+          provider: Database["public"]["Enums"]["email_provider"]
+          provider_message_id: string | null
+          provider_thread_id: string | null
+          public_id: string
+          send_idempotency_key: string
+          sender_email: string
+          sender_name: string | null
+          sent_at: string | null
+          status: Database["public"]["Enums"]["outbound_email_status"]
+          subject: string
+          text_body: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "email_messages"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      can_access_candidate: {
+        Args: { target_candidate_id: string }
+        Returns: boolean
+      }
       can_view_membership: {
         Args: { target_membership_id: string }
         Returns: boolean
+      }
+      claim_outbound_email_attempt: {
+        Args: { is_retry: boolean; target_message_public_id: string }
+        Returns: {
+          attempt_number: number
+          completed_at: string | null
+          created_at: string
+          email_message_id: string
+          error_code: string | null
+          id: string
+          provider_message_id: string | null
+          provider_request_started_at: string
+          provider_thread_id: string | null
+          retryable: boolean
+          status: Database["public"]["Enums"]["email_attempt_status"]
+        }
+        SetofOptions: {
+          from: "*"
+          to: "email_delivery_attempts"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      complete_discovery_session: {
+        Args: {
+          brand_strategy_readiness: string
+          intelligence_snapshot: Json
+          target_candidate_public_id: string
+        }
+        Returns: undefined
+      }
+      complete_outbound_email_attempt: {
+        Args: {
+          result_error_code?: string
+          result_provider_message_id?: string
+          result_provider_thread_id?: string
+          result_retryable?: boolean
+          result_status: Database["public"]["Enums"]["email_attempt_status"]
+          target_attempt_id: string
+          target_message_public_id: string
+        }
+        Returns: undefined
+      }
+      create_assessment_invitation: {
+        Args: {
+          invitation_expires_at: string
+          presented_token_hash: string
+          target_candidate_public_id: string
+        }
+        Returns: {
+          candidate_id: string
+          completed_at: string | null
+          created_at: string
+          created_by_membership_id: string
+          current_section: number
+          expires_at: string
+          id: string
+          instrument_version: string
+          last_saved_at: string | null
+          organization_id: string
+          owning_membership_id: string
+          progress_snapshot: Json | null
+          public_id: string
+          revoked_at: string | null
+          started_at: string | null
+          status: Database["public"]["Enums"]["assessment_session_status"]
+          submitted_at: string | null
+          token_hash: string
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "assessment_sessions"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       current_active_membership_id: {
         Args: { target_organization_id: string }
         Returns: string
       }
+      discovery_session_payload: { Args: { sid: string }; Returns: Json }
       get_authorized_membership_ids: {
         Args: { target_organization_id: string }
         Returns: {
           membership_id: string
         }[]
+      }
+      get_candidate_assessment: {
+        Args: { target_candidate_public_id: string }
+        Returns: {
+          analysis_snapshot: Json
+          candidate_public_id: string
+          completed_at: string
+          current_section: number
+          expires_at: string
+          id: string
+          last_saved_at: string
+          progress_snapshot: Json
+          public_id: string
+          revoked_at: string
+          started_at: string
+          status: Database["public"]["Enums"]["assessment_session_status"]
+          submitted_at: string
+        }[]
+      }
+      get_or_create_discovery_session: {
+        Args: { target_candidate_public_id: string }
+        Returns: Json
       }
       has_organization_role: {
         Args: {
@@ -221,11 +1320,167 @@ export type Database = {
         }
         Returns: boolean
       }
+      load_assessment_by_token: {
+        Args: { presented_token_hash: string }
+        Returns: {
+          analysis_snapshot: Json
+          candidate_public_id: string
+          completed_at: string
+          current_section: number
+          expires_at: string
+          id: string
+          last_saved_at: string
+          progress_snapshot: Json
+          public_id: string
+          revoked_at: string
+          started_at: string
+          status: Database["public"]["Enums"]["assessment_session_status"]
+          submitted_at: string
+        }[]
+      }
+      regenerate_assessment_analysis: {
+        Args: {
+          replacement_analysis: Json
+          replacement_analysis_version: number
+          target_candidate_public_id: string
+        }
+        Returns: undefined
+      }
+      revoke_assessment_invitation: {
+        Args: { target_candidate_public_id: string }
+        Returns: undefined
+      }
+      save_assessment_progress: {
+        Args: { presented_token_hash: string; progress_snapshot: Json }
+        Returns: {
+          candidate_id: string
+          completed_at: string | null
+          created_at: string
+          created_by_membership_id: string
+          current_section: number
+          expires_at: string
+          id: string
+          instrument_version: string
+          last_saved_at: string | null
+          organization_id: string
+          owning_membership_id: string
+          progress_snapshot: Json | null
+          public_id: string
+          revoked_at: string | null
+          started_at: string | null
+          status: Database["public"]["Enums"]["assessment_session_status"]
+          submitted_at: string | null
+          token_hash: string
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "assessment_sessions"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      save_discovery_notes: {
+        Args: {
+          consultant_notes_text: string
+          next_steps_text: string
+          summary_text: string
+          target_candidate_public_id: string
+        }
+        Returns: undefined
+      }
+      save_discovery_observation: {
+        Args: {
+          candidate_statement_text: string
+          consultant_significance: string
+          finding_status: Database["public"]["Enums"]["discovery_finding_status"]
+          finding_text: string
+          follow_up_needed: boolean
+          target_candidate_public_id: string
+          topic_key: string
+          topic_label: string
+        }
+        Returns: undefined
+      }
+      submit_assessment: {
+        Args: {
+          presented_token_hash: string
+          submitted_analysis: Json
+          submitted_analysis_version: number
+          submitted_answers: Json
+          submitted_intake: Json
+        }
+        Returns: {
+          candidate_id: string
+          completed_at: string | null
+          created_at: string
+          created_by_membership_id: string
+          current_section: number
+          expires_at: string
+          id: string
+          instrument_version: string
+          last_saved_at: string | null
+          organization_id: string
+          owning_membership_id: string
+          progress_snapshot: Json | null
+          public_id: string
+          revoked_at: string | null
+          started_at: string | null
+          status: Database["public"]["Enums"]["assessment_session_status"]
+          submitted_at: string | null
+          token_hash: string
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "assessment_sessions"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
     }
     Enums: {
+      assessment_session_status:
+        | "created"
+        | "invited"
+        | "in-progress"
+        | "submitted"
+        | "analyzed"
+        | "expired"
+        | "cancelled"
+      candidate_status: "active" | "on-hold" | "inactive" | "won" | "lost"
+      connected_email_account_status:
+        | "pending"
+        | "connected"
+        | "action-required"
+        | "revoked"
+        | "disconnected"
+      discovery_finding_status:
+        | "confirmed"
+        | "refined"
+        | "contradicted"
+        | "unclear"
+      discovery_session_status:
+        | "planned"
+        | "in-progress"
+        | "completed"
+        | "cancelled"
+      email_attempt_status:
+        | "submitting"
+        | "provider-accepted"
+        | "failed-confirmed"
+        | "ambiguous"
+      email_provider: "google" | "microsoft"
+      email_recipient_kind: "to" | "cc" | "bcc"
       membership_role: "owner" | "admin" | "manager" | "consultant"
       membership_status: "invited" | "active" | "suspended"
       organization_status: "active" | "suspended" | "archived"
+      outbound_email_status:
+        | "pending"
+        | "submitting"
+        | "provider-accepted"
+        | "failed-confirmed"
+        | "ambiguous"
       workspace_capability:
         | "organization:view"
         | "organization:manage"
@@ -360,9 +1615,53 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      assessment_session_status: [
+        "created",
+        "invited",
+        "in-progress",
+        "submitted",
+        "analyzed",
+        "expired",
+        "cancelled",
+      ],
+      candidate_status: ["active", "on-hold", "inactive", "won", "lost"],
+      connected_email_account_status: [
+        "pending",
+        "connected",
+        "action-required",
+        "revoked",
+        "disconnected",
+      ],
+      discovery_finding_status: [
+        "confirmed",
+        "refined",
+        "contradicted",
+        "unclear",
+      ],
+      discovery_session_status: [
+        "planned",
+        "in-progress",
+        "completed",
+        "cancelled",
+      ],
+      email_attempt_status: [
+        "submitting",
+        "provider-accepted",
+        "failed-confirmed",
+        "ambiguous",
+      ],
+      email_provider: ["google", "microsoft"],
+      email_recipient_kind: ["to", "cc", "bcc"],
       membership_role: ["owner", "admin", "manager", "consultant"],
       membership_status: ["invited", "active", "suspended"],
       organization_status: ["active", "suspended", "archived"],
+      outbound_email_status: [
+        "pending",
+        "submitting",
+        "provider-accepted",
+        "failed-confirmed",
+        "ambiguous",
+      ],
       workspace_capability: [
         "organization:view",
         "organization:manage",

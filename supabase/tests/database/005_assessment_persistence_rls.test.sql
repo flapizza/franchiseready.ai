@@ -6,7 +6,7 @@ select has_table('public','assessment_submissions','immutable submissions exist'
 select has_table('public','assessment_analyses','versioned analyses exist');
 select col_is_fk('public','assessment_sessions','organization_id','sessions are tenant bound');
 select col_is_fk('public','assessment_sessions','candidate_id','sessions associate candidates');
-select col_is_fk('public','assessment_sessions','owning_membership_id','sessions preserve ownership');
+select col_is_fk('public','assessment_sessions',array['owning_membership_id','organization_id'],'sessions preserve same-tenant ownership');
 select col_not_null('public','assessment_sessions','instrument_version','instrument version persists');
 select col_not_null('public','assessment_sessions','expires_at','tokens expire');
 select col_type_is('public','assessment_sessions','token_hash','text','opaque token hash is stored');
@@ -22,4 +22,3 @@ select has_function('public','regenerate_assessment_analysis',array['text','json
 select has_function('public','revoke_assessment_invitation',array['text'],'revocation boundary exists');
 select policies_are('public','assessment_analyses',array['assessment_analyses_read'],'consultant-only analysis policy is narrow');
 select * from finish(); rollback;
-

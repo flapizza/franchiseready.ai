@@ -1,30 +1,18 @@
 import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database, Tables } from "@/types/database.generated";
 import type { AuthenticatedWorkspaceContext } from "@/feature/identity/models/WorkspaceIdentity";
 import type { CandidateRecord, CandidateStatus, PipelineStage } from "../models/CandidateRecord";
 import type { CandidateRepository } from "./CandidateRepository";
 
-type CandidateRow = {
-  id: string; organization_id: string; public_id: string; assigned_membership_id: string;
-  created_by_membership_id: string; first_name: string; last_name: string; preferred_name: string | null;
-  email: string; phone: string | null; status: CandidateStatus; pipeline_stage_id: string;
-  created_at: string; updated_at: string; archived_at: string | null;
-};
-type CandidateInsert = Partial<Pick<CandidateRow, "id" | "public_id" | "preferred_name" | "phone" | "status" | "pipeline_stage_id" | "created_at" | "updated_at" | "archived_at">>
-  & Pick<CandidateRow, "organization_id" | "assigned_membership_id" | "created_by_membership_id" | "first_name" | "last_name" | "email">;
-export type CandidateDatabase = {
-  public: {
-    Tables: { candidates: { Row: CandidateRow; Insert: CandidateInsert; Update: Partial<CandidateInsert>; Relationships: [] } };
-    Views: Record<string, never>; Functions: Record<string, never>; Enums: Record<string, never>; CompositeTypes: Record<string, never>;
-  };
-};
+type CandidateRow = Tables<"candidates">;
 
 export class CandidateRepositoryError extends Error {}
 
 export class SupabaseCandidateRepository implements CandidateRepository {
   constructor(
-    private readonly supabase: SupabaseClient<CandidateDatabase>,
+    private readonly supabase: SupabaseClient<Database>,
     private readonly workspace: AuthenticatedWorkspaceContext,
   ) {}
 

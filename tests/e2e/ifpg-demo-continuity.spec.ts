@@ -38,6 +38,7 @@ test("IFPG primary journey preserves Jared and brand evidence through consultant
   await page.getByLabel("Strong Interest").check();
   await page.getByLabel("Consultant Note").fill("Validate the candidate's expectations for business development and owner involvement.");
   await page.getByRole("button", { name: "Save & Next Brand" }).click();
+  await expect(page).toHaveURL(/brandId=actioncoach$/);
   const interested = page.getByLabel("Interested", { exact: true });
   await interested.check(); await expect(interested).toBeChecked();
   const completePresentation = page.getByRole("button", { name: "Complete Presentation" });

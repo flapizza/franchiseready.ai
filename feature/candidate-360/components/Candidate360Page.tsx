@@ -22,6 +22,8 @@ import { ProductionEmailRepository } from "@/feature/communications/repositories
 import type { EmailMessageView } from "@/feature/communications/runtime/EmailCommunicationRuntime";
 import { createAuthenticatedAssessmentRepository } from "@/feature/assessment-engine/production/repository-factory";
 import { ProductionCandidateIntelligence } from "./ProductionCandidateIntelligence";
+import { createDiscoveryRepository } from "@/feature/discovery/production/repository-factory";
+import { ProductionDiscoverySummary } from "./ProductionDiscoverySummary";
 
 type Props = {
   candidateId: string;
@@ -34,6 +36,8 @@ export async function Candidate360Page({
   if (!composition) notFound();
   const productionAssessment=composition.mode==="supabase"?(await createAuthenticatedAssessmentRepository())?.repository.getForCandidate(candidateId)??null:null;
   const resolvedAssessment=await productionAssessment;
+  let productionDiscovery=null;
+  if(composition.mode==="supabase"&&resolvedAssessment?.analysis){try{productionDiscovery=(await(await createDiscoveryRepository())!.repository.getOrCreate(candidateId)).session}catch{productionDiscovery=null}}
   const runtime = new Candidate360Runtime(composition.repository, undefined, undefined, composition.mode === "supabase",resolvedAssessment);
 
   const candidate = await runtime.load(candidateId);
@@ -81,6 +85,7 @@ export async function Candidate360Page({
         candidate={candidate}
       />}
       {resolvedAssessment?.analysis && <ProductionCandidateIntelligence analysis={resolvedAssessment.analysis}/>}
+      {resolvedAssessment?.analysis && <ProductionDiscoverySummary candidateId={candidate.id} session={productionDiscovery}/>}
 
       {productionEmail ? <CandidateEmailPanel candidateId={candidate.id} candidateName={candidate.fullName} candidateEmail={candidate.email}
         sender={productionEmail.sender} messages={productionEmail.messages} accountId={productionEmail.accountId} externalDelivery />

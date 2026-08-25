@@ -26,7 +26,7 @@ Do not commit environment secrets. The local stack applies every versioned file 
 From the repository root:
 
 ```text
-npx supabase start
+npx supabase db start --debug
 npx supabase db reset
 npx supabase test db
 ```
@@ -40,29 +40,20 @@ For a linked non-production project, use the team's reviewed Supabase linking an
 The SQL migration is authoritative. Do not hand-maintain a broad fake `Database` interface. After applying migrations locally, generate types from the real schema:
 
 ```text
-npx supabase gen types typescript --local --schema public > types/database.generated.ts
+cmd /c "npx supabase gen types typescript --local --schema public > types\database.generated.ts"
 ```
+
+On Windows, use `cmd /c` as shown so shell redirection preserves the CLI's UTF-8 bytes; Windows PowerShell redirection can produce a UTF-16 file. Then run `npx tsc --noEmit --incremental false` to prove the generated contract compiles through the application adapters.
 
 For a linked project, the equivalent reviewed command may use `--project-id`. Regenerate and review the type diff whenever migrations change. The generated `types/database.generated.ts` schema is integrated into the browser, server, and admin Supabase client factories; application DTOs remain the domain boundary.
 
-### Windows Postgres-meta entrypoint anomaly
+### Windows Docker image-store recovery
 
-On Docker Desktop 4.87.0 with the containerd image store, the `linux/amd64`
-`public.ecr.aws/supabase/postgres-meta:v0.97.0` and `v0.98.0` images reproduce an
-`exec format error`. Their Node runtime and Postgres-meta server payload are
-intact, but `/usr/local/bin/docker-entrypoint.sh` is extracted as a zero-byte
-executable. The same behavior reproduces directly with the inherited
-`node:22.23.2-bookworm-slim` image, while `node:22.22.0-bookworm-slim` contains
-the expected 388-byte entrypoint and starts normally. This is an environment /
-upstream tooling-image issue rather than a schema or CPU-architecture failure.
+The accepted local stack is Supabase CLI `2.114.0` (the exact project pin) on Docker Desktop `4.87.0` / Engine `29.7.2`, WSL2, and the classic `overlay2` image store. On this workstation, containerd snapshot extraction produced corrupted but digest-valid image files: Realtime's `libapparmor.so.1.24.2` began with zero bytes and failed with `invalid ELF header`, while Postgres-meta and its Node base image had zero-byte entrypoints. Pulling the same tags again did not replace the retained corrupt snapshots.
 
-Pack 001B type generation was completed from the clean, migrated local schema
-using the pinned project CLI and a local-only derived Postgres-meta image that
-retained the official image payload but cleared its broken default entrypoint so
-the existing `node dist/server/server.js` command could run. The derived image
-and temporary Dockerfile are not repository artifacts. Do not hand-edit the
-generated types; regenerate them from a validated local or linked schema when a
-working upstream image is available.
+The supported recovery is Docker Desktop **Settings > General**, clear **Use containerd for pulling and storing images**, then restart Docker Desktop. This switches `UseContainerdSnapshotter` to `false`; it does not delete the containerd-store images or containers, which remain available if that store is re-enabled. Do not casually prune images, volumes, or the Docker data store. Obtain explicit approval before deleting local database state or changing Docker/WSL configuration.
+
+Distinguish infrastructure failure from schema failure by where it occurs. An invalid ELF header, empty entrypoint, or container crash before PostgreSQL applies migrations is an image/runtime problem. SQL migration errors and pgTAP failures after the database becomes healthy are schema/test problems. Confirm a recovery with the complete sequence above, including a clean reset, rather than treating a successful container start as database acceptance.
 
 ## Security boundaries
 
@@ -75,16 +66,9 @@ working upstream image is available.
 
 ## Current validation boundary
 
-Static TypeScript, lint, production build, and Playwright validation can run without the local Supabase stack because existing application domains remain explicit demo adapters. Runtime migration and RLS validation requires both the Supabase CLI and Docker. If either is unavailable, report database tests as not executed rather than inferred from application tests.
+Static TypeScript, lint, production build, and Playwright validation do not substitute for database acceptance. A persistence pack is locally accepted only when the pinned CLI starts the stack, a clean `db reset` applies every migration in order, the complete pgTAP suite passes, generated types come from that validated schema, and the application compiles against them. If Docker or the CLI is unavailable, report those checks as not executed rather than inferring success from application tests.
 
-As of August 21, 2026, this workstation has a local environmental blocker in
-the pinned Supabase CLI 2.114.0 initialization path. Both the standard and
-database-only start commands invoke the Realtime schema migrator; its
-`sudo -E -u nobody /app/bin/migrate` startup fails because the image's
-`libapparmor.so.1` has an invalid ELF header. PostgreSQL is removed before
-migrations or pgTAP can run. Pack 002 database runtime validation and type
-regeneration therefore remain unexecuted here; application validation does not
-substitute for those results.
+As of August 25, 2026, this workstation has completed that acceptance boundary: all six migrations apply from a clean database and all 126 pgTAP assertions pass.
 
 ## Persistence Pack 002 candidate boundary
 
@@ -101,3 +85,11 @@ Consultant invitation creates or reuses the Pack 002 candidate root first, then 
 Progress is saved at section boundaries as a typed JSONB working snapshot. Final submission atomically writes immutable intake/response evidence and a separately versioned derived analysis. Submitted rows reject updates/deletes; regeneration supersedes only analysis rows. The schema permits historical attempts, while the MVP maintains one active session per candidate/instrument through invitation behavior rather than a future-hostile uniqueness constraint.
 
 Candidate-provided discovery and financial answers are retained as source evidence; financial values remain self-reported. Opportunity Characteristics are persisted inside the reproducible analysis snapshot for Discovery and later Brand Strategy, but completion never produces brand recommendations. Abandoned-session cleanup, retention automation, candidate reassessment UI, and deeper Discovery outcome persistence remain deferred.
+
+## Production Pack 004 Discovery boundary
+
+Production Discovery is a consultant-only, tenant-owned evidence layer. A session references its source assessment but never edits assessment answers, submissions, or Analysis v2. Assessment priorities seed a four-to-six topic agenda. Structured observations record `confirmed`, `refined`, `contradicted`, or `unclear` findings, candidate paraphrases, consultant significance, follow-up state, and Discovery provenance. Private consultant notes remain separate and are never exposed through public assessment RPCs.
+
+Completion deterministically composes a versioned current-intelligence snapshot containing validated/refined patterns, contextual mixed evidence, unresolved questions, a current Consultant Brief, refined Opportunity Characteristics with their previous assessment disposition, and explainable Brand Strategy readiness. The assessment-derived brief and characteristics remain historical source intelligence. Completion does not automatically schedule work, create tasks, or enter Brand Strategy; those stay consultant-controlled links into their existing boundaries.
+
+Discovery tables use candidate hierarchy authorization and no anonymous grants. Multiple sessions are schema-compatible. Retention automation, stakeholder CRM records, production task/calendar persistence, and transcript ingestion remain deferred.
