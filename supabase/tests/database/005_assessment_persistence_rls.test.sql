@@ -1,0 +1,25 @@
+begin;
+create extension if not exists pgtap with schema extensions;
+select plan(20);
+select has_table('public','assessment_sessions','assessment sessions exist');
+select has_table('public','assessment_submissions','immutable submissions exist');
+select has_table('public','assessment_analyses','versioned analyses exist');
+select col_is_fk('public','assessment_sessions','organization_id','sessions are tenant bound');
+select col_is_fk('public','assessment_sessions','candidate_id','sessions associate candidates');
+select col_is_fk('public','assessment_sessions','owning_membership_id','sessions preserve ownership');
+select col_not_null('public','assessment_sessions','instrument_version','instrument version persists');
+select col_not_null('public','assessment_sessions','expires_at','tokens expire');
+select col_type_is('public','assessment_sessions','token_hash','text','opaque token hash is stored');
+select has_index('public','assessment_sessions','assessment_sessions_token_hash_key','token hashes are unique');
+select col_not_null('public','assessment_submissions','response_snapshot','source responses persist');
+select col_not_null('public','assessment_analyses','analysis_version','analysis version persists');
+select has_index('public','assessment_analyses','assessment_current_analysis_idx','one current derived analysis is enforced');
+select has_function('public','create_assessment_invitation',array['text','text','timestamp with time zone'],'consultant invitation boundary exists');
+select has_function('public','load_assessment_by_token',array['text'],'token-scoped load boundary exists');
+select has_function('public','save_assessment_progress',array['text','jsonb'],'durable resume boundary exists');
+select has_function('public','submit_assessment',array['text','jsonb','jsonb','jsonb','integer'],'atomic immutable submission boundary exists');
+select has_function('public','regenerate_assessment_analysis',array['text','jsonb','integer'],'analysis regeneration boundary exists');
+select has_function('public','revoke_assessment_invitation',array['text'],'revocation boundary exists');
+select policies_are('public','assessment_analyses',array['assessment_analyses_read'],'consultant-only analysis policy is narrow');
+select * from finish(); rollback;
+

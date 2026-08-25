@@ -6,6 +6,9 @@ import { DemoCandidateResolutionService } from "../services/DemoCandidateResolut
 import { CandidateIntakeService } from "../services/CandidateIntakeService";
 import { AssessmentInvitationService } from "../services/AssessmentInvitationService";
 import { createCandidateRepository } from "../repositories/candidate-repository-factory";
+import { createAuthenticatedAssessmentRepository } from "@/feature/assessment-engine/production/repository-factory";
+import { createAssessmentToken, hashAssessmentToken } from "@/feature/assessment-engine/production/token";
+import { getPublicEnvironment } from "@/lib/env";
 
 export interface CandidateFormState {
   status: "idle" | "validation-error" | "created" | "exact-match" | "possible-match";
@@ -46,7 +49,15 @@ export async function sendAssessmentInvitationAction(_previous: InvitationAction
   const candidateId = String(formData.get("candidateId") ?? "");
   try {
     const composition = await createCandidateRepository();
-    if (!composition || composition.mode === "supabase") return { status: "error", message: "Assessment persistence is not available yet." };
+    if (!composition) return { status: "error", message: "An active workspace is required." };
+    if (composition.mode === "supabase") {
+      const token=createAssessmentToken();
+      const assessment=await createAuthenticatedAssessmentRepository();
+      if(!assessment)return {status:"error",message:"An active workspace is required."};
+      await assessment.repository.createInvitation(candidateId,hashAssessmentToken(token),new Date(Date.now()+14*86400000).toISOString());
+      revalidatePath(`/crm/candidates/${candidateId}`);
+      return {status:"sent",message:"Assessment invitation created",url:`${getPublicEnvironment().APP_URL}/assessment/invitation/${token}`,candidateId};
+    }
     const invitation = await new AssessmentInvitationService(composition.repository).send(candidateId);
     revalidatePath("/crm/candidates");
     revalidatePath(`/crm/candidates/${candidateId}`);

@@ -1,6 +1,8 @@
 # Production Persistence Foundation
 
-Status: architecture audit and migration plan only. This document deliberately contains no SQL or migration implementation.
+Status: Packs 001-003 implemented through versioned migrations; later domain packs remain planned.
+
+Production Pack 003 adds tenant-owned assessment sessions, immutable submissions, and versioned analyses. Authenticated consultants operate through candidate hierarchy authorization. Public candidate access is limited to a single hashed, expiring, revocable token through narrow server-mediated RPCs. Production Candidate 360 consumes only persisted assessment intelligence; conference fixtures remain isolated. Assessment-originated Discovery priorities and Opportunity Characteristics are now durable inputs, while Discovery refinement and production Brand Strategy matching remain later persistence domains.
 
 ## 1. Executive assessment
 

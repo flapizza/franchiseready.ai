@@ -91,3 +91,13 @@ substitute for those results.
 `candidates` is the first production domain aggregate. It stores only tenant-bound root facts, a stable opaque `cand_...` routing ID, current membership assignment, creator membership, status, and the existing stable pipeline stage identifier. Candidate access is enforced by RLS through `can_access_candidate(uuid)`, which reuses active membership and recursive reporting-hierarchy authorization. Assignment changes are append-only in `candidate_assignment_history`.
 
 Production candidate list, intake, and `/crm/candidates/[candidateId]` resolution use the user-scoped Supabase repository. They never fall back to seed candidates. Candidate 360 is intentionally root-only in Supabase mode: assessment, intelligence, email, meetings, tasks, activity, strategy, and referral modules are hidden until their own persistence packs. Demo mode retains the complete seeded experience.
+
+## Production Pack 003 assessment boundary
+
+Production assessment sessions are candidate- and organization-bound and are composed only when `PERSISTENCE_MODE=supabase`. Conference mode keeps its process-local store and frozen `conference-assessment-v1` instrument. Production uses `franchise-ownership-assessment-v1` while sharing the same question definitions, validation, and deterministic Analysis v2 service.
+
+Consultant invitation creates or reuses the Pack 002 candidate root first, then creates a session with a 256-bit opaque URL token. Only its SHA-256 hash is stored. Reissue cancels the prior active attempt; expiration and revocation do not delete submitted evidence. Public routes are server-mediated through narrow security-definer functions and anon receives no direct table privileges.
+
+Progress is saved at section boundaries as a typed JSONB working snapshot. Final submission atomically writes immutable intake/response evidence and a separately versioned derived analysis. Submitted rows reject updates/deletes; regeneration supersedes only analysis rows. The schema permits historical attempts, while the MVP maintains one active session per candidate/instrument through invitation behavior rather than a future-hostile uniqueness constraint.
+
+Candidate-provided discovery and financial answers are retained as source evidence; financial values remain self-reported. Opportunity Characteristics are persisted inside the reproducible analysis snapshot for Discovery and later Brand Strategy, but completion never produces brand recommendations. Abandoned-session cleanup, retention automation, candidate reassessment UI, and deeper Discovery outcome persistence remain deferred.

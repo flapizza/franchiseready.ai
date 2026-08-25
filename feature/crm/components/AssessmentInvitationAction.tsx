@@ -19,7 +19,7 @@ export function AssessmentInvitationAction({ candidateId, existingUrl }: { candi
   return (
     <div className="rounded-2xl border border-blue-200 bg-blue-50 p-5">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <div><p className="font-bold text-slate-900">{url ? "Assessment Invitation Sent" : "Assessment not completed"}</p><p className="mt-1 text-sm text-slate-600">{url ? "The candidate can begin using the secure demo link." : "Invite this candidate to complete the readiness assessment."}</p></div>
+        <div><p className="font-bold text-slate-900">{url ? state.message ?? "Assessment Invitation Sent" : "Assessment not completed"}</p><p className="mt-1 text-sm text-slate-600">{url ? "Copy the secure link and share it when you are ready." : "Create a secure assessment invitation for this candidate."}</p></div>
         {!url && <form action={action}><input type="hidden" name="candidateId" value={candidateId} /><button disabled={pending} className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-blue-700 disabled:opacity-60"><Send size={16} />{pending ? "Sending…" : "Send Assessment"}</button></form>}
       </div>
       {state.status === "error" && <p className="mt-3 text-sm font-semibold text-red-700">{state.message}</p>}
