@@ -4,7 +4,7 @@ import { isConferenceDemoAccessEnabled } from "@/lib/auth/demo-access";
 import { redirect } from "next/navigation";
 import { ConferenceAssessmentAnalysisService } from "./ConferenceAssessmentAnalysisService";
 import { conferenceAssessmentStore } from "./ConferenceAssessmentStore";
-import type { ConferenceAnswers, ConferenceIntake } from "./types";
+import { CONFERENCE_INSTRUMENT_VERSION, type ConferenceAnswers, type ConferenceIntake } from "./types";
 import { validateConferenceSubmission } from "./validation";
 
 export async function completeConferenceAssessment(input: { intake: ConferenceIntake; answers: ConferenceAnswers; consent: boolean; startedAt: string }) {
@@ -16,7 +16,7 @@ export async function completeConferenceAssessment(input: { intake: ConferenceIn
   const id = `conf_${crypto.randomUUID()}`;
   const candidateId = `conference-candidate_${crypto.randomUUID()}`;
   const analysis = new ConferenceAssessmentAnalysisService().analyze(input.intake, input.answers);
-  conferenceAssessmentStore.save({ id, candidateId, status: "analyzed", intake: input.intake, answers: input.answers, startedAt: startedAt.toISOString(), completedAt: completedAt.toISOString(), durationSeconds: Math.max(0, Math.round((completedAt.getTime() - startedAt.getTime()) / 1000)), analysis });
+  conferenceAssessmentStore.save({ id, candidateId, status: "analyzed", instrumentVersion: CONFERENCE_INSTRUMENT_VERSION, intake: input.intake, answers: input.answers, startedAt: startedAt.toISOString(), completedAt: completedAt.toISOString(), durationSeconds: Math.max(0, Math.round((completedAt.getTime() - startedAt.getTime()) / 1000)), analysis });
   return { ok: true as const, id, candidateId };
 }
 

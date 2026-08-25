@@ -11,7 +11,7 @@ export function AppShell({
   children,
 }: Props) {
   return (
-    <div data-app-shell className="flex h-full min-h-0 overflow-hidden bg-slate-100">
+    <div data-app-shell className="flex h-dvh min-h-0 overflow-hidden bg-slate-100">
 
       <Sidebar />
 

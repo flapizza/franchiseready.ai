@@ -19,10 +19,76 @@ test("complete assessment creates deterministic candidate intelligence and clean
   await page.goto("/assessment/start"); await fillIntake(page); await page.getByRole("button",{name:"Continue"}).click(); await page.getByLabel("I understand and wish to continue.").check(); await page.getByRole("button",{name:"Begin assessment"}).click();
   for(let section=1;section<=6;section++){await answerVisibleQuestions(page);await page.getByRole("button",{name:"Continue"}).click();}
   await expect(page.getByRole("heading",{name:/concerns you most/i})).toBeVisible(); await page.getByLabel("Losing financial security").check(); await page.getByLabel("Replacing my income").check(); await page.locator('fieldset').last().getByLabel("Losing financial security").check(); await page.getByRole("button",{name:"Build my profile"}).click(); await expect(page.getByText("Building your Franchise Ownership Profile")).toBeVisible(); await expect(page.getByRole("heading",{name:"Your Franchise Ownership Profile"})).toBeVisible({timeout:15_000}); await expect(page.getByText("Questions Worth Discussing With Your Consultant")).toBeVisible(); await expect(page.getByText(/not independently verified/i)).toBeVisible();
-  await page.goto("/login"); await page.getByRole("button",{name:/Enter Conference Demo as/i}).click(); await expect(page).toHaveURL(/\/crm$/); await expect(page.getByText("New Candidate Intelligence Available")).toBeVisible(); await page.getByRole("link",{name:"Open Candidate Intelligence"}).click(); await expect(page.getByRole("heading",{name:"Lex Morgan"})).toBeVisible(); await expect(page.getByRole("heading",{name:"Discovery Priorities"})).toBeVisible(); await expect(page.getByRole("heading",{name:"Franchise Model Implications"})).toBeVisible(); await expect(page.getByText(/Capability evidence:/)).toBeVisible(); await expect(page.getByText(/Gmail activity.*have not been created/)).toBeVisible();
+  await page.goto("/login"); await page.getByRole("button",{name:/Enter Conference Demo as/i}).click(); await expect(page).toHaveURL(/\/crm$/); await expect(page.getByText("New Candidate Intelligence Available")).toBeVisible(); await page.setViewportSize({width:1366,height:768}); await page.getByRole("link",{name:"Open Candidate Intelligence"}).click(); await expect(page.getByRole("heading",{name:"Lex Morgan"})).toBeVisible(); const consultantBrief=page.getByRole("heading",{name:"Consultant Brief"});const startDiscovery=page.getByText("Start Discovery Here",{exact:true});await expect(consultantBrief).toBeVisible();await expect(startDiscovery).toBeVisible();expect((await consultantBrief.boundingBox())?.y??9999).toBeLessThan(768);expect((await startDiscovery.boundingBox())?.y??9999).toBeLessThan(768);await expect(page.getByRole("heading",{name:"Discovery Priorities"})).toBeVisible(); await expect(page.getByRole("heading",{name:"Franchise Model Implications"})).toBeVisible(); await expect(page.getByText(/Capability evidence:/)).toBeVisible();await expect(page.getByText(/Key Priority|· Priority/).first()).toBeVisible();await expect(page.locator("body")).not.toContainText(/· (high|normal)|Evidence: q\d|&#x20;/);const supporting=page.getByText("Supporting Evidence",{exact:true});await supporting.click();await expect(page.getByText("ownership motivation",{exact:true}).first()).toBeVisible(); await expect(page.getByText(/Gmail activity.*have not been created/)).toBeVisible();
   page.on("dialog",dialog=>dialog.accept()); await page.getByRole("button",{name:"Clear Conference Assessments"}).click(); await expect(page).toHaveURL(/\/crm$/); await expect(page.getByText("New Candidate Intelligence Available")).toHaveCount(0); await expect(page.getByText("Jared",{exact:false}).first()).toBeVisible(); await expect(page.getByText("Sarah",{exact:false}).first()).toBeVisible();
 });
 
-test("candidate assessment has no horizontal overflow at IFPG device sizes",async({page})=>{for(const viewport of [{width:390,height:844},{width:430,height:932},{width:768,height:1024},{width:1366,height:768}]){await page.setViewportSize(viewport);await page.goto("/assessment/start");const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>document.documentElement.clientWidth);expect(overflow,`${viewport.width}x${viewport.height}`).toBeFalsy();}});
+test("candidate assessment scrolls without horizontal overflow at IFPG device sizes",async({page})=>{for(const viewport of [{width:1920,height:1080},{width:1600,height:900},{width:1366,height:768},{width:1280,height:800},{width:390,height:844},{width:430,height:932},{width:768,height:1024}]){await page.setViewportSize(viewport);await page.goto("/assessment/start");const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>document.documentElement.clientWidth);expect(overflow,`${viewport.width}x${viewport.height}`).toBeFalsy();await page.mouse.wheel(0,10000);await expect.poll(()=>page.evaluate(()=>window.scrollY),{message:`scroll down at ${viewport.width}x${viewport.height}`}).toBeGreaterThan(0);await page.mouse.wheel(0,-10000);await expect.poll(()=>page.evaluate(()=>window.scrollY),{message:`scroll up at ${viewport.width}x${viewport.height}`}).toBe(0);}});
+
+test("candidate assessment supports native touch swiping",async({page,context,browserName})=>{
+  test.skip(browserName!=="chromium","Chromium CDP supplies real emulated touch input");
+  await page.setViewportSize({width:390,height:844});
+  await page.goto("/assessment/start");
+  const client=await context.newCDPSession(page);
+  await client.send("Emulation.setTouchEmulationEnabled",{enabled:true,maxTouchPoints:1});
+  await client.send("Input.dispatchTouchEvent",{type:"touchStart",touchPoints:[{x:195,y:700}]});
+  await client.send("Input.dispatchTouchEvent",{type:"touchMove",touchPoints:[{x:195,y:200}]});
+  await client.send("Input.dispatchTouchEvent",{type:"touchEnd",touchPoints:[]});
+  await expect.poll(()=>page.evaluate(()=>window.scrollY)).toBeGreaterThan(0);
+  await client.send("Input.dispatchTouchEvent",{type:"touchStart",touchPoints:[{x:195,y:200}]});
+  await client.send("Input.dispatchTouchEvent",{type:"touchMove",touchPoints:[{x:195,y:700}]});
+  await client.send("Input.dispatchTouchEvent",{type:"touchEnd",touchPoints:[]});
+  await expect.poll(()=>page.evaluate(()=>window.scrollY)).toBe(0);
+});
+
+test("legacy completed analysis is upgraded for candidate and consultant results",async({page})=>{
+  await page.goto("/login");
+  await page.getByRole("button",{name:/Enter Conference Demo as/i}).click();
+  await expect(page).toHaveURL(/\/crm$/);
+  const urls=await page.evaluate(async()=>{const response=await fetch("/assessment/start/test-legacy-assessment",{method:"POST"});if(!response.ok)throw new Error(`Legacy fixture failed: ${response.status}`);return response.json();});
+  await page.goto(urls.candidateResultUrl);
+  await expect(page.getByRole("heading",{name:"Your Franchise Ownership Profile"})).toBeVisible();
+  await expect(page.getByText(/Your responses combine|You appear to value|Your responses point to useful areas/)).toBeVisible();
+  await page.goto(urls.consultantResultUrl);
+  await expect(page.getByRole("heading",{name:"Legacy Candidate"})).toBeVisible();
+  await expect(page.getByRole("heading",{name:"Consultant Brief"})).toBeVisible();
+  await expect(page.getByText("Start Discovery Here",{exact:true})).toBeVisible();
+  await expect(page.locator("body")).not.toContainText(/Cannot read properties|&#x20;/);
+  page.on("dialog",dialog=>dialog.accept());
+  await page.getByRole("button",{name:"Clear Conference Assessments"}).click();
+  await expect(page).toHaveURL(/\/crm$/);
+});
+
+test("long assessment sections support real wheel scrolling down and back up",async({page})=>{
+  await page.setViewportSize({width:1366,height:768});
+  await page.goto("/assessment/start");
+  await fillIntake(page);
+  await page.getByRole("button",{name:"Continue"}).click();
+  await page.getByLabel("I understand and wish to continue.").check();
+  await page.getByRole("button",{name:"Begin assessment"}).click();
+  await answerVisibleQuestions(page);
+  await page.getByRole("button",{name:"Continue"}).click();
+
+  const heading=page.getByRole("heading",{level:1,name:"How You Lead and Operate"});
+  const continueButton=page.getByRole("button",{name:"Continue"});
+  await expect(heading).toBeVisible();
+  const initialY=await page.evaluate(()=>window.scrollY);
+  await page.mouse.wheel(0,10000);
+  await expect.poll(()=>page.evaluate(()=>window.scrollY)).toBeGreaterThan(initialY);
+  await expect(continueButton).toBeVisible();
+  const lowerY=await page.evaluate(()=>window.scrollY);
+  await page.mouse.wheel(0,-10000);
+  await expect.poll(()=>page.evaluate(()=>window.scrollY)).toBeLessThan(lowerY);
+  await expect.poll(()=>page.evaluate(()=>window.scrollY)).toBe(0);
+  await expect(heading).toBeVisible();
+
+  await page.keyboard.press("End");
+  await expect(continueButton).toBeVisible();
+  await page.keyboard.press("Home");
+  await expect(heading).toBeVisible();
+  await answerVisibleQuestions(page);
+  await continueButton.click();
+  await expect(page.getByText("Step 3 of 6")).toBeVisible();
+});
 
 test("multiple attendees remain separately accessible and cleanup removes all",async({page})=>{const firstUrl=await completeCandidate(page,"Avery","avery@example.com");const secondUrl=await completeCandidate(page,"Blair","blair@example.com");expect(firstUrl).not.toBe(secondUrl);await page.goto("/login");await page.getByRole("button",{name:/Enter Conference Demo as/i}).click();await expect(page.getByRole("region",{name:"New candidate intelligence"}).getByRole("link",{name:"Open Candidate Intelligence"})).toHaveCount(2);const links=await page.getByRole("region",{name:"New candidate intelligence"}).getByRole("link",{name:"Open Candidate Intelligence"}).evaluateAll(nodes=>nodes.map(node=>node.getAttribute("href")));expect(new Set(links).size).toBe(2);await page.getByRole("region",{name:"New candidate intelligence"}).getByRole("link",{name:"Open Candidate Intelligence"}).first().click();page.on("dialog",dialog=>dialog.accept());await page.getByRole("button",{name:"Clear Conference Assessments"}).click();await expect(page).toHaveURL(/\/crm$/);await expect(page.getByRole("region",{name:"New candidate intelligence"})).toHaveCount(0);await expect(page.getByText("Jared",{exact:false}).first()).toBeVisible();await expect(page.getByText("Sarah",{exact:false}).first()).toBeVisible();});
