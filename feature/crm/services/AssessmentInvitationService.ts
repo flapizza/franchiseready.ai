@@ -8,7 +8,11 @@ export class AssessmentInvitationService {
 
   async send(candidateId: string): Promise<AssessmentInvitation> {
     const existing = demoCandidateOverlayStore.getInvitationForCandidate(candidateId);
-    if (existing?.status === "sent") return existing;
+    if (existing?.status === "sent") {
+      return existing.assessmentUrl.startsWith("/assessment/demo")
+        ? { ...existing, assessmentId: "conference-assessment-v1", assessmentUrl: `/assessment/start?invitation=${encodeURIComponent(existing.token)}` }
+        : existing;
+    }
     const candidate = await this.candidates.getById(candidateId);
     if (!candidate) throw new Error("Candidate not found.");
     const now = new Date().toISOString();
@@ -17,7 +21,7 @@ export class AssessmentInvitationService {
     const invitation: AssessmentInvitation = {
       id: invitationId, token, candidateId: candidate.id,
       candidateName: `${candidate.firstName} ${candidate.lastName}`, candidateEmail: candidate.email,
-      assessmentId: "demo", assessmentUrl: `/assessment/demo?invitation=${encodeURIComponent(token)}`,
+      assessmentId: "conference-assessment-v1", assessmentUrl: `/assessment/start?invitation=${encodeURIComponent(token)}`,
       status: "sent", createdAt: now, sentAt: now,
     };
     const transition = await createDemoCandidateLifecycleService(this.candidates).transition({

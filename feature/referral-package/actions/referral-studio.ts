@@ -29,6 +29,12 @@ export async function saveReferralDraft(_state: ReferralActionState, formData: F
   refresh(candidateId); return { status: "success", message: "Consultant edits saved.", selectedReferralId: referralId };
 }
 
+export async function saveReportAttachments(_state:ReferralActionState,formData:FormData):Promise<ReferralActionState>{
+  const candidateId=String(formData.get("candidateId")??"");const referralId=String(formData.get("referralId")??"");
+  const result=await new CandidateReferralService().updateReportAttachments(candidateId,referralId,formData.getAll("reportTypes").map(String));
+  if(result.status!=="success")return {status:"error",message:result.message};refresh(candidateId);return {status:"success",message:"Supporting document selections saved.",selectedReferralId:referralId};
+}
+
 export async function markHandoffReady(_state: ReferralActionState, formData: FormData): Promise<ReferralActionState> {
   const candidateId = String(formData.get("candidateId") ?? ""); const referralId = String(formData.get("referralId") ?? "");
   const result = await new CandidateReferralService().markHandoffReady(candidateId, referralId);
@@ -45,7 +51,9 @@ export async function refreshHandoffPackage(_state: ReferralActionState, formDat
 
 export async function approveReferral(_state: ReferralActionState, formData: FormData): Promise<ReferralActionState> {
   const candidateId = String(formData.get("candidateId") ?? ""); const referralId = String(formData.get("referralId") ?? "");
-  const result = await new CandidateReferralService().approve(candidateId, referralId);
+  const service=new CandidateReferralService();const current=service.getOwned(candidateId,referralId);
+  if(current?.referralPackage.reportAttachments?.some(item=>item.reportType==="CONSULTANT_INTELLIGENCE_REPORT"&&item.selected&&!item.externalSharingIntent))return {status:"error",message:"Confirm external sharing of the Consultant Intelligence Report before approval."};
+  const result = await service.approve(candidateId, referralId);
   if (result.status !== "success") return { status: "error", message: result.message };
   refresh(candidateId);
   return { status: result.referral.delivery?.status === "failed" ? "error" : "success",

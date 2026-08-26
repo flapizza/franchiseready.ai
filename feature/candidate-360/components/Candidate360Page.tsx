@@ -84,7 +84,7 @@ export async function Candidate360Page({
       {candidate.hasIntelligence && <ReadinessScorecard
         candidate={candidate}
       />}
-      {resolvedAssessment?.analysis && <ProductionCandidateIntelligence analysis={resolvedAssessment.analysis}/>}
+      {resolvedAssessment?.analysis && <ProductionCandidateIntelligence analysis={resolvedAssessment.analysis} candidateId={candidateId} completedAt={resolvedAssessment.completedAt}/>}
       {resolvedAssessment?.analysis && <ProductionDiscoverySummary candidateId={candidate.id} session={productionDiscovery}/>}
 
       {productionEmail ? <CandidateEmailPanel candidateId={candidate.id} candidateName={candidate.fullName} candidateEmail={candidate.email}

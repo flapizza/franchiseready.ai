@@ -8,6 +8,32 @@ async function enterDemoAndReset(page: Page) {
   expect(response.ok(), `${response.status()} ${await response.text()}`).toBeTruthy();
 }
 
+async function completeCurrentAssessment(page: Page, email: string) {
+  await page.getByLabel("First name").fill("Conference");
+  await page.getByLabel("Last name").fill("Journey");
+  await page.getByLabel("Email", { exact: true }).fill(email);
+  await page.getByLabel("Mobile phone").fill("704-555-0132");
+  await page.getByLabel("Street address").fill("100 Conference Way");
+  await page.getByLabel("City").fill("Charlotte");
+  await page.getByLabel("State/Province").fill("NC");
+  await page.getByLabel("ZIP/Postal code").fill("28202");
+  await page.getByLabel("Current occupation/title").fill("Operations Executive");
+  await page.getByRole("button", { name: "Continue" }).click();
+  await page.getByLabel("I understand and wish to continue.").check();
+  await page.getByRole("button", { name: "Begin assessment" }).click();
+  for (let section = 1; section <= 6; section += 1) {
+    const groups = page.locator("fieldset");
+    for (let index = 0; index < await groups.count(); index += 1) {
+      const group = groups.nth(index);
+      if (!(await group.locator("input:checked").count())) await group.locator("input").first().check();
+    }
+    await page.getByRole("button", { name: "Continue" }).click();
+  }
+  await page.getByLabel("I don't have a major concern right now").check();
+  await page.getByRole("button", { name: "Build my profile" }).click();
+  await expect(page.getByRole("heading", { name: "Your Franchise Ownership Profile" })).toBeVisible({ timeout: 15_000 });
+}
+
 test("consultant-first candidate remains one identity through assessment and Discovery", async ({ page }) => {
   await enterDemoAndReset(page);
   const email = "conference.lifecycle@example.com";
@@ -22,15 +48,16 @@ test("consultant-first candidate remains one identity through assessment and Dis
   await expect(page.getByRole("heading", { name: "Candidate created" })).toBeVisible();
 
   await page.getByRole("link", { name: "Open candidate record" }).click();
+  await expect(page).toHaveURL(/\/crm\/candidates\/candidate-/);
+  const candidateUrl = page.url();
   await expect(page.getByRole("heading", { name: "Conference Journey" })).toBeVisible();
   await expect(page.getByText("New Candidate", { exact: true }).last()).toBeVisible();
   await page.getByRole("button", { name: "Send Assessment" }).click();
   await expect(page.getByRole("paragraph").filter({ hasText: /^Assessment Invitation Sent$/ })).toBeVisible();
   await page.getByRole("link", { name: "Open Assessment" }).click();
-
-  await page.getByText("Very Comfortable", { exact: true }).click();
-  await page.getByRole("button", { name: "Complete Assessment" }).click();
-  await expect(page).toHaveURL(/\/crm\/candidates\/candidate-/);
+  await expect(page).toHaveURL(/\/assessment\/start\?invitation=/);
+  await completeCurrentAssessment(page, email);
+  await page.goto(candidateUrl);
   await expect(page.getByText("Assessment Complete", { exact: true }).first()).toBeVisible();
   await expect(page.getByText("Assessment Completed", { exact: true }).first()).toBeVisible();
 

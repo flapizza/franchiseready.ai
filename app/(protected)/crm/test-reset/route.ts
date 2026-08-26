@@ -15,6 +15,10 @@ export async function POST() {
   conferenceAssessmentStore.clear();
   revalidatePath("/crm");
   revalidatePath("/crm/candidates");
+  revalidatePath("/crm/candidates/[candidateId]", "page");
+  revalidatePath("/crm/candidates/[candidateId]/strategy", "page");
+  revalidatePath("/crm/candidates/[candidateId]/strategy/presentation", "page");
+  revalidatePath("/crm/candidates/[candidateId]/referral", "page");
   revalidatePath("/crm/tasks");
   revalidatePath("/crm/communications");
   revalidatePath("/crm/candidates/[candidateId]/playbook", "page");

@@ -144,3 +144,9 @@ test("Awarded historical referral is read-only and does not trigger delivery", a
   await page.reload();
   await expect(page.getByText("Completed Referral History", { exact: true })).toBeVisible();
 });
+
+test("report attachments are opt-in and consultant intelligence requires an external-sharing decision",async({page})=>{
+  await enterDemoAndReset(page);await page.goto("/crm/candidates/jared-wirsig/referral");await page.getByRole("checkbox",{name:/ERA Group/}).check();await page.getByRole("button",{name:"Prepare Referral"}).click();
+  const candidate=page.getByRole("checkbox",{name:/Candidate Assessment Report/});const consultant=page.getByRole("checkbox",{name:/Consultant Intelligence Report/});await expect(candidate).not.toBeChecked();await expect(consultant).not.toBeChecked();
+  await consultant.check();await expect(page.getByText(/internal consultant intelligence and Discovery guidance/)).toBeVisible();await page.getByRole("button",{name:"Save Attachments"}).click();await expect(page.getByText("Supporting document selections saved.")).toBeVisible();await page.reload();await expect(consultant).toBeChecked();await expect(candidate).not.toBeChecked();
+});

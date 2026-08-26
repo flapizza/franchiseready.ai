@@ -2,6 +2,13 @@ import type { Evidence } from "@/feature/evidence/models/Evidence";
 import type { ReferralBrandHandoffState } from "@/feature/brand-strategy/models/CandidateBrandStrategyState";
 
 export type ReferralPackageStatus = "draft" | "ready-for-review" | "approved" | "sent" | "introduced";
+export type ReferralReportAttachment = {
+  reportType: "CANDIDATE_ASSESSMENT_REPORT" | "CONSULTANT_INTELLIGENCE_REPORT";
+  sourceAssessmentId: string;
+  reportVersion: "candidate-report-v1" | "consultant-report-v1";
+  selected: boolean;
+  externalSharingIntent: boolean;
+};
 
 export interface CandidateReferralPackage {
   id: string;
@@ -22,6 +29,7 @@ export interface CandidateReferralPackage {
   conversationFocus: string[];
   evidence: Evidence[];
   editable: { subject: string; introductionMessage: string; consultantNotes: string };
+  reportAttachments?: ReferralReportAttachment[];
   handoffStatus?: "draft" | "reviewed" | "ready";
   evidenceUpdatedAt?: string;
   evidenceFingerprint?: string;

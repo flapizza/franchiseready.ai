@@ -74,6 +74,18 @@ export class CandidateReferralService {
     return { status: "success", referral: updated };
   }
 
+  async updateReportAttachments(candidateId:string,referralId:string,selected:string[]):Promise<ReferralServiceResult>{
+    const current=this.getOwned(candidateId,referralId);if(!current)return {status:"not-found",message:"Prepare the referral package first."};
+    if(current.status!=="ready-for-review")return {status:"blocked",message:"Approved and historical referral packages are read-only."};
+    const allowed=new Set(["CANDIDATE_ASSESSMENT_REPORT","CONSULTANT_INTELLIGENCE_REPORT"]);if(selected.some(value=>!allowed.has(value)))return {status:"blocked",message:"Unsupported report attachment."};
+    const sourceAssessmentId=`assessment:${candidateId}`;
+    const reportAttachments:CandidateReferralPackage["reportAttachments"]=[
+      {reportType:"CANDIDATE_ASSESSMENT_REPORT",sourceAssessmentId,reportVersion:"candidate-report-v1",selected:selected.includes("CANDIDATE_ASSESSMENT_REPORT"),externalSharingIntent:selected.includes("CANDIDATE_ASSESSMENT_REPORT")},
+      {reportType:"CONSULTANT_INTELLIGENCE_REPORT",sourceAssessmentId,reportVersion:"consultant-report-v1",selected:selected.includes("CONSULTANT_INTELLIGENCE_REPORT"),externalSharingIntent:selected.includes("CONSULTANT_INTELLIGENCE_REPORT")},
+    ];
+    const updated={...current,updatedAt:new Date().toISOString(),referralPackage:{...current.referralPackage,reportAttachments}};demoCandidateOverlayStore.saveCandidateReferral(updated);return {status:"success",referral:updated};
+  }
+
   async markHandoffReady(candidateId: string, referralId: string): Promise<ReferralServiceResult> {
     const current = this.getOwned(candidateId, referralId);
     if (!current) return { status: "not-found", message: "Prepare the handoff package first." };
@@ -195,6 +207,10 @@ export class CandidateReferralService {
       concerns: handoff?.knownConcerns ?? candidate.intelligence.discoveryPriorities,
       conversationFocus: handoff ? [...handoff.presentationContext.emphasize, handoff.presentationContext.suggestedTransition] : candidate.intelligence.discoveryPriorities,
       evidence: handoff?.supportingEvidence ?? [], editable: { subject: `Introduction: ${context.handoff.candidateName} — ${brand.brandName}`, introductionMessage: intro, consultantNotes: "" },
+      reportAttachments: [
+        { reportType:"CANDIDATE_ASSESSMENT_REPORT",sourceAssessmentId:`assessment:${candidate.id}`,reportVersion:"candidate-report-v1",selected:false,externalSharingIntent:false },
+        { reportType:"CONSULTANT_INTELLIGENCE_REPORT",sourceAssessmentId:`assessment:${candidate.id}`,reportVersion:"consultant-report-v1",selected:false,externalSharingIntent:false },
+      ],
       ...generatedHandoff, handoffStatus: "draft", handoff, preparedAt: now, approvedAt: null, introducedAt: null };
     const referral: CandidateBrandReferral = { referralId, candidateId: candidate.id, brandId: brand.brandId, brandName: brand.brandName, source,
       recommendationRank: handoff?.rank ?? null, recommendationScore: handoff?.recommendationScore ?? null, recommendationConfidence: handoff?.recommendationConfidence ?? null,
