@@ -58,4 +58,10 @@ export class SeedCandidateRepository
     demoCandidateOverlayStore.saveCandidate(candidate);
     return candidate;
   }
+
+  async deleteById(id: string): Promise<void> {
+    if (!demoCandidateOverlayStore.deleteCandidate(id)) {
+      throw new Error("Candidate could not be deleted.");
+    }
+  }
 }

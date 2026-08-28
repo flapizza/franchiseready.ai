@@ -20,4 +20,6 @@ export interface CandidateRepository {
   save(
     candidate: CandidateRecord,
   ): Promise<CandidateRecord>;
+
+  deleteById(id: string): Promise<void>;
 }

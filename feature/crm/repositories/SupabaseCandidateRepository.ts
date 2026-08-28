@@ -71,6 +71,15 @@ export class SupabaseCandidateRepository implements CandidateRepository {
     return this.toRecord(data);
   }
 
+  async deleteById(publicId: string): Promise<void> {
+    const { data, error } = await this.supabase.rpc("delete_relation_free_candidate", {
+      target_candidate_public_id: publicId,
+    });
+    if (error || data !== "deleted") {
+      throw new CandidateRepositoryError("Candidate could not be deleted.");
+    }
+  }
+
   private toRecord(row: CandidateRow): CandidateRecord {
     const stage = row.pipeline_stage_id as PipelineStage;
     return {

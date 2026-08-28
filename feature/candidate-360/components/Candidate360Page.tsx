@@ -24,6 +24,7 @@ import { createAuthenticatedAssessmentRepository } from "@/feature/assessment-en
 import { ProductionCandidateIntelligence } from "./ProductionCandidateIntelligence";
 import { createDiscoveryRepository } from "@/feature/discovery/production/repository-factory";
 import { ProductionDiscoverySummary } from "./ProductionDiscoverySummary";
+import { DeleteCandidateControl } from "@/feature/crm/components/DeleteCandidateControl";
 
 type Props = {
   candidateId: string;
@@ -96,6 +97,10 @@ export async function Candidate360Page({
       {taskState && <CandidateTaskPanel candidateId={candidate.id} candidateName={candidate.fullName} tasks={taskState.tasks} recommendations={taskState.recommendations} defaultDueAt={taskState.defaultDueAt} />}
 
       <CandidateActivityTimeline candidate={candidate} />
+
+      <section aria-label="Candidate administration" className="flex justify-end border-t border-slate-200 pt-6">
+        <DeleteCandidateControl candidateId={candidate.id} />
+      </section>
 
     </div>
   );

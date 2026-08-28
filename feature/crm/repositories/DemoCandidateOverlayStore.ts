@@ -41,6 +41,7 @@ class DemoCandidateOverlayStore {
   getCandidates(): CandidateRecord[] { return structuredClone([...this.candidates.values()]); }
   getCandidate(id: string): CandidateRecord | null { const value = this.candidates.get(id); return value ? structuredClone(value) : null; }
   saveCandidate(candidate: CandidateRecord): void { this.candidates.set(candidate.id, structuredClone(candidate)); }
+  deleteCandidate(id: string): boolean { return this.candidates.delete(id); }
   getPipeline(consultantId: string): ConsultantPipelineConfiguration | null { const value = this.pipelines.get(consultantId); return value ? structuredClone(value) : null; }
   savePipeline(configuration: ConsultantPipelineConfiguration): void { this.pipelines.set(configuration.consultantId, structuredClone(configuration)); }
   getTasks(consultantId: string): ConsultantTask[] { return structuredClone([...this.tasks.values()].filter((task) => task.consultantId === consultantId)); }

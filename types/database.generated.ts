@@ -1138,6 +1138,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      delete_relation_free_candidate: {
+        Args: { target_candidate_public_id: string }
+        Returns: string
+      }
       begin_outbound_email_send: {
         Args: {
           idempotency_key: string
@@ -1673,4 +1677,3 @@ export const Constants = {
     },
   },
 } as const
-
