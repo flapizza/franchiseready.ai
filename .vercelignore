@@ -1,0 +1,26 @@
+# Local and generated build output
+/.next-dev/
+/.next/
+/out/
+/build/
+*.tsbuildinfo
+
+# Local service and environment state
+/supabase/.temp/
+/.env*
+
+# Browser, test, and coverage output
+/test-results/
+/playwright-report/
+/blob-report/
+/coverage/
+
+# Machine-local development artifacts
+/.vscode/
+/tmp/
+*.log
+.DS_Store
+
+# Reviewed non-runtime repository artifacts
+/feature.zip
+/manual-layout-problem.png
