@@ -19,9 +19,12 @@ Server Actions, Supabase SSR cookies, and in-memory PDF generation are compatibl
 with this model. No application route writes to the deployment filesystem.
 
 `APP_URL` is the canonical application origin for each environment. Production
-must use `https://app.frangroove.com`; Preview must use the deployment's Preview
-origin. Invitation paths remain relative inside the application and become
-absolute only at the browser or delivery boundary.
+must set it explicitly to `https://app.frangroove.com`. A Vercel Preview may
+derive its origin from the deployment-specific `VERCEL_URL` when `APP_URL` is
+absent; manual Preview deployments therefore use their exact generated
+deployment URL. Never use `VERCEL_PROJECT_PRODUCTION_URL` as the Preview
+canonical origin. Invitation paths remain relative inside the application and
+become absolute only at the browser or delivery boundary.
 
 ## 2. Runtime and persistence matrix
 
@@ -71,7 +74,7 @@ configured independently.
 | `NEXT_PUBLIC_SUPABASE_URL` | Public client value | Build/runtime | Local Supabase | Preview project | Production project |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Public client value | Build/runtime | Local anon key | Preview publishable key | Production publishable key |
 | `SUPABASE_SERVICE_ROLE_KEY` | Server secret | Runtime | Local only if required | Preview-specific | Production-specific; narrowly scoped use |
-| `APP_URL` | Server configuration | Runtime/build | `http://localhost:3000` | Exact Preview origin | `https://app.frangroove.com` |
+| `APP_URL` | Server configuration | Runtime/build | `http://localhost:3000` | Explicit exact Preview origin or derived from deployment-specific `VERCEL_URL` | Required explicitly: `https://app.frangroove.com` |
 | `PERSISTENCE_MODE` | Server configuration | Runtime | `demo` or `supabase` | `supabase` | Required: `supabase` |
 | `CONFERENCE_DEMO_ACCESS` | Optional demo flag | Runtime/build | Explicit only | Off | Off; production code fails closed |
 | `PLAYWRIGHT_TEST_MODE` | Test-only flag | Build/runtime | E2E runner only | Never | Never |

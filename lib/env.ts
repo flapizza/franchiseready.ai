@@ -3,12 +3,13 @@ import { z } from "zod";
 const publicEnvironmentSchema = z.object({
   NEXT_PUBLIC_SUPABASE_URL: z.url(),
   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: z.string().min(1),
-  APP_URL: z.url(),
 });
 
-const adminEnvironmentSchema = publicEnvironmentSchema.extend({
+const adminEnvironmentSchema = z.object({
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
 });
+
+const appUrlSchema = z.url();
 
 const persistenceModeSchema = z.enum(["demo", "supabase"]);
 
@@ -30,12 +31,57 @@ function parseEnvironment<T extends z.ZodType>(schema: T): z.output<T> {
   return result.data;
 }
 
+function invalidAppUrl(): never {
+  throw new Error("Invalid authentication environment configuration: APP_URL");
+}
+
+export function resolveAppUrl(
+  environment: NodeJS.ProcessEnv = process.env,
+): string {
+  if (environment.APP_URL !== undefined) {
+    const explicit = appUrlSchema.safeParse(environment.APP_URL);
+    if (!explicit.success) invalidAppUrl();
+    return explicit.data;
+  }
+
+  if (environment.VERCEL_TARGET_ENV !== "preview") invalidAppUrl();
+
+  const hostname = environment.VERCEL_URL;
+  if (!hostname || hostname !== hostname.trim()) invalidAppUrl();
+
+  const derived = `https://${hostname}`;
+  const parsed = appUrlSchema.safeParse(derived);
+  if (!parsed.success) invalidAppUrl();
+
+  const url = new URL(parsed.data);
+  if (
+    url.protocol !== "https:" ||
+    url.username ||
+    url.password ||
+    url.port ||
+    url.pathname !== "/" ||
+    url.search ||
+    url.hash ||
+    url.host !== hostname
+  ) {
+    invalidAppUrl();
+  }
+
+  return url.origin;
+}
+
 export function getPublicEnvironment() {
-  return parseEnvironment(publicEnvironmentSchema);
+  return {
+    ...parseEnvironment(publicEnvironmentSchema),
+    APP_URL: resolveAppUrl(),
+  };
 }
 
 export function getAdminEnvironment() {
-  return parseEnvironment(adminEnvironmentSchema);
+  return {
+    ...getPublicEnvironment(),
+    ...parseEnvironment(adminEnvironmentSchema),
+  };
 }
 
 export function getGoogleOAuthEnvironment() {
