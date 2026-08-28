@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { SignOutButton } from "@/feature/auth/components/sign-out-button";
 import { demoConsultant } from "@/feature/demo/data/demoConsultant";
 
 export function TopBar() {
@@ -110,6 +111,8 @@ export function TopBar() {
             </div>
 
           </div>
+
+          <SignOutButton />
 
         </div>
 
