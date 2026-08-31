@@ -1,6 +1,4 @@
-import { getPersistenceMode } from "@/lib/env";
-import { resolveAuthenticatedWorkspaceContext } from "@/feature/identity/data/workspace-context";
-import { ConnectedEmailAccountRepository } from "@/feature/connected-email/repositories/ConnectedEmailAccountRepository";
+import { resolveWorkspaceComposition } from "@/feature/platform/composition/resolveWorkspaceComposition";
 
 const notices: Record<string, string> = {
   denied: "Google connection was cancelled. Nothing was connected.",
@@ -13,12 +11,11 @@ const notices: Record<string, string> = {
 
 export default async function ConnectedEmailSettingsPage({ searchParams }: { searchParams: Promise<{ google?: string }> }) {
   const result = (await searchParams).google;
-  if (getPersistenceMode() !== "supabase") {
+  const resolution=await resolveWorkspaceComposition();
+  if (resolution.status!=="resolved" || "runtimes" in resolution.composition) {
     return <main className="mx-auto max-w-6xl p-10"><Header /><section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"><p className="text-xs font-black uppercase tracking-[.2em] text-slate-500">Demo workspace</p><h2 className="mt-2 text-xl font-black text-slate-900">Google connection is not required</h2><p className="mt-2 max-w-2xl text-sm text-slate-600">This workspace uses deterministic demo communications. Connect a Google account from an authenticated production workspace.</p></section></main>;
   }
-  const context = await resolveAuthenticatedWorkspaceContext();
-  if (!context) return <main className="mx-auto max-w-6xl p-10"><Header /><p className="rounded-xl bg-amber-50 p-4 text-sm font-bold text-amber-900">Sign in to manage connected email.</p></main>;
-  const accounts = (await new ConnectedEmailAccountRepository().listOwn(context)).map(ConnectedEmailAccountRepository.toSummary);
+  const accounts = await resolution.composition.dependencies.emailAccountSummaries();
   return <main className="mx-auto max-w-6xl p-10"><Header />
     {result && notices[result] && <p role="status" className="mb-5 rounded-xl bg-blue-50 p-4 text-sm font-bold text-blue-900">{notices[result]}</p>}
     <div className="space-y-4">{accounts.map((account) => <section key={account.publicId} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">

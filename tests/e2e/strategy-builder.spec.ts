@@ -8,7 +8,7 @@ async function enterDemoAndReset(page: Page) {
 test("consultant builds an ordered multi-brand strategy and hands referral intent to Referral Studio", async ({ page }) => {
   await enterDemoAndReset(page); await page.goto("/crm/strategy"); await page.getByRole("link", { name: "Review Strategy" }).first().click();
   await expect(page.getByRole("heading", { name: /Brand Strategy for/ })).toBeVisible();
-  const recommendations = page.locator('article[aria-label$=" recommendation"]'); await expect(recommendations).toHaveCount(3);
+  const recommendations = page.locator('article[aria-label$=" recommendation"]'); await expect(recommendations).toHaveCount(6);
   const first = recommendations.nth(0); const second = recommendations.nth(1);
   const firstName = await first.getByRole("heading").innerText(); const secondName = await second.getByRole("heading").innerText();
   const firstScore = await first.getByText(/%/).first().innerText(); const secondScore = await second.getByText(/%/).first().innerText();

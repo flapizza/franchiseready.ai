@@ -47,6 +47,7 @@ export interface AgendaMeetingState {
 }
 
 export interface TopOpportunityState {
+  spotlightLabel: string;
   candidateId: string;
   candidateName: string;
   rationale: string;

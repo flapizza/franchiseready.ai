@@ -1,20 +1,15 @@
-import { SeedBrandRepository } from "@/feature/brand-library/repositories/SeedBrandRepository";
+import type { BrandRepository } from "@/feature/brand-library/repositories/BrandRepository";
 import type { CandidateRecord } from "@/feature/crm/models/CandidateRecord";
 import type { CandidateRepository } from "@/feature/crm/repositories/CandidateRepository";
-import { SeedCandidateRepository } from "@/feature/crm/repositories/SeedCandidateRepository";
 import type { DemoCandidate } from "@/feature/demo/models/DemoScenario";
 import type { DemoScenarioRepository } from "@/feature/demo/repositories/DemoScenarioRepository";
-import { SeedDemoScenarioRepository } from "@/feature/demo/repositories/SeedDemoScenarioRepository";
-import { AssessmentInvitationService } from "../services/AssessmentInvitationService";
-import { createDemoCandidateLifecycleService } from "../services/DemoCandidateLifecycleService";
-import { demoCandidateOverlayStore } from "../repositories/DemoCandidateOverlayStore";
-import { getConferenceReferralHistory } from "@/feature/demo/data/conferenceReferralHistory";
+import type { AssessmentInvitationService } from "../services/AssessmentInvitationService";
+import type { CandidateLifecycleService } from "../services/CandidateLifecycleService";
+import type { CandidateBrandReferral } from "@/feature/referral-package/models/CandidateBrandReferral";
 
 import type { CandidateAttention, CandidateCRMItem, CandidateCRMState } from "../models/CandidateCRMState";
-import { demoConsultant } from "@/feature/demo/data/demoConsultant";
-import { DemoConsultantPipelineRepository } from "@/feature/pipeline/repositories/DemoConsultantPipelineRepository";
-import { PipelineConfigurationService } from "@/feature/pipeline/services/PipelineConfigurationService";
-import { DemoTaskRepository } from "@/feature/tasks/repositories/DemoTaskRepository";
+import type { PipelineConfigurationService } from "@/feature/pipeline/services/PipelineConfigurationService";
+import type { TaskRepository } from "@/feature/tasks/repositories/TaskRepository";
 
 function formatDate(value: string): string {
   return new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" }).format(new Date(value));
@@ -29,21 +24,26 @@ function attentionFor(candidate: DemoCandidate | undefined): CandidateAttention 
 }
 
 export class CandidateCRMRuntime {
-  public constructor(
-    private readonly candidates: CandidateRepository = new SeedCandidateRepository(),
-    private readonly scenarios: DemoScenarioRepository = new SeedDemoScenarioRepository(),
-    private readonly brands = new SeedBrandRepository(),
-    private readonly invitations = new AssessmentInvitationService(candidates),
-    private readonly pipelineService = new PipelineConfigurationService(new DemoConsultantPipelineRepository(), candidates),
-  ) {}
+  public constructor(private readonly dependencies: {
+    candidates: CandidateRepository;
+    scenarios: DemoScenarioRepository;
+    brands: BrandRepository;
+    invitations: Pick<AssessmentInvitationService, "getForCandidate">;
+    pipelineService: PipelineConfigurationService;
+    tasks: TaskRepository;
+    lifecycle: Pick<CandidateLifecycleService, "getRecommendedAction">;
+    consultantId: string;
+    referrals: (candidateId: string) => CandidateBrandReferral[];
+    referralHistory: (candidateId: string) => CandidateBrandReferral[];
+  }) {}
 
   public async load(): Promise<CandidateCRMState> {
     const [records, scenario, brands, pipeline, tasks] = await Promise.all([
-      this.candidates.getAll(),
-      this.scenarios.getScenario(),
-      this.brands.getAll(),
-      this.pipelineService.get(demoConsultant.id),
-      new DemoTaskRepository().getAll(demoConsultant.id),
+      this.dependencies.candidates.getAll(),
+      this.dependencies.scenarios.getScenario(),
+      this.dependencies.brands.getAll(),
+      this.dependencies.pipelineService.get(this.dependencies.consultantId),
+      this.dependencies.tasks.getAll(this.dependencies.consultantId),
     ]);
     const demoById = new Map(scenario.candidates.map((candidate) => [candidate.id, candidate]));
     const brandsById = new Map(brands.map((brand) => [brand.id, brand.name]));
@@ -59,13 +59,13 @@ export class CandidateCRMRuntime {
   }
 
   private toItem(record: CandidateRecord, demo: DemoCandidate | undefined, brands: Map<string, string>, pipeline: Awaited<ReturnType<PipelineConfigurationService["get"]>>): CandidateCRMItem {
-    const visibleStage = this.pipelineService.resolveStage(pipeline, record);
+    const visibleStage = this.dependencies.pipelineService.resolveStage(pipeline, record);
     const assessmentPending = !record.intelligence;
     const attention = attentionFor(demo);
-    const invitation = this.invitations.getForCandidate(record.id);
-    const lifecycleAction = createDemoCandidateLifecycleService(this.candidates).getRecommendedAction(record);
-    const overlayReferrals = demoCandidateOverlayStore.getCandidateReferrals(record.id);
-    const referrals = overlayReferrals.length ? overlayReferrals : getConferenceReferralHistory(record.id);
+    const invitation = this.dependencies.invitations.getForCandidate(record.id);
+    const lifecycleAction = this.dependencies.lifecycle.getRecommendedAction(record);
+    const overlayReferrals = this.dependencies.referrals(record.id);
+    const referrals = overlayReferrals.length ? overlayReferrals : this.dependencies.referralHistory(record.id);
     const awaitingApproval = referrals.filter((item) => item.status === "ready-for-review").length;
     const reviewReferral = referrals.find((item) => item.status === "ready-for-review");
     const approvedReferrals = referrals.filter((item) => item.status === "approved");

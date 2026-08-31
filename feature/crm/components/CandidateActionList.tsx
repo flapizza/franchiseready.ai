@@ -12,7 +12,7 @@ export function CandidateActionList({
   return (
     <Card
       title="Recommended Actions"
-      subtitle="Prioritized by the FranchiseReady Intelligence Engine."
+      subtitle="Prioritized by the FranGroove Intelligence Engine."
     >
       <div className="space-y-5">
         {actions.map((action) => (

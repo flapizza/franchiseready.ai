@@ -487,6 +487,53 @@ export type Database = {
           },
         ]
       }
+      consultant_profiles: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          linkedin_url: string | null
+          membership_id: string
+          organization_id: string
+          professional_email: string | null
+          professional_phone: string | null
+          professional_title: string | null
+          scheduling_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          linkedin_url?: string | null
+          membership_id: string
+          organization_id: string
+          professional_email?: string | null
+          professional_phone?: string | null
+          professional_title?: string | null
+          scheduling_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          linkedin_url?: string | null
+          membership_id?: string
+          organization_id?: string
+          professional_email?: string | null
+          professional_phone?: string | null
+          professional_title?: string | null
+          scheduling_url?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consultant_profiles_membership_organization_fk"
+            columns: ["membership_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization_memberships"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
       discovery_intelligence: {
         Row: {
           brand_strategy_readiness: string
@@ -965,6 +1012,120 @@ export type Database = {
           },
         ]
       }
+      membership_invitations: {
+        Row: {
+          accepted_at: string | null
+          accepted_membership_id: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          intended_role: Database["public"]["Enums"]["membership_role"]
+          invited_email: string
+          inviter_membership_id: string
+          organization_id: string
+          revoked_at: string | null
+          status: Database["public"]["Enums"]["membership_invitation_status"]
+          token_hash: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          accepted_membership_id?: string | null
+          created_at?: string
+          expires_at: string
+          id?: string
+          intended_role: Database["public"]["Enums"]["membership_role"]
+          invited_email: string
+          inviter_membership_id: string
+          organization_id: string
+          revoked_at?: string | null
+          status?: Database["public"]["Enums"]["membership_invitation_status"]
+          token_hash: string
+        }
+        Update: {
+          accepted_at?: string | null
+          accepted_membership_id?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          intended_role?: Database["public"]["Enums"]["membership_role"]
+          invited_email?: string
+          inviter_membership_id?: string
+          organization_id?: string
+          revoked_at?: string | null
+          status?: Database["public"]["Enums"]["membership_invitation_status"]
+          token_hash?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "membership_invitations_accepted_membership_fk"
+            columns: ["accepted_membership_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization_memberships"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "membership_invitations_inviter_fk"
+            columns: ["inviter_membership_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization_memberships"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "membership_invitations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      membership_onboarding: {
+        Row: {
+          completed_at: string | null
+          completed_steps: string[]
+          created_at: string
+          current_step: string | null
+          membership_id: string
+          onboarding_version: number
+          organization_id: string
+          started_at: string | null
+          status: Database["public"]["Enums"]["membership_onboarding_status"]
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          completed_steps?: string[]
+          created_at?: string
+          current_step?: string | null
+          membership_id: string
+          onboarding_version?: number
+          organization_id: string
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["membership_onboarding_status"]
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          completed_steps?: string[]
+          created_at?: string
+          current_step?: string | null
+          membership_id?: string
+          onboarding_version?: number
+          organization_id?: string
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["membership_onboarding_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "membership_onboarding_membership_organization_fk"
+            columns: ["membership_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization_memberships"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
       membership_reporting_history: {
         Row: {
           changed_at: string
@@ -1082,6 +1243,41 @@ export type Database = {
           },
         ]
       }
+      organization_settings: {
+        Row: {
+          branding_version: number
+          created_at: string
+          display_name: string | null
+          organization_id: string
+          updated_at: string
+          website_url: string | null
+        }
+        Insert: {
+          branding_version?: number
+          created_at?: string
+          display_name?: string | null
+          organization_id: string
+          updated_at?: string
+          website_url?: string | null
+        }
+        Update: {
+          branding_version?: number
+          created_at?: string
+          display_name?: string | null
+          organization_id?: string
+          updated_at?: string
+          website_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organizations: {
         Row: {
           created_at: string
@@ -1138,9 +1334,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      delete_relation_free_candidate: {
-        Args: { target_candidate_public_id: string }
-        Returns: string
+      accept_membership_invitation: {
+        Args: { presented_token: string }
+        Returns: {
+          accepted: boolean
+          membership_id: string
+          organization_id: string
+        }[]
       }
       begin_outbound_email_send: {
         Args: {
@@ -1181,6 +1381,19 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      bootstrap_first_workspace: {
+        Args: {
+          proposed_consultant_display_name: string
+          proposed_organization_name: string
+        }
+        Returns: {
+          created: boolean
+          membership_id: string
+          organization_id: string
+          organization_name: string
+          organization_public_id: string
+        }[]
       }
       can_access_candidate: {
         Args: { target_candidate_id: string }
@@ -1266,8 +1479,24 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      create_membership_invitation: {
+        Args: {
+          presented_token: string
+          proposed_email: string
+          proposed_role: Database["public"]["Enums"]["membership_role"]
+          target_organization_id: string
+        }
+        Returns: {
+          created: boolean
+          invitation_id: string
+        }[]
+      }
       current_active_membership_id: {
         Args: { target_organization_id: string }
+        Returns: string
+      }
+      delete_relation_free_candidate: {
+        Args: { target_candidate_public_id: string }
         Returns: string
       }
       discovery_session_payload: { Args: { sid: string }; Returns: Json }
@@ -1350,8 +1579,20 @@ export type Database = {
         }
         Returns: undefined
       }
+      resolve_membership_invitation: {
+        Args: { presented_token: string }
+        Returns: {
+          intended_role: Database["public"]["Enums"]["membership_role"]
+          organization_name: string
+          resolution: string
+        }[]
+      }
       revoke_assessment_invitation: {
         Args: { target_candidate_public_id: string }
+        Returns: undefined
+      }
+      revoke_membership_invitation: {
+        Args: { target_invitation_id: string }
         Returns: undefined
       }
       save_assessment_progress: {
@@ -1384,6 +1625,35 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      save_consultant_profile: {
+        Args: {
+          proposed_display_name: string
+          proposed_linkedin_url: string
+          proposed_professional_email: string
+          proposed_professional_phone: string
+          proposed_professional_title: string
+          proposed_scheduling_url: string
+          target_organization_id: string
+        }
+        Returns: {
+          created_at: string
+          display_name: string | null
+          linkedin_url: string | null
+          membership_id: string
+          organization_id: string
+          professional_email: string | null
+          professional_phone: string | null
+          professional_title: string | null
+          scheduling_url: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "consultant_profiles"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       save_discovery_notes: {
         Args: {
           consultant_notes_text: string
@@ -1405,6 +1675,53 @@ export type Database = {
           topic_label: string
         }
         Returns: undefined
+      }
+      save_organization_settings: {
+        Args: {
+          proposed_display_name: string
+          proposed_website_url: string
+          target_organization_id: string
+        }
+        Returns: {
+          branding_version: number
+          created_at: string
+          display_name: string | null
+          organization_id: string
+          updated_at: string
+          website_url: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "organization_settings"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      set_membership_onboarding_state: {
+        Args: {
+          proposed_completed_steps: string[]
+          proposed_current_step: string
+          proposed_status: Database["public"]["Enums"]["membership_onboarding_status"]
+          target_organization_id: string
+        }
+        Returns: {
+          completed_at: string | null
+          completed_steps: string[]
+          created_at: string
+          current_step: string | null
+          membership_id: string
+          onboarding_version: number
+          organization_id: string
+          started_at: string | null
+          status: Database["public"]["Enums"]["membership_onboarding_status"]
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "membership_onboarding"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       submit_assessment: {
         Args: {
@@ -1476,6 +1793,8 @@ export type Database = {
         | "ambiguous"
       email_provider: "google" | "microsoft"
       email_recipient_kind: "to" | "cc" | "bcc"
+      membership_invitation_status: "pending" | "accepted" | "revoked"
+      membership_onboarding_status: "not-started" | "in-progress" | "completed"
       membership_role: "owner" | "admin" | "manager" | "consultant"
       membership_status: "invited" | "active" | "suspended"
       organization_status: "active" | "suspended" | "archived"
@@ -1656,6 +1975,8 @@ export const Constants = {
       ],
       email_provider: ["google", "microsoft"],
       email_recipient_kind: ["to", "cc", "bcc"],
+      membership_invitation_status: ["pending", "accepted", "revoked"],
+      membership_onboarding_status: ["not-started", "in-progress", "completed"],
       membership_role: ["owner", "admin", "manager", "consultant"],
       membership_status: ["invited", "active", "suspended"],
       organization_status: ["active", "suspended", "archived"],

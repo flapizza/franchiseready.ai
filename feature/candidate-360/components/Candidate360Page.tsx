@@ -9,22 +9,13 @@ import { CandidateActivityTimeline } from "./CandidateActivityTimeline";
 import { CandidateEmailPanel } from "@/feature/communications/components/CandidateEmailPanel";
 import { CandidateTaskPanel } from "@/feature/tasks/components/CandidateTaskPanel";
 import { CandidateMeetingPanel } from "@/feature/calendar/components/CandidateMeetingPanel";
-import { TaskRuntime } from "@/feature/tasks/runtime/TaskRuntime";
-import { DemoTaskRepository } from "@/feature/tasks/repositories/DemoTaskRepository";
-import { SeedCandidateRepository } from "@/feature/crm/repositories/SeedCandidateRepository";
-import { demoConsultant } from "@/feature/demo/data/demoConsultant";
-import { createCandidateRepository } from "@/feature/crm/repositories/candidate-repository-factory";
-import { CandidateEngagementPlaybookService } from "@/feature/engagement-playbook/services/CandidateEngagementPlaybookService";
+import { resolveWorkspaceComposition } from "@/feature/platform/composition/resolveWorkspaceComposition";
 import { CandidatePlaybookSummary } from "@/feature/engagement-playbook/components/CandidatePlaybookSummary";
-import { resolveAuthenticatedWorkspaceContext } from "@/feature/identity/data/workspace-context";
-import { ConnectedEmailAccountRepository } from "@/feature/connected-email/repositories/ConnectedEmailAccountRepository";
-import { ProductionEmailRepository } from "@/feature/communications/repositories/ProductionEmailRepository";
 import type { EmailMessageView } from "@/feature/communications/runtime/EmailCommunicationRuntime";
-import { createAuthenticatedAssessmentRepository } from "@/feature/assessment-engine/production/repository-factory";
 import { ProductionCandidateIntelligence } from "./ProductionCandidateIntelligence";
-import { createDiscoveryRepository } from "@/feature/discovery/production/repository-factory";
 import { ProductionDiscoverySummary } from "./ProductionDiscoverySummary";
 import { DeleteCandidateControl } from "@/feature/crm/components/DeleteCandidateControl";
+import { DemoCandidateJourney } from "./DemoCandidateJourney";
 
 type Props = {
   candidateId: string;
@@ -33,28 +24,31 @@ type Props = {
 export async function Candidate360Page({
   candidateId,
 }: Props) {
-  const composition = await createCandidateRepository();
-  if (!composition) notFound();
-  const productionAssessment=composition.mode==="supabase"?(await createAuthenticatedAssessmentRepository())?.repository.getForCandidate(candidateId)??null:null;
+  const resolution = await resolveWorkspaceComposition();
+  if (resolution.status !== "resolved") notFound();
+  const composition = resolution.composition;
+  const isProduction = composition.session.kind === "production";
+  const productionAssessment=isProduction&&!("runtimes" in composition)?composition.dependencies.assessments.getForCandidate(candidateId):null;
   const resolvedAssessment=await productionAssessment;
   let productionDiscovery=null;
-  if(composition.mode==="supabase"&&resolvedAssessment?.analysis){try{productionDiscovery=(await(await createDiscoveryRepository())!.repository.getOrCreate(candidateId)).session}catch{productionDiscovery=null}}
-  const runtime = new Candidate360Runtime(composition.repository, undefined, undefined, composition.mode === "supabase",resolvedAssessment);
+  if(isProduction&&resolvedAssessment?.analysis&&!("runtimes" in composition)){try{productionDiscovery=(await composition.dependencies.discovery.getOrCreate(candidateId)).session}catch{productionDiscovery=null}}
+  const runtime = "runtimes" in composition
+    ? composition.runtimes.createCandidate360()
+    : new Candidate360Runtime({ candidates: composition.dependencies.candidates, rootOnly: true, productionAssessment: resolvedAssessment });
 
   const candidate = await runtime.load(candidateId);
 
   if (!candidate) {
     notFound();
   }
-  const taskState = candidate.rootOnly ? null : await new TaskRuntime(new DemoTaskRepository(), new SeedCandidateRepository()).forCandidate(demoConsultant.id, candidate.id);
-  const playbook = candidate.rootOnly ? null : await new CandidateEngagementPlaybookService().build(candidate.id);
+  const taskState = candidate.rootOnly || !("runtimes" in composition) ? null : await composition.runtimes.loadCandidateTasks(candidate.id);
+  const playbook = candidate.rootOnly || !("runtimes" in composition) ? null : await composition.runtimes.createEngagementPlaybook().build(candidate.id);
   let productionEmail: { accountId?: string; sender: { name: string; email: string | null }; messages: EmailMessageView[] } | null = null;
-  if (composition.mode === "supabase") {
-    const context = await resolveAuthenticatedWorkspaceContext();
-    if (context) {
-      const accounts = await new ConnectedEmailAccountRepository().listOwn(context);
+  if (isProduction) {
+    if (!("runtimes" in composition)) {
+      const accounts = await composition.dependencies.emailAccountSummaries();
       const account = accounts.find((item) => item.provider === "google" && item.status === "connected");
-      const rows = await new ProductionEmailRepository(context).listByCandidate(candidate.id);
+      const rows = await composition.dependencies.emailMessages.listByCandidate(candidate.id);
       productionEmail = { accountId: account?.publicId, sender: { name: account?.displayName ?? "FranGroove", email: account?.emailAddress ?? null },
         messages: rows.map((row) => ({ messageId: row.public_id, subject: row.subject,
           from: `${row.sender_name ?? row.sender_email} <${row.sender_email}>`,
@@ -74,13 +68,13 @@ export async function Candidate360Page({
         candidate={candidate}
       />
 
+      {!candidate.rootOnly && candidate.id === "candidate-demo" && <DemoCandidateJourney candidateId={candidate.id} />}
+
       <CandidateRelationshipOverview candidate={candidate} />
 
       {playbook && <CandidatePlaybookSummary playbook={playbook} />}
 
-      {candidate.hasIntelligence && <ExecutiveSummary
-        candidate={candidate}
-      />}
+      {candidate.hasIntelligence && <div id="assessment-intelligence" className="scroll-mt-24"><ExecutiveSummary candidate={candidate} /></div>}
 
       {candidate.hasIntelligence && <ReadinessScorecard
         candidate={candidate}
@@ -98,9 +92,9 @@ export async function Candidate360Page({
 
       <CandidateActivityTimeline candidate={candidate} />
 
-      <section aria-label="Candidate administration" className="flex justify-end border-t border-slate-200 pt-6">
+      {isProduction && <section aria-label="Candidate administration" className="flex justify-end border-t border-slate-200 pt-6">
         <DeleteCandidateControl candidateId={candidate.id} />
-      </section>
+      </section>}
 
     </div>
   );

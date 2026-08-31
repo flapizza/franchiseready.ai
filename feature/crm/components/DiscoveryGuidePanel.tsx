@@ -14,7 +14,7 @@ export function DiscoveryGuidePanel({
   return (
     <Card
       title="AI Discovery Guide"
-      subtitle="Preparation guidance generated from the FranchiseReady Intelligence Engine."
+      subtitle="Preparation guidance generated from the FranGroove Intelligence Engine."
     >
       <div className="space-y-10">
 

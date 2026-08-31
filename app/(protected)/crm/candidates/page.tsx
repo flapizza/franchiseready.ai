@@ -1,13 +1,11 @@
 import { CandidateCRMPage } from "@/feature/crm/components/CandidateCRMPage";
-import { CandidateCRMRuntime } from "@/feature/crm/runtime/CandidateCRMRuntime";
-import { createCandidateRepository } from "@/feature/crm/repositories/candidate-repository-factory";
-import { notFound } from "next/navigation";
+import { resolveWorkspaceComposition } from "@/feature/platform/composition/resolveWorkspaceComposition";
 import { connection } from "next/server";
 
 export default async function CandidatesPage() {
   await connection();
-  const composition = await createCandidateRepository();
-  if (!composition) notFound();
-  const state = await new CandidateCRMRuntime(composition.repository).load();
+  const resolution = await resolveWorkspaceComposition();
+  if (resolution.status !== "resolved") return null;
+  const state = "runtimes" in resolution.composition ? await resolution.composition.runtimes.createCandidateCRM().load() : await resolution.composition.dependencies.candidateCRM.load();
   return <CandidateCRMPage state={state} />;
 }

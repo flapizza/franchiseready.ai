@@ -1,7 +1,9 @@
 import type { CandidateRecord } from "../models/CandidateRecord";
 import type { CandidateRepository } from "../repositories/CandidateRepository";
-import { demoCandidateOverlayStore } from "../repositories/DemoCandidateOverlayStore";
 import type { CandidateResolutionService } from "./CandidateResolutionService";
+
+export interface CandidateIntakeActivitySink { candidateCreated(candidate: CandidateRecord): Promise<void> }
+const noActivitySink: CandidateIntakeActivitySink = { async candidateCreated() {} };
 
 export interface CandidateIntakeInput {
   consultantId: string; firstName: string; lastName: string; email: string;
@@ -14,10 +16,11 @@ export type CandidateIntakeResult =
   | { status: "possible-match"; candidateIds: string[] };
 
 export class CandidateIntakeService {
-  public constructor(private readonly candidates: CandidateRepository, private readonly resolver: CandidateResolutionService) {}
+  public constructor(private readonly candidates: CandidateRepository, private readonly resolver: CandidateResolutionService, private readonly activities: CandidateIntakeActivitySink = noActivitySink) {}
 
   async create(input: CandidateIntakeInput): Promise<CandidateIntakeResult> {
     const resolution = await this.resolver.resolve({ consultantId: input.consultantId, email: input.email, phone: input.phone });
+    if (resolution.status === "unavailable") throw new Error("Candidate identity resolution is unavailable.");
     if (resolution.status === "matched" && resolution.method === "normalized-phone") {
       return { status: "possible-match", candidateIds: [resolution.candidateId] };
     }
@@ -37,7 +40,7 @@ export class CandidateIntakeService {
       assessmentIds: [], intelligence: null, preferredTerritory: input.preferredTerritory?.trim(), leadSource: input.leadSource?.trim(), notes: input.notes?.trim(),
     };
     const saved = await this.candidates.save(candidate);
-    if (process.env.PERSISTENCE_MODE !== "supabase") demoCandidateOverlayStore.addActivity({ id: crypto.randomUUID(), candidateId: saved.id, consultantId: input.consultantId, type: "candidate-created", title: "Candidate created", createdAt: now });
+    await this.activities.candidateCreated(saved);
     return { status: "created", candidate: saved };
   }
 }

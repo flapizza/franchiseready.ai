@@ -3,7 +3,7 @@ export type PresentationApproval = "approved-for-presentation" | "internal-only"
 export interface GovernedBrandFact<T> { value: T | null; source: BrandFactSource; approval: PresentationApproval; verifiedAt: string | null }
 export interface BrandMaterialReference { kind: "website" | "brochure" | "video" | "fdd" | "territory-map" | "validation-contact" | "financial-disclosure"; label: string; url: string | null; approval: PresentationApproval }
 export interface BrandIntelligenceProfile {
-  brandId: string; brandName: string; category: GovernedBrandFact<string>; website: GovernedBrandFact<string>;
+  brandId: string; brandName: string; demoClassification: "existing-demo-profile" | "curated-demo-concept"; category: GovernedBrandFact<string>; website: GovernedBrandFact<string>;
   overview: GovernedBrandFact<string>; ownerRole: GovernedBrandFact<string>; customerType: GovernedBrandFact<string>;
   businessModel: GovernedBrandFact<string>; operatingEnvironment: GovernedBrandFact<string>;
   businessDevelopment: GovernedBrandFact<{ level: "low" | "moderate" | "high" | "very-high"; description: string }>;

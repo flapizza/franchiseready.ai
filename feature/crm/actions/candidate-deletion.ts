@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { createCandidateRepository } from "../repositories/candidate-repository-factory";
+import { resolveWorkspaceComposition } from "@/feature/platform/composition/resolveWorkspaceComposition";
 
 export type CandidateDeletionState = { status: "idle" | "error"; message?: string };
 
@@ -16,9 +16,9 @@ export async function deleteCandidateAction(
   }
 
   try {
-    const composition = await createCandidateRepository();
-    if (!composition) return { status: "error", message: "An active workspace is required." };
-    await composition.repository.deleteById(candidateId);
+    const resolution = await resolveWorkspaceComposition();
+    if (resolution.status!=="resolved") return { status: "error", message: "An active workspace is required." };
+    await resolution.composition.dependencies.candidates.deleteById(candidateId);
   } catch {
     return { status: "error", message: "Candidate could not be deleted. Related records may need to be retained." };
   }

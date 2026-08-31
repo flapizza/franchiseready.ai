@@ -24,6 +24,7 @@ export function CandidateRelationshipOverview({ candidate }: { candidate: Candid
         <h2 className="mt-5 text-xl font-black text-slate-900">Assessment status</h2>
         <p className="mt-2 text-sm leading-6 text-slate-600">{candidate.assessment.detail}</p>
         <div className="mt-5 rounded-xl bg-slate-50 p-4"><p className="text-xs font-bold uppercase tracking-wider text-slate-400">Next recommended action</p><p className="mt-1 text-sm font-bold text-slate-800">{candidate.nextBestAction}</p></div>
+        {candidate.assessment.actionHref && <Link href={candidate.assessment.actionHref} className="mt-4 inline-flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-4 py-2.5 text-sm font-black text-blue-800">{candidate.assessment.actionLabel}<ArrowRight size={16} /></Link>}
         {candidate.lifecycleAction && <div className="mt-4"><CandidateLifecycleAction candidateId={candidate.id} label={candidate.lifecycleAction.label} /></div>}
         {candidate.brandStrategyHref && <Link href={candidate.brandStrategyHref} className="mt-4 inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-black text-white transition hover:bg-blue-700">Review Brand Strategy <ArrowRight size={16} /></Link>}
         {candidate.referralAction && <Link href={candidate.referralAction.href} className="ml-3 mt-4 inline-flex items-center gap-2 rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-black text-white transition hover:bg-slate-800">{candidate.referralAction.label}<ArrowRight size={16} /></Link>}

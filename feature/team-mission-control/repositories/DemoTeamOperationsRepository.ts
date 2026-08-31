@@ -25,8 +25,8 @@ const assignments: TeamCandidateAssignment[] = [
 ];
 
 const signals: TeamWorkSignal[] = [
-  { id: "team-task-mike", memberId: "consultant-avery", candidateId: "mike-lavalle", kind: "task", title: "Discovery follow-up overdue", detail: "Family alignment remains unresolved before validation.", whenLabel: "Overdue by 1 day", href: "/crm/tasks", overdue: true, highPriority: true },
-  { id: "team-meeting-john", memberId: "team-manager-jim", candidateId: "candidate-demo", kind: "meeting", title: "Discovery Call", detail: "Review family alignment and decision timing.", whenLabel: "Today · 11:00 PM", href: "/crm/calendar?event=meeting-john-discovery" },
+  { id: "team-task-mike", memberId: "consultant-avery", candidateId: "mike-lavalle", kind: "task", title: "Discovery follow-up overdue", detail: "Ownership motivation and decision timing remain unresolved before validation.", whenLabel: "Overdue by 1 day", href: "/crm/tasks", overdue: true, highPriority: true },
+  { id: "team-meeting-john", memberId: "team-manager-jim", candidateId: "candidate-demo", kind: "meeting", title: "Discovery Call", detail: "Review family alignment and decision timing.", whenLabel: "Today · 2:00 PM", href: "/crm/calendar?event=meeting-john-discovery" },
   { id: "team-task-michael", memberId: "consultant-avery", candidateId: "michael-chen", kind: "task", title: "Prepare Discovery evidence", detail: "Financial goals and assessment evidence need review.", whenLabel: "Today · 2:00 PM", href: "/crm/tasks", highPriority: true },
   { id: "team-meeting-elena", memberId: "leader-maya", candidateId: "elena-rodriguez", kind: "meeting", title: "Ownership questions follow-up", detail: "Recent email engagement created a timely opening.", whenLabel: "Tomorrow · 11:00 AM", href: "/crm/calendar?event=meeting-elena-followup" },
   { id: "team-referral-sarah", memberId: "consultant-leo", candidateId: "sarah-williams", kind: "referral", title: "ERA Group package awaiting review", detail: "Referral package is prepared but still needs consultant approval.", whenLabel: "Waiting 2 days", href: "/crm/candidates/sarah-williams/referral", highPriority: true },

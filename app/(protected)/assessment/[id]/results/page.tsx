@@ -1,5 +1,6 @@
-import { SeedIntelligenceEngine } from "@/feature/intelligence/services/SeedIntelligenceEngine";
 import { OverallReadinessCard } from "@/feature/intelligence/components/OverallReadinessCard";
+import { resolveWorkspaceComposition } from "@/feature/platform/composition/resolveWorkspaceComposition";
+import { WorkspaceFeatureUnavailable } from "@/feature/platform/components/WorkspaceFeatureUnavailable";
 
 type Props = {
   params: Promise<{
@@ -12,9 +13,8 @@ export default async function AssessmentResultsPage({
 }: Props) {
   const { id } = await params;
 
-  const engine = new SeedIntelligenceEngine();
-
-  const profile = await engine.buildProfile(id);
+  const resolution=await resolveWorkspaceComposition();if(resolution.status!=="resolved" || !("runtimes" in resolution.composition))return <WorkspaceFeatureUnavailable title="Assessment intelligence"/>;
+  const profile = await resolution.composition.dependencies.intelligence.buildProfile(id);
 
   return (
     <main className="mx-auto max-w-7xl space-y-8 p-8">

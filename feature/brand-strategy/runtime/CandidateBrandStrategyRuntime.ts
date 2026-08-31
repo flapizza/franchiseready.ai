@@ -190,14 +190,14 @@ export class CandidateBrandStrategyRuntime {
     });
     const concerns = [
       ...(!qualified ? ["Investment requirements are not currently satisfied."] : []),
-      ...(weakest.alignment < 88 ? [`${weakest.label} requires discussion before presentation.`] : []),
+      ...(weakest.alignment < 88 ? [`${candidate.firstName}'s ${weakest.label.toLowerCase()} evidence (${weakest.candidateValue}%) differs from this model's target (${weakest.brandTarget}%); validate the tradeoff before presentation.`] : []),
       ...brand.considerations.slice(0, 2),
     ];
 
     return {
       brandId: brand.id, brandName: brand.name, category: brand.category, score,
       confidence: existing?.confidence ?? Math.min(84, profileAlignment), qualified,
-      rationale: `${brand.name} aligns most clearly around ${strongest.map((item) => item.label.toLowerCase()).join(", ")}. ${qualified ? "Financial requirements are satisfied." : "Financial qualification prevents advancement."}`,
+      rationale: `${candidate.firstName}'s strongest alignment is ${strongest.map((item) => `${item.label.toLowerCase()} (${item.candidateValue}% evidence against ${item.brandTarget}% target)`).join(", ")}. This ${brand.businessModel.executiveModel ? "executive" : "owner-operator"}, ${brand.operatingModel.teamModel.replace("-", " ")}, ${brand.businessModel.recurringRevenue ? "recurring-revenue" : "transactional"} model serves ${brand.operatingModel.primaryCustomer.toLowerCase()}. ${qualified ? `Available capital clears the ${money(brand.investment.minimum)} entry and ${money(brand.investment.liquidCapitalMinimum ?? 0)} liquidity thresholds.` : `The ${money(brand.investment.minimum)} entry and ${money(brand.investment.liquidCapitalMinimum ?? 0)} liquidity thresholds exceed the current financial profile.`}`,
       fitDimensions: dimensions, evidence, concerns,
       presentationGuidance: {
         leadWith: brand.strengths.slice(0, 2),

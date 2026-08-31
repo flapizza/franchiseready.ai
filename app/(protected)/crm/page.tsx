@@ -1,16 +1,19 @@
 import { MissionControlPage } from "@/feature/mission-control/components/MissionControlPage";
-import { MissionControlRuntime } from "@/feature/mission-control/runtime/MissionControlRuntime";
-import { conferenceAssessmentStore } from "@/feature/assessment-engine/conference/ConferenceAssessmentStore";
+import { notFound } from "next/navigation";
+import { resolveWorkspaceComposition } from "@/feature/platform/composition/resolveWorkspaceComposition";
+import { WorkspaceFeatureUnavailable } from "@/feature/platform/components/WorkspaceFeatureUnavailable";
 
 export const dynamic = "force-dynamic";
 
 export default async function CRMPage() {
-  const runtime =
-    new MissionControlRuntime();
+  const resolution = await resolveWorkspaceComposition();
+  if (resolution.status !== "resolved") notFound();
+  if (!("runtimes" in resolution.composition)) return <WorkspaceFeatureUnavailable title="Mission Control"/>;
+  const runtime = resolution.composition.runtimes.createMissionControl();
 
   const state =
     await runtime.build();
-  const conferenceAssessments = conferenceAssessmentStore.getAll();
+  const conferenceAssessments = resolution.composition.dependencies.conferenceAssessments.getAll();
 
   return (
     <>

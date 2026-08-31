@@ -5,7 +5,7 @@ import { MeetingBriefService } from "../services/MeetingBriefService";
 import { DEMO_CONSULTANT_TIMEZONE, formatEventDate, formatEventTime, localDateKey } from "../time/ConsultantTime";
 
 export class CalendarRuntime {
-  constructor(private readonly repository: CalendarRepository, private readonly candidates: CandidateRepository) {}
+  constructor(private readonly repository: CalendarRepository, private readonly candidates: CandidateRepository, private readonly now: () => Date = () => new Date()) {}
   async build(consultantId: string): Promise<CalendarWorkspaceState> {
     const [events, candidates, reminders] = await Promise.all([this.repository.getEvents(consultantId), this.candidates.getAll(), this.repository.getReminders(consultantId)]);
     const owned = candidates.filter((item) => item.consultantId === consultantId);
@@ -13,7 +13,7 @@ export class CalendarRuntime {
     const briefService = new MeetingBriefService(this.candidates);
     return {
       timezone: DEMO_CONSULTANT_TIMEZONE,
-      todayKey: localDateKey(new Date()),
+      todayKey: localDateKey(this.now()),
       candidates: owned.map((item) => ({ id: item.id, name: names.get(item.id)! })).sort((a, b) => a.name.localeCompare(b.name)),
       events: await Promise.all(events.sort((a, b) => Date.parse(a.startAt) - Date.parse(b.startAt)).map(async (event) => ({
         id: event.id, title: event.title, candidateId: event.candidateId, startAt: event.startAt, endAt: event.endAt,

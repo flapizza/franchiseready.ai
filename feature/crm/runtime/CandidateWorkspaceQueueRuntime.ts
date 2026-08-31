@@ -33,7 +33,7 @@ function destination(kind: CandidateWorkspaceKind, candidate: CandidateCRMItem) 
 }
 
 export class CandidateWorkspaceQueueRuntime {
-  public constructor(private readonly crm = new CandidateCRMRuntime(), private readonly eligibility = new CandidateWorkspaceEligibilityService()) {}
+  public constructor(private readonly crm: CandidateCRMRuntime, private readonly eligibility = new CandidateWorkspaceEligibilityService()) {}
 
   public async load(kind: CandidateWorkspaceKind, view: CandidateWorkspaceView = "active"): Promise<CandidateWorkspaceQueueState> {
     const crm = await this.crm.load();

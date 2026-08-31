@@ -1,35 +1,43 @@
-import { SeedCandidateRepository } from "@/feature/crm/repositories/SeedCandidateRepository";
-import { EmailCommunicationRuntime } from "@/feature/communications/runtime/EmailCommunicationRuntime";
-import { DemoCalendarRepository } from "@/feature/calendar/repositories/DemoCalendarRepository";
-import { DemoTaskRepository } from "@/feature/tasks/repositories/DemoTaskRepository";
-import { CandidateBrandStrategyRuntime } from "@/feature/brand-strategy/runtime/CandidateBrandStrategyRuntime";
-import { CandidateReferralService } from "@/feature/referral-package/services/CandidateReferralService";
+import type { CandidateRepository } from "@/feature/crm/repositories/CandidateRepository";
+import type { EmailCommunicationRuntime } from "@/feature/communications/runtime/EmailCommunicationRuntime";
+import type { CalendarRepository } from "@/feature/calendar/repositories/CalendarRepository";
+import type { TaskRepository } from "@/feature/tasks/repositories/TaskRepository";
+import type { CandidateBrandStrategyRuntime } from "@/feature/brand-strategy/runtime/CandidateBrandStrategyRuntime";
+import type { CandidateReferralService } from "@/feature/referral-package/services/CandidateReferralService";
 import type { CandidateEngagementPlaybook, CandidateEngagementStep, EngagementActionType, EngagementEvidence } from "../models/CandidateEngagementPlaybook";
-import { DemoEngagementPlaybookRepository } from "../repositories/DemoEngagementPlaybookRepository";
+import type { EngagementPlaybookRepository } from "../repositories/EngagementPlaybookRepository";
+import { conferenceDemoIso } from "@/feature/demo/time/conferenceDemoClock";
 
-const DEMO_NOW = "2026-08-21T14:00:00.000Z";
+const DEMO_NOW = conferenceDemoIso(0, 10);
 const due = (days: number) => new Date(Date.parse(DEMO_NOW) + days * 86_400_000).toISOString();
 
 type Draft = Omit<CandidateEngagementStep, "stepId" | "order" | "status">;
 
 export class CandidateEngagementPlaybookService {
   constructor(
-    private readonly candidates = new SeedCandidateRepository(),
-    private readonly decisions = new DemoEngagementPlaybookRepository(),
+    private readonly dependencies: {
+      candidates: CandidateRepository;
+      decisions: EngagementPlaybookRepository;
+      email: Pick<EmailCommunicationRuntime, "load">;
+      calendar: CalendarRepository;
+      tasks: TaskRepository;
+      strategy: Pick<CandidateBrandStrategyRuntime, "load">;
+      referrals: Pick<CandidateReferralService, "getByCandidate">;
+    },
   ) {}
 
   async build(candidateId: string): Promise<CandidateEngagementPlaybook | null> {
-    const candidate = await this.candidates.getById(candidateId);
+    const candidate = await this.dependencies.candidates.getById(candidateId);
     if (!candidate) return null;
     const [emails, meetings, tasks, strategy] = await Promise.all([
-      Promise.resolve(new EmailCommunicationRuntime().load(candidateId)),
-      new DemoCalendarRepository().getEvents(candidate.consultantId),
-      new DemoTaskRepository().getAll(candidate.consultantId),
-      candidate.intelligence ? new CandidateBrandStrategyRuntime().load(candidateId) : Promise.resolve(null),
+      Promise.resolve(this.dependencies.email.load(candidateId)),
+      this.dependencies.calendar.getEvents(candidate.consultantId),
+      this.dependencies.tasks.getAll(candidate.consultantId),
+      candidate.intelligence ? this.dependencies.strategy.load(candidateId) : Promise.resolve(null),
     ]);
     const ownMeetings = meetings.filter((item) => item.candidateId === candidateId);
     const ownTasks = tasks.filter((item) => item.candidateId === candidateId);
-    const referrals = new CandidateReferralService().getByCandidate(candidateId);
+    const referrals = this.dependencies.referrals.getByCandidate(candidateId);
     const latest = emails[0];
     const clicks = latest?.links.reduce((sum, link) => sum + link.clickCount, 0) ?? 0;
     const fingerprint = [candidate.pipelineStage, latest?.messageId, latest?.deliveryStatus, latest?.openCount, clicks, latest?.replyCount, ownMeetings.map((item) => `${item.id}:${item.status}`).join(","), ownTasks.filter((item) => item.source !== "engagement-playbook").map((item) => `${item.taskId}:${item.status}`).join(","), referrals.map((item) => `${item.referralId}:${item.status}`).join(","), strategy?.workflow.label].join("|");
@@ -37,7 +45,7 @@ export class CandidateEngagementPlaybookService {
     const drafts = this.compose({ candidateId, stage: candidate.pipelineStage, summary: candidate.intelligence?.executiveSummary ?? "",
       risks: (candidate.intelligence?.discoveryPriorities ?? []).filter((item) => /confirm|risk|unresolved|reconfirm/i.test(item)),
       latest, clicks, meetings: ownMeetings, strategy, referrals });
-    const decisions = this.decisions.getDecisions(candidateId);
+    const decisions = this.dependencies.decisions.getDecisions(candidateId);
     const steps = drafts.map((draft, index) => {
       const stepId = `playbook:${candidateId}:${draft.actionType}:${index + 1}`;
       const decision = decisions.find((item) => item.stepId === stepId && item.evidenceFingerprint === fingerprint);
@@ -56,7 +64,7 @@ export class CandidateEngagementPlaybookService {
     };
   }
 
-  private compose(context: { candidateId: string; stage: string; summary: string; risks: string[]; latest?: ReturnType<EmailCommunicationRuntime["load"]>[number]; clicks: number; meetings: Awaited<ReturnType<DemoCalendarRepository["getEvents"]>>; strategy: Awaited<ReturnType<CandidateBrandStrategyRuntime["load"]>>; referrals: ReturnType<CandidateReferralService["getByCandidate"]> }): Draft[] {
+  private compose(context: { candidateId: string; stage: string; summary: string; risks: string[]; latest?: ReturnType<EmailCommunicationRuntime["load"]>[number]; clicks: number; meetings: Awaited<ReturnType<CalendarRepository["getEvents"]>>; strategy: Awaited<ReturnType<CandidateBrandStrategyRuntime["load"]>>; referrals: ReturnType<CandidateReferralService["getByCandidate"]> }): Draft[] {
     const steps: Draft[] = [];
     const emailEvidence = context.latest ? [{ source: "email-engagement", referenceId: context.latest.messageId, label: context.latest.engagementLabel, detail: context.latest.mostRecentEngagement ?? `${context.latest.subject} was ${context.latest.deliveryStatus}.` }] satisfies EngagementEvidence[] : [];
     const add = (actionType: EngagementActionType, title: string, description: string, rationale: string, timing: string, evidence: EngagementEvidence[], actionLabel?: string, actionHref?: string, suggestedDueAt?: string, relatedMessageId?: string) => steps.push({ actionType, title, description, rationale, recommendedTiming: timing, evidence, actionLabel, actionHref, suggestedDueAt, relatedMessageId });

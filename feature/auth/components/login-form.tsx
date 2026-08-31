@@ -6,11 +6,12 @@ import { AuthFormError } from "@/feature/auth/components/auth-form-error";
 import { AuthSubmitButton } from "@/feature/auth/components/auth-submit-button";
 import { initialActionResult } from "@/feature/auth/types/actions";
 
-export function LoginForm() {
+export function LoginForm({ nextPath }: { nextPath?: string }) {
   const [state, action] = useActionState(signIn, initialActionResult);
 
   return (
     <form action={action} className="space-y-4" noValidate>
+      {nextPath ? <input type="hidden" name="next" value={nextPath} /> : null}
       <AuthFormError messages={state.status === "error" ? [state.message] : undefined} />
       <div>
         <label htmlFor="email" className="text-sm font-medium text-ink">Email address</label>

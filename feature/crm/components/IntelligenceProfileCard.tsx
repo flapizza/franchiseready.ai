@@ -18,7 +18,7 @@ export function IntelligenceProfileCard({
   return (
     <Card
       title="Candidate DNA Profile"
-      subtitle="Core competencies identified by the FranchiseReady Intelligence Engine."
+      subtitle="Core competencies identified by the FranGroove Intelligence Engine."
     >
       <div className="space-y-10">
 

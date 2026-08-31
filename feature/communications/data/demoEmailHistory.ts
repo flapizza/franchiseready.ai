@@ -1,6 +1,7 @@
 import type { EmailMessage } from "../models/EmailMessage";
 import type { EmailEngagementEvent } from "../models/EmailEngagementEvent";
 import { demoConsultant } from "@/feature/demo/data/demoConsultant";
+import { conferenceDemoIso } from "@/feature/demo/time/conferenceDemoClock";
 
 const message = (candidateId: string, subject: string, body: string, sentAt: string, links: Array<[string, string, string]> = [], delivery: Pick<EmailMessage, "deliveryStatus" | "deliveryFailureReason"> = { deliveryStatus: "delivered" }): EmailMessage => ({
   messageId: `email-seed-${candidateId}`, candidateId, consultantId: demoConsultant.id, threadId: `thread-${candidateId}`,
@@ -12,18 +13,18 @@ const message = (candidateId: string, subject: string, body: string, sentAt: str
 });
 
 export const demoEmailMessages: EmailMessage[] = [
-  message("sarah-williams", "ERA Group information and next steps", "Here are the ERA Group materials and a link to schedule our next call.", "2026-08-17T14:00:00.000Z", [["era", "https://www.eragroup.com", "ERA Group website"], ["schedule", "https://cal.example.com/jim", "Schedule Next Call"]]),
-  message("mike-lavalle", "Discovery follow-up", "A quick follow-up from our Discovery conversation.", "2026-08-16T15:00:00.000Z"),
-  message("elena-rodriguez", "Financing information", "Here is the financing information we discussed.", "2026-08-15T16:00:00.000Z", [["financing", "https://example.com/financing", "Financing Information"]]),
-  message("robert-king", "Introduction follow-up", "I wanted to make sure you received the introduction details.", "2026-08-14T15:30:00.000Z", [], { deliveryStatus: "failed", deliveryFailureReason: "Demo provider rejected the recipient address." }),
+  message("sarah-williams", "ERA Group information and next steps", "Here are the ERA Group materials and a link to schedule our next call.", conferenceDemoIso(-1, 10), [["era", "https://www.eragroup.com", "ERA Group website"], ["schedule", "https://cal.example.com/jim", "Schedule Next Call"]]),
+  message("mike-lavalle", "Discovery follow-up", "A quick follow-up from our Discovery conversation.", conferenceDemoIso(-2, 11)),
+  message("elena-rodriguez", "Financing information", "Here is the financing information we discussed.", conferenceDemoIso(-3, 12), [["financing", "https://example.com/financing", "Financing Information"]]),
+  message("robert-king", "Introduction follow-up", "I wanted to make sure you received the introduction details.", conferenceDemoIso(-4, 11, 30), [], { deliveryStatus: "failed", deliveryFailureReason: "Demo provider rejected the recipient address." }),
 ];
 
 export const demoEmailEvents: EmailEngagementEvent[] = [
-  { eventId: "seed-sarah-open-1", messageId: "email-seed-sarah-williams", candidateId: "sarah-williams", type: "open", occurredAt: "2026-08-17T14:12:00.000Z" },
-  { eventId: "seed-sarah-open-2", messageId: "email-seed-sarah-williams", candidateId: "sarah-williams", type: "open", occurredAt: "2026-08-17T16:20:00.000Z" },
-  { eventId: "seed-sarah-open-3", messageId: "email-seed-sarah-williams", candidateId: "sarah-williams", type: "open", occurredAt: "2026-08-18T13:10:00.000Z" },
-  { eventId: "seed-sarah-click", messageId: "email-seed-sarah-williams", candidateId: "sarah-williams", type: "link-click", linkId: "era", url: "https://www.eragroup.com", occurredAt: "2026-08-18T13:12:00.000Z" },
-  { eventId: "seed-elena-open", messageId: "email-seed-elena-rodriguez", candidateId: "elena-rodriguez", type: "open", occurredAt: "2026-08-15T17:00:00.000Z" },
-  { eventId: "seed-elena-click", messageId: "email-seed-elena-rodriguez", candidateId: "elena-rodriguez", type: "link-click", linkId: "financing", url: "https://example.com/financing", occurredAt: "2026-08-15T17:02:00.000Z" },
-  { eventId: "seed-elena-reply", messageId: "email-seed-elena-rodriguez", candidateId: "elena-rodriguez", type: "reply", occurredAt: "2026-08-15T18:00:00.000Z" },
+  { eventId: "seed-sarah-open-1", messageId: "email-seed-sarah-williams", candidateId: "sarah-williams", type: "open", occurredAt: conferenceDemoIso(-1, 10, 12) },
+  { eventId: "seed-sarah-open-2", messageId: "email-seed-sarah-williams", candidateId: "sarah-williams", type: "open", occurredAt: conferenceDemoIso(-1, 12, 20) },
+  { eventId: "seed-sarah-open-3", messageId: "email-seed-sarah-williams", candidateId: "sarah-williams", type: "open", occurredAt: conferenceDemoIso(0, 8, 10) },
+  { eventId: "seed-sarah-click", messageId: "email-seed-sarah-williams", candidateId: "sarah-williams", type: "link-click", linkId: "era", url: "https://www.eragroup.com", occurredAt: conferenceDemoIso(0, 8, 12) },
+  { eventId: "seed-elena-open", messageId: "email-seed-elena-rodriguez", candidateId: "elena-rodriguez", type: "open", occurredAt: conferenceDemoIso(-3, 13) },
+  { eventId: "seed-elena-click", messageId: "email-seed-elena-rodriguez", candidateId: "elena-rodriguez", type: "link-click", linkId: "financing", url: "https://example.com/financing", occurredAt: conferenceDemoIso(-3, 13, 2) },
+  { eventId: "seed-elena-reply", messageId: "email-seed-elena-rodriguez", candidateId: "elena-rodriguez", type: "reply", occurredAt: conferenceDemoIso(-3, 14) },
 ];

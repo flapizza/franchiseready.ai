@@ -4,11 +4,12 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import type { Response } from "../types/domain";
+import type { AssessmentVersion } from "../types/domain";
 
 import { ProgressBar } from "./ProgressBar";
 import { QuestionCard } from "./QuestionCard";
 
-import { SeedAssessmentRepository } from "../repositories/AssessmentRepository";
+import type { AssessmentRepository } from "../repositories/AssessmentRepository";
 import { useAssessmentRuntime } from "../hooks/useAssessmentRuntime";
 import { completeAssessmentAction, type AssessmentIdentityInput } from "../actions/complete-assessment";
 
@@ -16,19 +17,20 @@ type Props = {
   assessmentId: string;
   invitationToken?: string;
   invitedIdentity?: AssessmentIdentityInput;
+  assessment: AssessmentVersion;
 };
 
 export function AssessmentPlayer({
   assessmentId,
   invitationToken,
   invitedIdentity,
+  assessment,
 }: Props) {
   const router = useRouter();
 
-  const repository = useMemo(
-    () => new SeedAssessmentRepository(),
-    [],
-  );
+  const repository = useMemo<AssessmentRepository>(() => ({
+    async getAssessmentById(id) { return id === assessment.id ? assessment : null; },
+  }), [assessment]);
 
   const {
     runtime,

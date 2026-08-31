@@ -1,18 +1,14 @@
 import type { BrandProfile } from "@/feature/brand-library/models/BrandProfile";
-import { SeedBrandRepository } from "@/feature/brand-library/repositories/SeedBrandRepository";
+import type { BrandRepository } from "@/feature/brand-library/repositories/BrandRepository";
 import type { DemoCandidate } from "@/feature/demo/models/DemoScenario";
 import type { DemoScenarioRepository } from "@/feature/demo/repositories/DemoScenarioRepository";
-import { SeedDemoScenarioRepository } from "@/feature/demo/repositories/SeedDemoScenarioRepository";
 import type { CandidateRepository } from "@/feature/crm/repositories/CandidateRepository";
-import { SeedCandidateRepository } from "@/feature/crm/repositories/SeedCandidateRepository";
-import { demoCandidateOverlayStore } from "@/feature/crm/repositories/DemoCandidateOverlayStore";
-import { EmailCommunicationRuntime } from "@/feature/communications/runtime/EmailCommunicationRuntime";
-import { demoConsultant } from "@/feature/demo/data/demoConsultant";
-import { TaskRuntime } from "@/feature/tasks/runtime/TaskRuntime";
-import { DemoTaskRepository } from "@/feature/tasks/repositories/DemoTaskRepository";
-import { CalendarRuntime } from "@/feature/calendar/runtime/CalendarRuntime";
-import { DemoCalendarRepository } from "@/feature/calendar/repositories/DemoCalendarRepository";
-import { CandidateEngagementPlaybookService } from "@/feature/engagement-playbook/services/CandidateEngagementPlaybookService";
+import type { EmailCommunicationRuntime } from "@/feature/communications/runtime/EmailCommunicationRuntime";
+import type { TaskRuntime } from "@/feature/tasks/runtime/TaskRuntime";
+import type { CalendarRuntime } from "@/feature/calendar/runtime/CalendarRuntime";
+import type { CandidateEngagementPlaybookService } from "@/feature/engagement-playbook/services/CandidateEngagementPlaybookService";
+import type { CandidateBrandReferral } from "@/feature/referral-package/models/CandidateBrandReferral";
+import type { StrategyBuilderRecord } from "@/feature/brand-strategy/models/StrategyBuilderRecord";
 
 import type {
   IntelligenceEventState,
@@ -71,18 +67,25 @@ function opportunityScore(candidate: DemoCandidate): number {
 }
 
 export class MissionControlRuntime {
-  public constructor(
-    private readonly scenarioRepository: DemoScenarioRepository =
-      new SeedDemoScenarioRepository(),
-    private readonly brandRepository = new SeedBrandRepository(),
-    private readonly candidateRepository: CandidateRepository = new SeedCandidateRepository(),
-  ) {}
+  public constructor(private readonly dependencies: {
+    scenarioRepository: DemoScenarioRepository;
+    brandRepository: BrandRepository;
+    candidateRepository: CandidateRepository;
+    playbooks: Pick<CandidateEngagementPlaybookService, "build">;
+    tasks: Pick<TaskRuntime, "build">;
+    calendar: Pick<CalendarRuntime, "build">;
+    email: Pick<EmailCommunicationRuntime, "load">;
+    consultantId: string;
+    referrals: (candidateId: string) => CandidateBrandReferral[];
+    strategy: (candidateId: string) => StrategyBuilderRecord | null;
+    presenterCandidateId?: string;
+  }) {}
 
   public async build(): Promise<MissionControlState> {
     const [scenario, brands, candidateRecords] = await Promise.all([
-      this.scenarioRepository.getScenario(),
-      this.brandRepository.getAll(),
-      this.candidateRepository.getAll(),
+      this.dependencies.scenarioRepository.getScenario(),
+      this.dependencies.brandRepository.getAll(),
+      this.dependencies.candidateRepository.getAll(),
     ]);
 
     const recordsById = new Map(candidateRecords.map((candidate) => [candidate.id, candidate]));
@@ -96,17 +99,18 @@ export class MissionControlRuntime {
     );
     const brandsById = new Map(brands.map((brand) => [brand.id, brand]));
 
-    const topCandidate = [...activeCandidates]
+    const rankedTopCandidate = [...activeCandidates]
       .sort((left, right) => opportunityScore(right) - opportunityScore(left))[0];
 
-    if (!topCandidate) {
+    if (!rankedTopCandidate) {
       throw new Error("Mission Control requires at least one active candidate.");
     }
+    const spotlightCandidate = activeCandidates.find((candidate) => candidate.id === this.dependencies.presenterCandidateId) ?? rankedTopCandidate;
 
     const priorityCandidates = this.buildPriorityCandidates(
-      activeCandidates.filter((candidate) => candidate.id !== topCandidate.id),
+      activeCandidates.filter((candidate) => candidate.id !== spotlightCandidate.id),
     );
-    const playbooks = new Map((await Promise.all(activeCandidates.map(async (candidate) => [candidate.id, await new CandidateEngagementPlaybookService().build(candidate.id)] as const))));
+    const playbooks = new Map((await Promise.all(activeCandidates.map(async (candidate) => [candidate.id, await this.dependencies.playbooks.build(candidate.id)] as const))));
     priorityCandidates.forEach((candidate) => {
       const playbook = playbooks.get(candidate.candidateId);
       const current = playbook?.steps.find((step) => step.stepId === playbook.currentStepId);
@@ -116,8 +120,8 @@ export class MissionControlRuntime {
       activeCandidates,
       brandsById,
     );
-    const taskState = await new TaskRuntime(new DemoTaskRepository(), this.candidateRepository).build(demoConsultant.id);
-    const calendarState = await new CalendarRuntime(new DemoCalendarRepository(), this.candidateRepository).build(demoConsultant.id);
+    const taskState = await this.dependencies.tasks.build(this.dependencies.consultantId);
+    const calendarState = await this.dependencies.calendar.build(this.dependencies.consultantId);
     const todayMeetings = calendarState.events.filter((event) => event.dateKey === calendarState.todayKey && event.status === "scheduled");
 
     return {
@@ -155,7 +159,7 @@ export class MissionControlRuntime {
           },
         ],
       },
-      topOpportunity: (() => { const opportunity = this.buildTopOpportunity(topCandidate, brandsById); const playbook = playbooks.get(topCandidate.id); const current = playbook?.steps.find((step) => step.stepId === playbook.currentStepId); if (current) opportunity.primaryAction = { label: current.title, href: `/crm/candidates/${topCandidate.id}/playbook` }; return opportunity; })(),
+      topOpportunity: this.buildTopOpportunity(spotlightCandidate, brandsById),
       priorityCandidates,
       agenda: todayMeetings.map((meeting) => ({ id: meeting.id, candidateId: meeting.candidateId ?? "", candidateName: meeting.candidateName ?? "Consultant", time: meeting.timeLabel, objective: meeting.title, status: meeting.brief ? "Review Brief" : "Ready", briefingHref: `/crm/calendar?event=${meeting.id}` })),
       recommendedActions: this.buildRecommendedActions(
@@ -196,7 +200,7 @@ export class MissionControlRuntime {
   ): TopOpportunityState {
     const bestBrand = brandsById.get(candidate.recommendedBrands[0]?.brandId);
     const isReferralReady = candidate.pipelineStage === "referral";
-    const referralPackages = demoCandidateOverlayStore.getCandidateReferrals(candidate.id);
+    const referralPackages = this.dependencies.referrals(candidate.id);
     const introduced = referralPackages.filter((item) => item.status === "sent" || item.status === "introduced").length;
     const approved = referralPackages.filter((item) => item.status === "approved").length;
     const primaryAction: MissionControlAction = isReferralReady
@@ -207,6 +211,7 @@ export class MissionControlRuntime {
         };
 
     return {
+      spotlightLabel: this.dependencies.presenterCandidateId === candidate.id ? "IFPG Candidate Story" : "Top Opportunity",
       candidateId: candidate.id,
       candidateName: candidateName(candidate),
       rationale: candidate.aiExplanation,
@@ -218,7 +223,7 @@ export class MissionControlRuntime {
       primaryAction,
       secondaryActions: [
         {
-          label: "Open Candidate",
+          label: `Open ${candidateName(candidate)} Candidate 360`,
           href: candidateWorkspaceHref(candidate.id),
         },
         { label: "Review Brand Strategy", href: `/crm/candidates/${candidate.id}/strategy` },
@@ -243,7 +248,7 @@ export class MissionControlRuntime {
           brandsById.get(candidate.recommendedBrands[0]?.brandId)?.name ??
           "Recommendation pending",
         confidence: candidate.confidence,
-        action: { label: demoCandidateOverlayStore.getCandidateReferrals(candidate.id).some((item) => item.status === "sent" || item.status === "introduced") ? "View Sent Referrals" : "Open Referral Studio", href: `/crm/candidates/${candidate.id}/referral` },
+        action: { label: this.dependencies.referrals(candidate.id).some((item) => item.status === "sent" || item.status === "introduced") ? "View Sent Referrals" : "Open Referral Studio", href: `/crm/candidates/${candidate.id}/referral` },
       }));
   }
 
@@ -267,7 +272,7 @@ export class MissionControlRuntime {
       const brand = brandsById.get(
         referralCandidate.recommendedBrands[0]?.brandId,
       );
-      const referralPackages = demoCandidateOverlayStore.getCandidateReferrals(referralCandidate.id);
+      const referralPackages = this.dependencies.referrals(referralCandidate.id);
       const introduced = referralPackages.filter((item) => item.status === "sent" || item.status === "introduced").length;
       const awaitingApproval = referralPackages.filter((item) => item.status === "ready-for-review").length;
       actions.push({
@@ -297,7 +302,7 @@ export class MissionControlRuntime {
     }
 
     if (strategyCandidate) {
-      const strategy = demoCandidateOverlayStore.getStrategy(strategyCandidate.id);
+      const strategy = this.dependencies.strategy(strategyCandidate.id);
       const selected = strategy?.decisions.filter((item) => item.selectedForPresentation) ?? [];
       const referralSelections = selected.filter((item) => item.shortlistDisposition === "refer").length;
       const presented = selected.filter((item) => item.presentedAt).length;
@@ -336,7 +341,7 @@ export class MissionControlRuntime {
       });
     };
 
-    const engaged = candidates.map((candidate) => ({ candidate, message: new EmailCommunicationRuntime().load(candidate.id).find((message) => message.mostRecentEngagement) }))
+    const engaged = candidates.map((candidate) => ({ candidate, message: this.dependencies.email.load(candidate.id).find((message) => message.mostRecentEngagement) }))
       .filter((item): item is { candidate: DemoCandidate; message: NonNullable<typeof item.message> } => Boolean(item.message))
       .sort((left, right) => Date.parse(right.message.sentAt ?? "") - Date.parse(left.message.sentAt ?? ""))[0];
     if (engaged) append(engaged.candidate, { id: `email-engagement-${engaged.message.messageId}`, type: "email-engagement", label: "Email Engagement", explanation: `${engaged.message.mostRecentEngagement}. ${engaged.message.nextAction ?? "Behavioral evidence recorded for consultant review."}`, dateLabel: "Recent", href: `/crm/communications?message=${engaged.message.messageId}` });

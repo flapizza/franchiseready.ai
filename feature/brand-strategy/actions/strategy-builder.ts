@@ -2,7 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import type { BrandShortlistDisposition, CandidateBrandReaction } from "../models/StrategyBuilderRecord";
-import { StrategyBuilderService, type StrategyBuilderCommand } from "../services/StrategyBuilderService";
+import type { StrategyBuilderCommand } from "../services/StrategyBuilderService";
+import { resolveWorkspaceComposition } from "@/feature/platform/composition/resolveWorkspaceComposition";
 
 export interface StrategyActionState { status: "idle" | "success" | "error"; message?: string }
 const reactions = new Set<CandidateBrandReaction>(["strong-interest", "interested", "neutral", "not-interested"]);
@@ -18,7 +19,8 @@ export async function updateStrategyBuilder(_previous: StrategyActionState, form
   if (kind === "response" && reactions.has(String(formData.get("reaction")) as CandidateBrandReaction)) command = { kind, brandId, reaction: String(formData.get("reaction")) as CandidateBrandReaction, notes: String(formData.get("notes") ?? "") };
   if (kind === "disposition" && dispositions.has(String(formData.get("disposition")) as BrandShortlistDisposition)) command = { kind, brandId, disposition: String(formData.get("disposition")) as BrandShortlistDisposition };
   if (!candidateId || !brandId || !command) return { status: "error", message: "Invalid Strategy Builder request." };
-  const result = await new StrategyBuilderService().execute(candidateId, command);
+  const resolution=await resolveWorkspaceComposition();if(resolution.status!=="resolved" || !("runtimes" in resolution.composition))return {status:"error",message:"Brand Strategy is not available in this workspace."};
+  const result = await resolution.composition.runtimes.createStrategyBuilder().execute(candidateId, command);
   revalidatePath(`/crm/candidates/${candidateId}/strategy`);
   revalidatePath(`/crm/candidates/${candidateId}`);
   revalidatePath(`/crm/candidates/${candidateId}/referral`);

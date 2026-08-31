@@ -11,7 +11,7 @@ test("consultant manages independent referrals for multiple recommended brands",
   await expect(page).toHaveURL(/\/crm\/candidates\/jared-wirsig\/referral$/);
   await expect(page.locator("header").getByRole("heading", { name: "Referral Studio", exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Recommended Opportunities" })).toBeVisible();
-  const checkboxes = page.getByRole("checkbox"); await expect(checkboxes).toHaveCount(3);
+  const checkboxes = page.getByRole("checkbox"); await expect(checkboxes).toHaveCount(6);
   await page.getByRole("checkbox", { name: /ERA Group/ }).check(); await page.getByRole("checkbox", { name: /Schooley Mitchell/ }).check();
   await expect(page.getByRole("button", { name: "Prepare 2 Referrals" })).toBeVisible(); await page.getByRole("button", { name: "Prepare 2 Referrals" }).click();
   await expect(page.getByText("2 referral packages prepared.")).toBeVisible();

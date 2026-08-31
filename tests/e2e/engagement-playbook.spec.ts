@@ -10,20 +10,20 @@ async function enter(page: Page) {
 test("Candidate 360 and full playbook explain high-engagement and converge with Mission Control", async ({ page }) => {
   await enter(page);
   await page.goto("/crm/candidates/sarah-williams");
-  const summary = page.getByRole("region", { name: "Send a personal follow-up" });
-  await expect(summary).toContainText("Send a personal follow-up");
+  const summary = page.getByRole("region", { name: "Wait for candidate engagement" });
+  await expect(summary).toContainText("Wait for candidate engagement");
   await summary.getByRole("link", { name: /Open Full Playbook/ }).click();
   await expect(page).toHaveURL(/\/crm\/candidates\/sarah-williams\/playbook$/);
-  await expect(page.getByRole("heading", { name: "Send a personal follow-up" })).toBeVisible();
-  await expect(page.getByText(/Repeated opens and a tracked-link click/).first()).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Wait for candidate engagement" })).toBeVisible();
+  await expect(page.getByText(/cadence guardrail/).first()).toBeVisible();
   const upcoming = page.getByRole("heading", { name: "Upcoming steps" }).locator("xpath=parent::section");
   await expect(upcoming).toContainText("Review referral readiness");
   await expect(upcoming.locator("li").first()).toContainText("2");
 
   await page.goto("/crm");
-  const currentAction = page.getByRole("link", { name: "Send a personal follow-up" });
-  await expect(currentAction).toBeVisible();
-  await expect(currentAction).toHaveAttribute("href", "/crm/candidates/sarah-williams/playbook");
+  const engagement = page.locator("article").filter({ hasText: "Email Engagement" }).filter({ hasText: "Sarah Williams" });
+  await expect(engagement).toContainText("ERA Group website");
+  await expect(engagement.getByRole("link", { name: "Open Communications" })).toHaveAttribute("href", "/crm/communications?message=email-seed-sarah-williams");
 });
 
 test("playbook composes concern, presentation, referral, and calendar strategies from evidence", async ({ page }) => {
@@ -51,10 +51,10 @@ test("consultant decisions and TaskService provenance persist without automatic 
   await page.getByRole("button", { name: "Create Task" }).click();
   await expect(page.getByRole("status")).toContainText("Task created from the playbook");
   await page.reload();
-  await expect(page.getByText("Send a personal follow-up").first()).toBeVisible();
+  await expect(page.getByText("Wait for candidate engagement").first()).toBeVisible();
   await page.goto("/crm/tasks");
-  await page.getByRole("button", { name: /^Today/ }).click();
-  const task = page.locator("article").filter({ hasText: "Send a personal follow-up" });
+  await page.getByRole("button", { name: /^Upcoming/ }).click();
+  const task = page.locator("article").filter({ hasText: "Wait for candidate engagement" });
   await expect(task).toContainText("Engagement Playbook");
 
   await page.goto("/crm/candidates/mike-lavalle/playbook");
@@ -113,7 +113,7 @@ test("playbook has no horizontal page overflow at supported desktop and laptop s
   for (const viewport of [{ width: 1920, height: 1080 }, { width: 1600, height: 900 }, { width: 1366, height: 768 }, { width: 1280, height: 800 }]) {
     await page.setViewportSize(viewport);
     await expect(page.locator("[data-engagement-playbook]")).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Send a personal follow-up" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Wait for candidate engagement" })).toBeVisible();
     await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   }
 });

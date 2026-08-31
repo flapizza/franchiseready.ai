@@ -28,7 +28,8 @@ export type CandidateResolutionResult =
         CandidateResolutionMethod,
         "normalized-email" | "normalized-phone"
       >;
-    };
+    }
+  | { status: "unavailable"; reason: "not-implemented" };
 
 /**
  * Resolves an assessment participant to the candidate aggregate before any

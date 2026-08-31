@@ -41,7 +41,7 @@ export function CandidateWorkspace({
 
             <TimelineItem
               title="Assessment Completed"
-              subtitle="Candidate completed the FranchiseReady assessment."
+              subtitle="Candidate completed the FranGroove assessment."
             />
 
             <TimelineItem

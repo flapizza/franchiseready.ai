@@ -60,7 +60,7 @@ test("failed delivery retries the same canonical message", async ({ page }) => {
   const configured = await page.request.post("/crm/test-email-engagement", { data: { candidateId: "mike-lavalle", type: "fail-next-delivery" } }); expect(configured.ok()).toBeTruthy();
   await page.goto("/crm/candidates/mike-lavalle"); await compose(page, "Retry-safe follow-up", "This message should be preserved.");
   let record = page.locator("article", { hasText: "Retry-safe follow-up" }); const detail = record.locator("details"); await expect(detail).not.toHaveAttribute("open", ""); await expect(record).toContainText("Failed · Retry available");
-  const id = await record.getAttribute("data-message-id"); await record.getByRole("button", { name: "Retry Send" }).click(); await page.reload();
+  const id = await record.getAttribute("data-message-id"); await record.getByRole("button", { name: "Retry Send" }).click(); await expect(record).toContainText("Delivered · No engagement yet"); await page.reload();
   record = page.locator("article", { hasText: "Retry-safe follow-up" }); expect(await record.getAttribute("data-message-id")).toBe(id); await expect(record).toHaveCount(1); await record.locator("summary").click(); await expect(record).toContainText("Delivered · No engagement yet");
   expect(errors).toEqual([]);
 });

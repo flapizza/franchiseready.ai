@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { conferenceAssessmentStore } from "@/feature/assessment-engine/conference/ConferenceAssessmentStore";
+import { resolveWorkspaceComposition } from "@/feature/platform/composition/resolveWorkspaceComposition";
 import { ClearConferenceAssessmentsButton } from "@/feature/assessment-engine/conference/components/ClearConferenceAssessmentsButton";
 import type { ConferenceAnalysis, SynthesisStatement } from "@/feature/assessment-engine/conference/types";
 
@@ -7,7 +7,8 @@ const priorityLabel = (priority: "high" | "normal") => priority === "high" ? "Ke
 
 export default async function ConferenceCandidatePage({params}:{params:Promise<{candidateId:string}>}) {
   const {candidateId}=await params;
-  const loaded=conferenceAssessmentStore.loadByCandidateId(candidateId);
+  const resolution=await resolveWorkspaceComposition();if(resolution.status!=="resolved" || !("runtimes" in resolution.composition))notFound();
+  const loaded=resolution.composition.dependencies.conferenceAssessments.loadByCandidateId(candidateId);
   if(!loaded)notFound();
   if(!loaded.ok)return <RecoveryState reason={loaded.reason}/>;
   const record=loaded.record;

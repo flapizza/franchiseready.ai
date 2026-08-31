@@ -8,8 +8,9 @@ import type {
   DemoScenario,
 } from "../models/DemoScenario";
 import { demoConsultant } from "./demoConsultant";
+import { conferenceDemoIso } from "../time/conferenceDemoClock";
 
-const DEMO_NOW = "2026-08-17T13:00:00.000Z";
+const DEMO_NOW = conferenceDemoIso(0, 9);
 
 type CandidateSeed = {
   id: string;
@@ -115,7 +116,7 @@ function buildCandidate(seed: CandidateSeed, index: number): DemoCandidate {
   const stageRank = history.findIndex((item) => item.stage === seed.stage);
   const historicalActivity = history.slice(0, Math.max(stageRank + 1, 1)).map((item, activityIndex) => ({
     id: `${seed.id}-history-${activityIndex}`,
-    occurredAt: new Date(Date.parse("2026-07-20T13:00:00.000Z") + activityIndex * 86_400_000).toISOString(),
+    occurredAt: conferenceDemoIso(activityIndex - 14, 9),
     title: item.title,
     detail: `${item.title} recorded in the canonical candidate lifecycle.`,
   }));
@@ -159,7 +160,7 @@ function buildCandidate(seed: CandidateSeed, index: number): DemoCandidate {
       fit: Math.max(72, seed.readiness - brandIndex * 4 + 3),
     })),
     recentActivity: [...historicalActivity, { id: `${seed.id}-activity-current`, occurredAt: DEMO_NOW, title: seed.nextBestAction, detail: seed.explanation }],
-    createdAt: "2026-07-20T13:00:00.000Z",
+    createdAt: conferenceDemoIso(-14, 9),
     updatedAt: DEMO_NOW,
     lastActivityAt: DEMO_NOW,
     assessmentIds:
@@ -200,7 +201,7 @@ const candidateSeeds: CandidateSeed[] = [
     nextBestAction: "Present Brand Strategy",
     explanation: "Jared completed Discovery with strong leadership, financial, and systems-alignment evidence.",
     flags: ["Compare executive business models"], referralReadiness: 88,
-    brandIds: ["era-group", "actioncoach"], discoveryStatus: "completed",
+    brandIds: ["actioncoach", "era-group"], discoveryStatus: "completed",
   },
   {
     id: "christine-williams", firstName: "Christine", lastName: "Williams",
@@ -220,7 +221,7 @@ const candidateSeeds: CandidateSeed[] = [
     nextBestAction: "Generate Referral Package",
     explanation: "Sarah has completed validation and is ready for an ERA Group franchisor introduction.",
     flags: ["Referral ready"], referralReadiness: 97,
-    brandIds: ["era-group"], discoveryStatus: "completed",
+    brandIds: ["era-group", "brightpath-home-services"], discoveryStatus: "completed",
   },
   {
     id: "michael-chen", firstName: "Michael", lastName: "Chen",

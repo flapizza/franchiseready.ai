@@ -1,7 +1,5 @@
 import { CalendarWorkspacePage } from "@/feature/calendar/components/CalendarWorkspacePage";
-import { CalendarRuntime } from "@/feature/calendar/runtime/CalendarRuntime";
-import { DemoCalendarRepository } from "@/feature/calendar/repositories/DemoCalendarRepository";
-import { SeedCandidateRepository } from "@/feature/crm/repositories/SeedCandidateRepository";
-import { demoConsultant } from "@/feature/demo/data/demoConsultant";
+import { resolveWorkspaceComposition } from "@/feature/platform/composition/resolveWorkspaceComposition";
+import { WorkspaceFeatureUnavailable } from "@/feature/platform/components/WorkspaceFeatureUnavailable";
 export const dynamic = "force-dynamic";
-export default async function CalendarPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) { const query = await searchParams; const state = await new CalendarRuntime(new DemoCalendarRepository(), new SeedCandidateRepository()).build(demoConsultant.id); return <CalendarWorkspacePage state={state} candidateId={typeof query.candidate === "string" ? query.candidate : undefined} eventId={typeof query.event === "string" ? query.event : undefined} />; }
+export default async function CalendarPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) { const query = await searchParams; const resolution=await resolveWorkspaceComposition(); if(resolution.status!=="resolved" || !("runtimes" in resolution.composition))return <WorkspaceFeatureUnavailable title="Calendar"/>; const state = await resolution.composition.runtimes.createCalendar().build(resolution.composition.runtimes.consultant.id); return <CalendarWorkspacePage state={state} candidateId={typeof query.candidate === "string" ? query.candidate : undefined} eventId={typeof query.event === "string" ? query.event : undefined} />; }

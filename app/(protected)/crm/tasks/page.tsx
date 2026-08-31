@@ -1,12 +1,12 @@
 import { TaskWorkspacePage } from "@/feature/tasks/components/TaskWorkspacePage";
-import { TaskRuntime } from "@/feature/tasks/runtime/TaskRuntime";
-import { DemoTaskRepository } from "@/feature/tasks/repositories/DemoTaskRepository";
-import { SeedCandidateRepository } from "@/feature/crm/repositories/SeedCandidateRepository";
-import { demoConsultant } from "@/feature/demo/data/demoConsultant";
+import { resolveWorkspaceComposition } from "@/feature/platform/composition/resolveWorkspaceComposition";
+import { WorkspaceFeatureUnavailable } from "@/feature/platform/components/WorkspaceFeatureUnavailable";
 
 export const dynamic = "force-dynamic";
 
 export default async function TasksPage() {
-  const state = await new TaskRuntime(new DemoTaskRepository(), new SeedCandidateRepository()).build(demoConsultant.id);
+  const resolution = await resolveWorkspaceComposition();
+  if (resolution.status !== "resolved" || !("runtimes" in resolution.composition)) return <WorkspaceFeatureUnavailable title="Tasks" />;
+  const state = await resolution.composition.runtimes.createTasks().build(resolution.composition.runtimes.consultant.id);
   return <TaskWorkspacePage state={state} />;
 }

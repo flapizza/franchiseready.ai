@@ -12,7 +12,7 @@ test("governed ERA Group facts drive library, presentation, and referral investm
   await expect(page.getByRole("navigation").getByRole("link", { name: "Brand Library" })).toHaveAttribute("aria-current", "page");
   await expect(page.getByText("Brand Profile · approved for presentation", { exact: true }).first()).toBeVisible();
   await expect(page.getByText("Not Yet Available", { exact: true }).first()).toBeVisible();
-  await expect(page.getByText("Needs Verification", { exact: true })).toBeVisible();
+  await expect(page.getByText("Relationship-led business development within an assigned local market", { exact: true })).toBeVisible();
   await expect(page.getByText("$85,000", { exact: true })).toBeVisible();
   await expect(page.getByText("$175,000", { exact: true })).toBeVisible();
 
@@ -20,7 +20,7 @@ test("governed ERA Group facts drive library, presentation, and referral investm
   const era = page.getByLabel("ERA Group recommendation"); const aiMatch = await era.getByText(/%/).first().innerText();
   await era.getByRole("button", { name: "Add to Presentation Set" }).click(); await page.getByRole("button", { name: "Start Brand Presentation" }).click();
   await expect(page.getByText("Global business consulting franchise specializing in cost optimization and operational improvement.", { exact: true })).toBeVisible();
-  await expect(page.getByText("Not Yet Profiled", { exact: true })).toBeVisible();
+  await expect(page.getByText("Curated demo profile: consulting methodology and business launch preparation", { exact: true })).toBeVisible();
   await page.goto("/crm/candidates/elena-rodriguez/strategy"); await expect(page.getByLabel("ERA Group recommendation").getByText(aiMatch, { exact: true })).toBeVisible(); await page.getByLabel("ERA Group presentation").getByRole("button", { name: "Refer", exact: true }).click();
   await page.goto("/crm/candidates/elena-rodriguez/referral"); await page.getByRole("checkbox", { name: /ERA Group/ }).check(); await page.getByRole("button", { name: "Prepare Referral Anyway" }).click();
   await expect(page.getByText("Brand Investment Range:", { exact: false })).toContainText("$85,000–$175,000");

@@ -22,7 +22,7 @@ export function AIMeetingCoach({
   return (
     <Card
       title="AI Meeting Coach"
-      subtitle="Real-time guidance generated from the candidate's FranchiseReady Intelligence Profile."
+      subtitle="Real-time guidance generated from the candidate's FranGroove Intelligence Profile."
     >
       <div className="space-y-8">
 

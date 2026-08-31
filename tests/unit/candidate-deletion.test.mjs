@@ -17,8 +17,8 @@ test("candidate deletion is RPC-only, organization-safe, and dependency guarded"
 test("server action requires confirmation and returns only fixed messages", async () => {
   const action = await read("feature/crm/actions/candidate-deletion.ts");
   assert.match(action, /formData\.get\("confirmed"\) !== "yes"/);
-  assert.match(action, /createCandidateRepository\(\)/);
-  assert.match(action, /repository\.deleteById\(candidateId\)/);
+  assert.match(action, /resolveWorkspaceComposition\(\)/);
+  assert.match(action, /composition\.dependencies\.candidates\.deleteById\(candidateId\)/);
   assert.match(action, /redirect\("\/crm\/candidates"\)/);
   assert.doesNotMatch(action, /error\.message|String\(error\)/);
 });
@@ -29,5 +29,6 @@ test("candidate workspace exposes an explicit two-step confirmation control", as
   assert.match(component, />Delete Candidate</);
   assert.match(component, /type="checkbox"[\s\S]*name="confirmed"[\s\S]*required/);
   assert.match(component, /"Confirm Delete"/);
+  assert.match(page, /isProduction && <section aria-label="Candidate administration"/);
   assert.match(page, /<DeleteCandidateControl candidateId=\{candidate\.id\}/);
 });

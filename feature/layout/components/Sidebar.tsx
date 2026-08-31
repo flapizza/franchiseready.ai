@@ -18,10 +18,9 @@ import { BrandLockup } from "@/feature/branding/components/BrandLockup";
 import { APP_ROUTES } from "@/lib/auth/constants";
 
 import { NavigationItem } from "./NavigationItem";
-import { demoTeamViewer } from "@/feature/team-mission-control/repositories/DemoTeamOperationsRepository";
-import { roleHasCapability } from "@/feature/identity/auth/capabilities";
+import type { WorkspacePresentation } from "../models/WorkspacePresentation";
 
-export function Sidebar() {
+export function Sidebar({ presentation }: { presentation: WorkspacePresentation }) {
   return (
     <aside data-app-sidebar className="flex h-full min-h-0 w-72 flex-col overflow-hidden border-r border-slate-800 bg-slate-950 text-white">
 
@@ -47,7 +46,7 @@ export function Sidebar() {
           excludedSuffixes={["/strategy", "/presentation", "/referral"]}
         />
 
-        {roleHasCapability(demoTeamViewer.role, "hierarchy:view_descendants") && <NavigationItem
+        {presentation.capabilities.includes("hierarchy:view_descendants") && <NavigationItem
           href={APP_ROUTES.teamMissionControl}
           label="Team Command Center"
           icon={<Network size={20} />}
@@ -104,7 +103,7 @@ export function Sidebar() {
 
       </nav>
 
-      <div className="hidden shrink-0 border-t border-slate-800 p-4 [@media(min-height:900px)]:block">
+      {presentation.kind === "demo" && <div className="hidden shrink-0 border-t border-slate-800 p-4 [@media(min-height:900px)]:block">
 
         <div className="rounded-2xl border border-teal-500/10 bg-gradient-to-br from-slate-900 to-slate-950 p-3 [@media(min-height:900px)]:p-4">
 
@@ -126,7 +125,7 @@ export function Sidebar() {
 
         </div>
 
-      </div>
+      </div>}
 
     </aside>
   );

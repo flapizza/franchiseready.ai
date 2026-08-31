@@ -26,7 +26,7 @@ export function DiscoveryExperiencePage({ state }: { state: DiscoveryExperienceS
 
   return <main className="mx-auto max-w-7xl space-y-6 p-6 lg:p-10">
     <header className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 pb-5">
-      <div><Link href="/crm/discovery" className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-slate-900"><ArrowLeft size={16} />Discovery queue</Link><p className="mt-4 text-xs font-black uppercase tracking-[0.22em] text-teal-600">Discovery Copilot · {phase.replace("-", " ")}</p><h1 className="mt-1 text-3xl font-black text-slate-950">{state.candidate.name}</h1></div>
+      <div><Link href={`/crm/candidates/${state.candidate.id}`} className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-slate-900"><ArrowLeft size={16} />{state.candidate.name} Candidate 360</Link><p className="mt-4 text-xs font-black uppercase tracking-[0.22em] text-teal-600">Discovery Copilot · {phase.replace("-", " ")}</p><h1 className="mt-1 text-3xl font-black text-slate-950">{state.candidate.name}</h1></div>
       <div className="flex gap-3"><Metric label="Candidate Readiness" value={`${state.candidate.readiness}%`} /><Metric label="Buying Confidence" value={`${state.candidate.buyingConfidence}%`} /></div>
     </header>
     {phase === "pre-meeting" && <PreMeeting state={state} onStart={() => setPhase("live")} />}

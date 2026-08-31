@@ -19,9 +19,14 @@ export async function POST() {
   revalidatePath("/crm/candidates/[candidateId]/strategy", "page");
   revalidatePath("/crm/candidates/[candidateId]/strategy/presentation", "page");
   revalidatePath("/crm/candidates/[candidateId]/referral", "page");
+  revalidatePath("/crm/[id]/discovery", "page");
+  revalidatePath("/crm/calendar");
   revalidatePath("/crm/tasks");
   revalidatePath("/crm/communications");
   revalidatePath("/crm/candidates/[candidateId]/playbook", "page");
   revalidatePath("/settings/pipeline");
-  return NextResponse.json({ status: "reset" });
+  return NextResponse.json(
+    { status: "reset", baseline: "ifpg-conference-demo-v1" },
+    { headers: { "Clear-Site-Data": '"storage"' } },
+  );
 }

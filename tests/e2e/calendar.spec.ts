@@ -18,7 +18,7 @@ test("invalid ranges show inline validation and are not created", async ({ page 
 });
 
 test("editing preserves the stored duration instead of applying the new-event default", async ({ page }) => {
-  await enter(page); await page.goto("/crm/calendar?event=meeting-john-discovery"); const form = page.getByRole("form", { name: "Edit meeting" }); await expect(form.getByLabel("Start Time")).toHaveValue("23:00"); await expect(form.getByLabel("End Time")).toHaveValue("23:30");
+  await enter(page); await page.goto("/crm/calendar?event=meeting-john-discovery"); const form = page.getByRole("form", { name: "Edit meeting" }); await expect(form.getByLabel("Start Time")).toHaveValue("14:00"); await expect(form.getByLabel("End Time")).toHaveValue("14:30");
 });
 
 test("Candidate 360 keeps candidate preselection and refined scheduling", async ({ page }) => {

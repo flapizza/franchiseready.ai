@@ -6,8 +6,9 @@ import { enterConferenceDemo } from "@/feature/auth/actions/enter-conference-dem
 import { demoConsultant } from "@/feature/demo/data/demoConsultant";
 import { isConferenceDemoAccessEnabled } from "@/lib/auth/demo-access";
 
-export default function LoginPage() {
+export default async function LoginPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
   const demoAccessEnabled = isConferenceDemoAccessEnabled();
+  const { next } = await searchParams;
 
   return (
     <AuthShell
@@ -15,7 +16,7 @@ export default function LoginPage() {
       description="Sign in to continue to FranGroove AI."
       footer={<><span>New here? </span><Link href={AUTH_ROUTES.signup} className="font-semibold text-brand hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand">Create an account</Link></>}
     >
-      <LoginForm />
+      <LoginForm nextPath={next} />
       {demoAccessEnabled ? (
         <>
           <div className="my-6 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.18em] text-muted">

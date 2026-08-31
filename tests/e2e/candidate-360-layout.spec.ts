@@ -30,8 +30,8 @@ async function expectSingleScrollOwner(page: Page) {
   await page.mouse.wheel(0, 1100);
   await expect.poll(() => scroll.evaluate((element) => element.scrollTop)).toBeGreaterThan(0);
   const state = await page.evaluate(() => {
-    const shell = document.querySelector("[data-app-shell]")!.getBoundingClientRect(); const sidebar = document.querySelector("[data-app-sidebar]")!.getBoundingClientRect(); const topbar = document.querySelector("[data-app-topbar]")!.getBoundingClientRect(); const main = document.querySelector("[data-workspace-scroll]")!; const mainRect = main.getBoundingClientRect();
-    return { innerHeight: window.innerHeight, windowScrollY: window.scrollY, documentScrollTop: document.documentElement.scrollTop, bodyScrollTop: document.body.scrollTop, documentScrollHeight: document.documentElement.scrollHeight, bodyScrollHeight: document.body.scrollHeight, htmlOverflow: getComputedStyle(document.documentElement).overflowY, bodyOverflow: getComputedStyle(document.body).overflowY, mainScrollTop: main.scrollTop, shellBottom: shell.bottom, sidebarTop: sidebar.top, sidebarBottom: sidebar.bottom, topbarTop: topbar.top, topbarPosition: getComputedStyle(document.querySelector("[data-app-topbar]")!).position, mainBottom: mainRect.bottom };
+    const shell = document.querySelector("[data-app-shell]")!.getBoundingClientRect(); const sidebar = document.querySelector("[data-app-sidebar]")!.getBoundingClientRect(); const notice = document.querySelector('[aria-label="Demo workspace data notice"]')!.getBoundingClientRect(); const topbar = document.querySelector("[data-app-topbar]")!.getBoundingClientRect(); const main = document.querySelector("[data-workspace-scroll]")!; const mainRect = main.getBoundingClientRect();
+    return { innerHeight: window.innerHeight, windowScrollY: window.scrollY, documentScrollTop: document.documentElement.scrollTop, bodyScrollTop: document.body.scrollTop, documentScrollHeight: document.documentElement.scrollHeight, bodyScrollHeight: document.body.scrollHeight, htmlOverflow: getComputedStyle(document.documentElement).overflowY, bodyOverflow: getComputedStyle(document.body).overflowY, mainScrollTop: main.scrollTop, shellBottom: shell.bottom, sidebarTop: sidebar.top, sidebarBottom: sidebar.bottom, noticeBottom: notice.bottom, topbarTop: topbar.top, topbarPosition: getComputedStyle(document.querySelector("[data-app-topbar]")!).position, mainBottom: mainRect.bottom };
   });
   expect(state.windowScrollY).toBe(0);
   expect(state.documentScrollTop).toBe(0);
@@ -45,7 +45,7 @@ async function expectSingleScrollOwner(page: Page) {
   expect(Math.abs(state.sidebarTop)).toBeLessThanOrEqual(1);
   expect(Math.abs(state.sidebarBottom - state.innerHeight)).toBeLessThanOrEqual(1);
   expect(Math.abs(state.mainBottom - state.innerHeight)).toBeLessThanOrEqual(1);
-  expect(Math.abs(state.topbarTop)).toBeLessThanOrEqual(1);
+  expect(Math.abs(state.topbarTop - state.noticeBottom)).toBeLessThanOrEqual(1);
   expect(state.topbarPosition).toBe("static");
 }
 

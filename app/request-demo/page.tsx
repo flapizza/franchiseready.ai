@@ -1,5 +1,4 @@
 import { Calendar, CheckCircle2, MessageSquare } from "lucide-react";
-import Link from "next/link";
 
 export default function RequestDemoPage() {
   return (
@@ -69,13 +68,12 @@ export default function RequestDemoPage() {
 
             </div>
 
-            <Link
-              href="https://calendly.com/YOUR-CALENDLY-LINK"
-              target="_blank"
-              className="mt-10 inline-flex w-full items-center justify-center rounded-xl bg-brand px-6 py-4 text-center text-lg font-semibold text-brand-foreground transition hover:bg-brand-strong"
+            <div
+              aria-label="Demo scheduling is not connected"
+              className="mt-10 inline-flex w-full cursor-not-allowed items-center justify-center rounded-xl bg-slate-200 px-6 py-4 text-center text-lg font-semibold text-slate-600"
             >
-              Schedule My Demo
-            </Link>
+              Scheduling Link Coming Soon
+            </div>
 
           </div>
 

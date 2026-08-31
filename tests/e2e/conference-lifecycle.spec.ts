@@ -54,7 +54,7 @@ test("consultant-first candidate remains one identity through assessment and Dis
   await expect(page.getByText("New Candidate", { exact: true }).last()).toBeVisible();
   await page.getByRole("button", { name: "Send Assessment" }).click();
   await expect(page.getByRole("paragraph").filter({ hasText: /^Assessment Invitation Sent$/ })).toBeVisible();
-  await page.getByRole("link", { name: "Open Assessment" }).click();
+  await page.getByRole("link", { name: "Open Assessment" }).last().click();
   await expect(page).toHaveURL(/\/assessment\/start\?invitation=/);
   await completeCurrentAssessment(page, email);
   await page.goto(candidateUrl);

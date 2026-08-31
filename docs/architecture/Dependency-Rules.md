@@ -267,6 +267,44 @@ It does not generate AI reasoning.
 
 # Import Rules
 
+## Protected Route and Server Action Composition Boundary
+
+Protected routes and server actions must obtain persistence and integration
+dependencies from the server-only workspace composition root.
+
+They must not directly construct or import:
+
+- Demo or seed repositories and process-local stores
+- Supabase or other production repository adapters
+- Provider-specific persistence or delivery adapters
+- Demo consultant, demo team, or conference-store identity as authorization
+
+Server actions are independent entry points. They must resolve the workspace
+composition again, authorize the actor and resource through that boundary, and
+then call the selected service. A page-level check is not inherited by an
+action.
+
+Demo and production selection is explicit and fail-closed. Production errors,
+missing implementations, provider configuration, authorization, entitlement,
+usage allowance, and consent/compliance are separate states. None may cause a
+production request to fall back to demo data.
+
+Protected route and server-action migration is complete. Direct dependency
+selection is permitted only in explicit demo composition/factory modules,
+fixtures and tests, and safeguarded demo-only reset/failure/test endpoints.
+Production-backed routes must not use a demo implementation when resolution or
+a production dependency fails.
+
+Allowed composition ownership:
+
+- `feature/platform/composition` owns workspace session and composition
+  contracts.
+- Demo and production composition adapters own concrete dependency selection.
+- Repository implementations remain owned by their features.
+
+The composition contract itself must remain server-only and must not import a
+concrete repository or provider adapter.
+
 Preferred
 
 import { CandidateRepository }

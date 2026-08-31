@@ -3,6 +3,8 @@ export interface BrandProfile {
 
   name: string;
 
+  demoClassification: "existing-demo-profile" | "curated-demo-concept";
+
   shortDescription: string;
 
   category: string;
@@ -22,6 +24,17 @@ export interface BrandProfile {
   businessModel: BusinessModelProfile;
 
   operatingModel: OperatingModelProfile;
+
+  operatingEnvironment: string;
+
+  territoryModel: string;
+
+  trainingSupport: {
+    initialTraining: string;
+    launchSupport: string;
+    ongoingSupport: string;
+    technologySupport: string;
+  };
 
   culture: string[];
 

@@ -7,9 +7,9 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SignOutButton } from "@/feature/auth/components/sign-out-button";
-import { demoConsultant } from "@/feature/demo/data/demoConsultant";
+import type { WorkspacePresentation } from "../models/WorkspacePresentation";
 
-export function TopBar() {
+export function TopBar({ presentation }: { presentation: WorkspacePresentation }) {
   const pathname = usePathname();
   const context = pathname === "/crm/referrals"
     ? { eyebrow: "Consultant Workspace", title: "Referral Studio", description: "Manage candidates ready for referral preparation and introduction." }
@@ -30,7 +30,7 @@ export function TopBar() {
     : /^\/crm\/candidates\/[^/]+\/strategy$/.test(pathname)
     ? { eyebrow: "AI Brand Strategy", title: "Brand Strategy", description: "Evaluate candidate-brand fit, presentation order, and readiness for introduction." }
     : pathname === "/crm"
-    ? { eyebrow: "Mission Control", title: `Welcome back, ${demoConsultant.firstName}.`, description: "Your AI team has prioritized the candidates and actions that deserve attention today." }
+    ? { eyebrow: "Mission Control", title: `Welcome back, ${presentation.identity.greetingName}.`, description: "Your workspace has prioritized the candidates and actions that deserve attention today." }
     : pathname === "/crm/candidates/new"
       ? { eyebrow: "Candidate Intake", title: "New Candidate", description: "Create the relationship first, then invite the candidate to complete their assessment." }
       : pathname === "/crm/candidates"
@@ -41,7 +41,7 @@ export function TopBar() {
             ? { eyebrow: "Discovery Copilot", title: "Discovery", description: "Validate ownership goals, risks, and evidence before Brand Strategy." }
             : /^\/crm\/[^/]+\/briefing$/.test(pathname)
               ? { eyebrow: "Consultant Briefing", title: "Meeting Brief", description: "Prepare candidate context, objectives, and conversation guidance." }
-        : { eyebrow: "FranGroove Workspace", title: `Welcome back, ${demoConsultant.firstName}.`, description: "Your consultant workspace is ready." };
+        : { eyebrow: "FranGroove Workspace", title: `Welcome back, ${presentation.identity.greetingName}.`, description: "Your consultant workspace is ready." };
   return (
     <header data-app-topbar className="z-20 shrink-0 border-b border-slate-200 bg-white/95 backdrop-blur">
 
@@ -77,7 +77,7 @@ export function TopBar() {
 
           </Link>
 
-          <div className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+          {presentation.kind === "demo" && <div className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
 
             <div className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
 
@@ -90,22 +90,22 @@ export function TopBar() {
               AI Active
             </span>
 
-          </div>
+          </div>}
 
           <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-2 shadow-sm">
 
             <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-slate-900 to-slate-700 font-bold text-white">
-              {demoConsultant.initials}
+              {presentation.identity.initials}
             </div>
 
             <div>
 
               <div className="font-semibold text-slate-900">
-                {demoConsultant.displayName}
+                {presentation.identity.displayName}
               </div>
 
               <div className="text-sm text-slate-500">
-                {demoConsultant.title}
+                {presentation.identity.title}
               </div>
 
             </div>

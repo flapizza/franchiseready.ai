@@ -15,7 +15,7 @@ export function CandidateSpotlight({ candidate }: Props) {
       <div className="grid gap-8 p-7 lg:grid-cols-[1.45fr_0.8fr] lg:p-8">
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.3em] text-blue-200">
-            Top Opportunity
+            {candidate.spotlightLabel}
           </p>
           <h2 className="mt-3 text-4xl font-black tracking-tight">
             {candidate.candidateName}

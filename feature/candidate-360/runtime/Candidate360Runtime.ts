@@ -1,22 +1,16 @@
 import type { CandidateRepository } from "@/feature/crm/repositories/CandidateRepository";
 import type { CandidateRecord } from "@/feature/crm/models/CandidateRecord";
-import { SeedCandidateRepository } from "@/feature/crm/repositories/SeedCandidateRepository";
-import { AssessmentInvitationService } from "@/feature/crm/services/AssessmentInvitationService";
+import type { AssessmentInvitationService } from "@/feature/crm/services/AssessmentInvitationService";
 import type { Activity, ActivityType } from "@/feature/crm/models/Activity";
 import type { CandidateActivityRepository } from "@/feature/crm/repositories/CandidateActivityRepository";
-import { DemoCandidateActivityRepository } from "@/feature/crm/repositories/DemoCandidateActivityRepository";
 import type { DemoScenarioRepository } from "@/feature/demo/repositories/DemoScenarioRepository";
-import { SeedDemoScenarioRepository } from "@/feature/demo/repositories/SeedDemoScenarioRepository";
-import { createDemoCandidateLifecycleService } from "@/feature/crm/services/DemoCandidateLifecycleService";
-import { demoCandidateOverlayStore } from "@/feature/crm/repositories/DemoCandidateOverlayStore";
-import { getConferenceReferralHistory } from "@/feature/demo/data/conferenceReferralHistory";
-import { CandidateBrandStrategyRuntime } from "@/feature/brand-strategy/runtime/CandidateBrandStrategyRuntime";
-import { EmailCommunicationRuntime } from "@/feature/communications/runtime/EmailCommunicationRuntime";
-import { DemoEmailRepository } from "@/feature/communications/repositories/DemoEmailRepository";
-import { demoConsultant } from "@/feature/demo/data/demoConsultant";
-import { DemoConsultantPipelineRepository } from "@/feature/pipeline/repositories/DemoConsultantPipelineRepository";
-import { PipelineConfigurationService } from "@/feature/pipeline/services/PipelineConfigurationService";
-import { DemoCalendarRepository } from "@/feature/calendar/repositories/DemoCalendarRepository";
+import type { CandidateLifecycleService } from "@/feature/crm/services/CandidateLifecycleService";
+import type { CandidateBrandStrategyRuntime } from "@/feature/brand-strategy/runtime/CandidateBrandStrategyRuntime";
+import type { EmailCommunicationRuntime } from "@/feature/communications/runtime/EmailCommunicationRuntime";
+import type { EmailEngagementEvent } from "@/feature/communications/models/EmailEngagementEvent";
+import type { PipelineConfigurationService } from "@/feature/pipeline/services/PipelineConfigurationService";
+import type { CalendarRepository } from "@/feature/calendar/repositories/CalendarRepository";
+import type { CandidateBrandReferral } from "@/feature/referral-package/models/CandidateBrandReferral";
 import { formatEventDate, formatEventTime } from "@/feature/calendar/time/ConsultantTime";
 
 import type { Candidate360State, CandidateActivityState } from "../models/Candidate360State";
@@ -56,34 +50,46 @@ function formatActivityDate(value: string): string {
 }
 
 export class Candidate360Runtime {
-  public constructor(
-    private readonly candidates: CandidateRepository =
-      new SeedCandidateRepository(),
-    private readonly scenarios: DemoScenarioRepository =
-      new SeedDemoScenarioRepository(),
-    private readonly activityRepository: CandidateActivityRepository =
-      new DemoCandidateActivityRepository(),
-    private readonly rootOnly = false,
-    private readonly productionAssessment: ProductionAssessmentSession | null = null,
-  ) {}
+  public constructor(private readonly dependencies: {
+    candidates: CandidateRepository;
+    rootOnly: boolean;
+    productionAssessment?: ProductionAssessmentSession | null;
+    demo?: {
+      scenarios: DemoScenarioRepository;
+      activities: CandidateActivityRepository;
+      calendar: CalendarRepository;
+      pipeline: PipelineConfigurationService;
+      invitations: Pick<AssessmentInvitationService, "getForCandidate">;
+      lifecycle: Pick<CandidateLifecycleService, "getRecommendedAction">;
+      referrals: (candidateId: string) => CandidateBrandReferral[];
+      referralHistory: (candidateId: string) => CandidateBrandReferral[];
+      strategy: Pick<CandidateBrandStrategyRuntime, "load">;
+      email: Pick<EmailCommunicationRuntime, "load">;
+      emailEvents: { getEvents(candidateId: string): EmailEngagementEvent[] };
+      consultant: { displayName: string; email?: string | null };
+      now?: () => Date;
+    };
+  }) {}
 
   public async load(candidateId: string): Promise<Candidate360State | null> {
-    const candidate = await this.candidates.getById(candidateId);
+    const candidate = await this.dependencies.candidates.getById(candidateId);
 
     if (!candidate) return null;
-    if (this.rootOnly) return this.loadRootOnly(candidate);
-    const nextMeeting = (await new DemoCalendarRepository().getEvents(candidate.consultantId)).filter((event) => event.candidateId === candidate.id && event.status === "scheduled" && Date.parse(event.endAt) >= Date.now()).sort((a, b) => Date.parse(a.startAt) - Date.parse(b.startAt))[0];
-    const pipelineService = new PipelineConfigurationService(new DemoConsultantPipelineRepository(), this.candidates);
+    if (this.dependencies.rootOnly) return this.loadRootOnly(candidate);
+    const demo = this.dependencies.demo;
+    if (!demo) throw new Error("Candidate 360 demo dependencies are required outside root-only production mode.");
+    const nextMeeting = (await demo.calendar.getEvents(candidate.consultantId)).filter((event) => event.candidateId === candidate.id && event.status === "scheduled" && Date.parse(event.endAt) >= (demo.now?.() ?? new Date()).getTime()).sort((a, b) => Date.parse(a.startAt) - Date.parse(b.startAt))[0];
+    const pipelineService = demo.pipeline;
     const pipeline = await pipelineService.get(candidate.consultantId);
     const visibleStage = pipelineService.resolveStage(pipeline, candidate);
 
-    const invitation = new AssessmentInvitationService(this.candidates).getForCandidate(candidate.id);
-    const scenarioCandidate = await this.scenarios.getCandidateById(candidate.id);
+    const invitation = demo.invitations.getForCandidate(candidate.id);
+    const scenarioCandidate = await demo.scenarios.getCandidateById(candidate.id);
     const intelligence = candidate.intelligence;
-    const lifecycleAction = createDemoCandidateLifecycleService(this.candidates).getRecommendedAction(candidate);
-    const overlayReferrals = demoCandidateOverlayStore.getCandidateReferrals(candidate.id);
-    const referrals = overlayReferrals.length ? overlayReferrals : getConferenceReferralHistory(candidate.id);
-    const brandStrategy = candidate.intelligence ? await new CandidateBrandStrategyRuntime().load(candidate.id) : null;
+    const lifecycleAction = demo.lifecycle.getRecommendedAction(candidate);
+    const overlayReferrals = demo.referrals(candidate.id);
+    const referrals = overlayReferrals.length ? overlayReferrals : demo.referralHistory(candidate.id);
+    const brandStrategy = candidate.intelligence ? await demo.strategy.load(candidate.id) : null;
     const awaitingApproval = referrals.filter((item) => item.status === "ready-for-review").length;
     const approvedReferrals = referrals.filter((item) => item.status === "approved").length;
     const assessmentStatus = candidate.pipelineStage === "assessment-started"
@@ -91,13 +97,13 @@ export class Candidate360Runtime {
       : intelligence ? "completed" as const : "not-completed" as const;
     const lifecycleDetail = this.lifecycleDetail(candidate.pipelineStage);
     const assessment = assessmentStatus === "completed"
-      ? { label: candidate.pipelineStage === "awarded" ? "Placement Awarded" : "Assessment Complete", detail: lifecycleDetail, invitationSent: Boolean(invitation), actionLabel: candidate.pipelineStage === "awarded" ? "View Referral History" : "Open Candidate Workspace", actionHref: candidate.pipelineStage === "awarded" ? `/crm/candidates/${candidate.id}/referral` : `/crm/${candidate.id}/discovery` }
+      ? { label: candidate.pipelineStage === "awarded" ? "Placement Awarded" : "Assessment Complete", detail: lifecycleDetail, invitationSent: Boolean(invitation), actionLabel: candidate.pipelineStage === "awarded" ? "View Referral History" : "Review Assessment Intelligence", actionHref: candidate.pipelineStage === "awarded" ? `/crm/candidates/${candidate.id}/referral` : `/crm/candidates/${candidate.id}#assessment-intelligence` }
       : assessmentStatus === "pending"
         ? { label: "Assessment Pending", detail: invitation ? `Invitation sent to ${invitation.candidateEmail}. The candidate has not completed the assessment yet.` : "The assessment is pending, but an active invitation link is not available. Send a new invitation to continue.", invitationSent: Boolean(invitation), actionLabel: invitation ? "Open Assessment" : "Send Assessment", actionHref: invitation?.assessmentUrl }
         : { label: "Assessment Not Started", detail: "No completed assessment or Candidate Intelligence is available.", invitationSent: false, actionLabel: "Send Assessment" };
 
-    const emails = new EmailCommunicationRuntime().load(candidate.id);
-    const emailEvents = new DemoEmailRepository().getEvents(candidate.id);
+    const emails = demo.email.load(candidate.id);
+    const emailEvents = demo.emailEvents.getEvents(candidate.id);
     const emailActivities: CandidateActivityState[] = emails.flatMap((message) => {
       const own = emailEvents.filter((event) => event.messageId === message.messageId);
       const opens = own.filter((event) => event.type === "open");
@@ -111,7 +117,7 @@ export class Candidate360Runtime {
       if (replies.length) values.push({ id: `${message.messageId}:reply`, title: "Candidate Replied", description: message.subject, timestamp: replies.at(-1)!.occurredAt, dateLabel: formatActivityDate(replies.at(-1)!.occurredAt), icon: "email", tone: "emerald" });
       return values;
     });
-    const overlayActivities = await this.activityRepository.getByCandidateId(candidate.id);
+    const overlayActivities = await demo.activities.getByCandidateId(candidate.id);
     const baselineActivities: CandidateActivityState[] = (scenarioCandidate?.recentActivity ?? []).map((activity) => ({
       id: activity.id, title: activity.title, description: activity.detail,
       timestamp: activity.occurredAt, dateLabel: formatActivityDate(activity.occurredAt), icon: "activity", tone: "slate",
@@ -123,7 +129,7 @@ export class Candidate360Runtime {
       id: candidate.id,
       fullName: `${candidate.firstName} ${candidate.lastName}`,
       email: candidate.email,
-      consultantSender: { name: demoConsultant.displayName, email: demoConsultant.email ?? null },
+      consultantSender: { name: demo.consultant.displayName, email: demo.consultant.email ?? null },
       emails,
       currentStage: visibleStage.displayName,
       currentStageId: visibleStage.stageId,
@@ -169,7 +175,7 @@ export class Candidate360Runtime {
 
   private loadRootOnly(candidate: CandidateRecord): Candidate360State {
     const stage = candidate.pipelineStageId ?? candidate.pipelineStage;
-    const session=this.productionAssessment;
+    const session=this.dependencies.productionAssessment ?? null;
     const complete=session?.status==="analyzed"&&Boolean(session.analysis);
     const pending=session?.status==="in-progress";
     return {

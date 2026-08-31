@@ -1,21 +1,15 @@
 import type { ConsultantTask } from "../models/ConsultantTask";
 import type { TaskRepository } from "./TaskRepository";
 import { demoCandidateOverlayStore } from "@/feature/crm/repositories/DemoCandidateOverlayStore";
-
-function localDue(days: number, hour = 12): string {
-  const value = new Date();
-  value.setHours(hour, 0, 0, 0);
-  value.setDate(value.getDate() + days);
-  return value.toISOString();
-}
+import { conferenceDemoIso } from "@/feature/demo/time/conferenceDemoClock";
 
 function seedTasks(consultantId: string): ConsultantTask[] {
-  const createdAt = localDue(-10, 9);
+  const createdAt = conferenceDemoIso(-10, 9);
   return [
-    { taskId: "task-seed-overdue-mike", consultantId, createdByConsultantId: consultantId, assignedToConsultantId: consultantId, candidateId: "mike-lavalle", title: "Follow up on Discovery concerns", description: "Clarify the remaining family alignment concern before validation.", status: "open", priority: "urgent", dueAt: localDue(-1, 10), source: "discovery", sourceReferenceId: "discovery:mike-lavalle", recommendedReason: "Discovery identified an unresolved family-alignment concern.", createdAt, updatedAt: createdAt },
-    { taskId: "task-seed-today-michael", consultantId, createdByConsultantId: consultantId, assignedToConsultantId: consultantId, candidateId: "michael-chen", title: "Prepare for Discovery call", description: "Review the assessment evidence and financial goals.", status: "open", priority: "high", dueAt: localDue(0, 14), source: "consultant", createdAt, updatedAt: createdAt },
-    { taskId: "task-seed-upcoming-sarah", consultantId, createdByConsultantId: consultantId, assignedToConsultantId: consultantId, candidateId: "sarah-williams", title: "Check referral acknowledgement", status: "open", priority: "normal", dueAt: localDue(3, 11), source: "referral", sourceReferenceId: "referral:sarah-williams", recommendedReason: "Confirm the brand received the introduction.", createdAt, updatedAt: createdAt },
-    { taskId: "task-seed-completed-jared", consultantId, createdByConsultantId: consultantId, assignedToConsultantId: consultantId, candidateId: "jared-wirsig", title: "Send presentation recap", status: "completed", priority: "normal", dueAt: localDue(-3, 16), completedAt: localDue(-3, 15), source: "brand-presentation", sourceReferenceId: "presentation:jared-wirsig", createdAt, updatedAt: localDue(-3, 15) },
+    { taskId: "task-seed-overdue-mike", consultantId, createdByConsultantId: consultantId, assignedToConsultantId: consultantId, candidateId: "mike-lavalle", title: "Follow up on Discovery concerns", description: "Clarify ownership motivation and decision timing before validation.", status: "open", priority: "urgent", dueAt: conferenceDemoIso(-1, 10), source: "discovery", sourceReferenceId: "discovery:mike-lavalle", recommendedReason: "Discovery identified unresolved ownership-motivation and timeline questions.", createdAt, updatedAt: createdAt },
+    { taskId: "task-seed-today-michael", consultantId, createdByConsultantId: consultantId, assignedToConsultantId: consultantId, candidateId: "michael-chen", title: "Prepare for Discovery call", description: "Review the assessment evidence and financial goals.", status: "open", priority: "high", dueAt: conferenceDemoIso(0, 15), source: "consultant", createdAt, updatedAt: createdAt },
+    { taskId: "task-seed-upcoming-sarah", consultantId, createdByConsultantId: consultantId, assignedToConsultantId: consultantId, candidateId: "sarah-williams", title: "Review prepared referral package", status: "open", priority: "normal", dueAt: conferenceDemoIso(3, 11), source: "referral", sourceReferenceId: "referral:sarah-williams", recommendedReason: "Review and approve the prepared ERA Group introduction.", createdAt, updatedAt: createdAt },
+    { taskId: "task-seed-completed-jared", consultantId, createdByConsultantId: consultantId, assignedToConsultantId: consultantId, candidateId: "jared-wirsig", title: "Send presentation recap", status: "completed", priority: "normal", dueAt: conferenceDemoIso(-3, 16), completedAt: conferenceDemoIso(-3, 15), source: "brand-presentation", sourceReferenceId: "presentation:jared-wirsig", createdAt, updatedAt: conferenceDemoIso(-3, 15) },
   ];
 }
 

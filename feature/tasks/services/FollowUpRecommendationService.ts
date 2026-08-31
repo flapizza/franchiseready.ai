@@ -4,10 +4,8 @@ import { EmailCommunicationRuntime } from "@/feature/communications/runtime/Emai
 import type { FollowUpRecommendation, TaskPriority, TaskSource } from "../models/ConsultantTask";
 import type { TaskRepository } from "../repositories/TaskRepository";
 
-const due = (days: number) => { const value = new Date(); value.setHours(12, 0, 0, 0); value.setDate(value.getDate() + days); return value.toISOString(); };
-
 export class FollowUpRecommendationService {
-  constructor(private readonly tasks: TaskRepository) {}
+  constructor(private readonly tasks: TaskRepository, private readonly now: () => Date = () => new Date()) {}
 
   async build(consultantId: string, candidates: CandidateRecord[]): Promise<FollowUpRecommendation[]> {
     const recommendations: FollowUpRecommendation[] = [];
@@ -32,6 +30,7 @@ export class FollowUpRecommendationService {
   }
 
   private item(consultantId: string, candidateId: string, title: string, reason: string, priority: TaskPriority, source: Exclude<TaskSource, "consultant" | "system">, sourceReferenceId: string, days: number): FollowUpRecommendation {
-    return { recommendationId: `recommendation:${sourceReferenceId}`, consultantId, candidateId, title, reason, priority, suggestedDueAt: due(days), source, sourceReferenceId, actionType: "create-task" };
+    const dueAt = this.now(); dueAt.setHours(12, 0, 0, 0); dueAt.setDate(dueAt.getDate() + days);
+    return { recommendationId: `recommendation:${sourceReferenceId}`, consultantId, candidateId, title, reason, priority, suggestedDueAt: dueAt.toISOString(), source, sourceReferenceId, actionType: "create-task" };
   }
 }
