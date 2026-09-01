@@ -9,6 +9,7 @@ import { OAuthTransactionRepository } from "@/feature/connected-email/repositori
 import { GoogleConnectionService } from "@/feature/connected-email/services/GoogleConnectionService";
 import { GoogleConnectionProvider } from "@/feature/connected-email/providers/google/GoogleConnectionProvider";
 import { SupabaseCandidateRepository } from "@/feature/crm/repositories/SupabaseCandidateRepository";
+import { SupabaseContactRepository } from "@/feature/contacts/repositories/SupabaseContactRepository";
 import { ProductionCandidateResolutionService } from "@/feature/crm/services/ProductionCandidateResolutionService";
 import { ProductionCandidateCRMRuntime } from "@/feature/crm/runtime/ProductionCandidateCRMRuntime";
 import { SupabaseDiscoveryRepository } from "@/feature/discovery/production/SupabaseDiscoveryRepository";
@@ -49,6 +50,7 @@ const unavailable: FeatureAvailability = {
 const productionFeatures: WorkspaceFeatureAvailability = {
   "mission-control": unavailable,
   candidates: available(),
+  contacts: available(),
   assessments: available(),
   discovery: available(),
   tasks: unavailable,
@@ -65,6 +67,7 @@ const productionFeatures: WorkspaceFeatureAvailability = {
 export interface ProductionWorkspaceDependencies {
   workspaceContext: AuthenticatedWorkspaceContext;
   candidates: SupabaseCandidateRepository;
+  contacts: SupabaseContactRepository;
   assessments: SupabaseAssessmentRepository;
   discovery: SupabaseDiscoveryRepository;
   emailAccounts: ConnectedEmailAccountRepository;
@@ -140,6 +143,7 @@ export async function createProductionWorkspaceComposition(
     dependencies: (() => { const candidates = new SupabaseCandidateRepository(client, context); return {
       workspaceContext: context,
       candidates,
+      contacts: new SupabaseContactRepository(client, context),
       assessments: new SupabaseAssessmentRepository(client, context),
       discovery: new SupabaseDiscoveryRepository(client),
       emailAccounts: new ConnectedEmailAccountRepository(),

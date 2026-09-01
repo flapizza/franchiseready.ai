@@ -308,6 +308,7 @@ export type Database = {
         Row: {
           archived_at: string | null
           assigned_membership_id: string
+          contact_id: string | null
           created_at: string
           created_by_membership_id: string
           email: string
@@ -325,6 +326,7 @@ export type Database = {
         Insert: {
           archived_at?: string | null
           assigned_membership_id: string
+          contact_id?: string | null
           created_at?: string
           created_by_membership_id: string
           email: string
@@ -342,6 +344,7 @@ export type Database = {
         Update: {
           archived_at?: string | null
           assigned_membership_id?: string
+          contact_id?: string | null
           created_at?: string
           created_by_membership_id?: string
           email?: string
@@ -362,6 +365,13 @@ export type Database = {
             columns: ["assigned_membership_id", "organization_id"]
             isOneToOne: false
             referencedRelation: "organization_memberships"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "candidates_contact_same_organization_fk"
+            columns: ["contact_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
             referencedColumns: ["id", "organization_id"]
           },
           {
@@ -531,6 +541,118 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "organization_memberships"
             referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      contacts: {
+        Row: {
+          address_line_1: string | null
+          address_line_2: string | null
+          archived_at: string | null
+          assigned_membership_id: string
+          city: string | null
+          company: string | null
+          country: string
+          created_at: string
+          created_by_membership_id: string
+          first_name: string
+          id: string
+          last_name: string
+          lifecycle_status: Database["public"]["Enums"]["contact_lifecycle_status"]
+          marketing_email_status: Database["public"]["Enums"]["marketing_permission_status"]
+          marketing_sms_status: Database["public"]["Enums"]["marketing_permission_status"]
+          normalized_primary_email: string | null
+          normalized_primary_phone: string | null
+          organization_id: string
+          postal_code: string | null
+          preferred_name: string | null
+          primary_email: string | null
+          primary_phone: string | null
+          public_id: string
+          source: string
+          state_province: string | null
+          title_occupation: string | null
+          updated_at: string
+        }
+        Insert: {
+          address_line_1?: string | null
+          address_line_2?: string | null
+          archived_at?: string | null
+          assigned_membership_id: string
+          city?: string | null
+          company?: string | null
+          country?: string
+          created_at?: string
+          created_by_membership_id: string
+          first_name: string
+          id?: string
+          last_name: string
+          lifecycle_status?: Database["public"]["Enums"]["contact_lifecycle_status"]
+          marketing_email_status?: Database["public"]["Enums"]["marketing_permission_status"]
+          marketing_sms_status?: Database["public"]["Enums"]["marketing_permission_status"]
+          normalized_primary_email?: string | null
+          normalized_primary_phone?: string | null
+          organization_id: string
+          postal_code?: string | null
+          preferred_name?: string | null
+          primary_email?: string | null
+          primary_phone?: string | null
+          public_id?: string
+          source?: string
+          state_province?: string | null
+          title_occupation?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address_line_1?: string | null
+          address_line_2?: string | null
+          archived_at?: string | null
+          assigned_membership_id?: string
+          city?: string | null
+          company?: string | null
+          country?: string
+          created_at?: string
+          created_by_membership_id?: string
+          first_name?: string
+          id?: string
+          last_name?: string
+          lifecycle_status?: Database["public"]["Enums"]["contact_lifecycle_status"]
+          marketing_email_status?: Database["public"]["Enums"]["marketing_permission_status"]
+          marketing_sms_status?: Database["public"]["Enums"]["marketing_permission_status"]
+          normalized_primary_email?: string | null
+          normalized_primary_phone?: string | null
+          organization_id?: string
+          postal_code?: string | null
+          preferred_name?: string | null
+          primary_email?: string | null
+          primary_phone?: string | null
+          public_id?: string
+          source?: string
+          state_province?: string | null
+          title_occupation?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contacts_assignee_same_organization_fk"
+            columns: ["assigned_membership_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization_memberships"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "contacts_creator_same_organization_fk"
+            columns: ["created_by_membership_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization_memberships"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "contacts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -1571,6 +1693,12 @@ export type Database = {
           submitted_at: string
         }[]
       }
+      promote_contact_to_candidate: {
+        Args: { target_contact_public_id: string }
+        Returns: {
+          candidate_public_id: string
+        }[]
+      }
       regenerate_assessment_analysis: {
         Args: {
           replacement_analysis: Json
@@ -1776,6 +1904,13 @@ export type Database = {
         | "action-required"
         | "revoked"
         | "disconnected"
+      contact_lifecycle_status:
+        | "prospect"
+        | "engaged"
+        | "active-candidate"
+        | "nurture"
+        | "closed-placed"
+        | "historical"
       discovery_finding_status:
         | "confirmed"
         | "refined"
@@ -1793,6 +1928,11 @@ export type Database = {
         | "ambiguous"
       email_provider: "google" | "microsoft"
       email_recipient_kind: "to" | "cc" | "bcc"
+      marketing_permission_status:
+        | "unknown"
+        | "opted-in"
+        | "opted-out"
+        | "suppressed"
       membership_invitation_status: "pending" | "accepted" | "revoked"
       membership_onboarding_status: "not-started" | "in-progress" | "completed"
       membership_role: "owner" | "admin" | "manager" | "consultant"
@@ -1955,6 +2095,14 @@ export const Constants = {
         "revoked",
         "disconnected",
       ],
+      contact_lifecycle_status: [
+        "prospect",
+        "engaged",
+        "active-candidate",
+        "nurture",
+        "closed-placed",
+        "historical",
+      ],
       discovery_finding_status: [
         "confirmed",
         "refined",
@@ -1975,6 +2123,12 @@ export const Constants = {
       ],
       email_provider: ["google", "microsoft"],
       email_recipient_kind: ["to", "cc", "bcc"],
+      marketing_permission_status: [
+        "unknown",
+        "opted-in",
+        "opted-out",
+        "suppressed",
+      ],
       membership_invitation_status: ["pending", "accepted", "revoked"],
       membership_onboarding_status: ["not-started", "in-progress", "completed"],
       membership_role: ["owner", "admin", "manager", "consultant"],

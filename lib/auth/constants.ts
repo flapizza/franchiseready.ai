@@ -12,6 +12,7 @@ export const APP_ROUTES = {
   missionControl: "/crm",
   teamMissionControl: "/crm/team",
   candidates: "/crm/candidates",
+  contacts: "/crm/contacts",
   candidateIntelligence: "/crm/candidates",
   tasks: "/crm/tasks",
   calendar: "/crm/calendar",

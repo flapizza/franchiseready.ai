@@ -4,6 +4,7 @@ import { getConferenceDemoUser } from "@/lib/auth/demo-session";
 import { isConferenceDemoAccessEnabled } from "@/lib/auth/demo-access";
 import { demoCandidateOverlayStore } from "@/feature/crm/repositories/DemoCandidateOverlayStore";
 import { conferenceAssessmentStore } from "@/feature/assessment-engine/conference/ConferenceAssessmentStore";
+import { demoContactStore } from "@/feature/contacts/repositories/DemoContactStore";
 
 export async function POST() {
   if (!isConferenceDemoAccessEnabled()) {
@@ -13,8 +14,10 @@ export async function POST() {
   if (!user) return new NextResponse("Forbidden", { status: 403 });
   demoCandidateOverlayStore.reset();
   conferenceAssessmentStore.clear();
+  demoContactStore.reset();
   revalidatePath("/crm");
   revalidatePath("/crm/candidates");
+  revalidatePath("/crm/contacts");
   revalidatePath("/crm/candidates/[candidateId]", "page");
   revalidatePath("/crm/candidates/[candidateId]/strategy", "page");
   revalidatePath("/crm/candidates/[candidateId]/strategy/presentation", "page");

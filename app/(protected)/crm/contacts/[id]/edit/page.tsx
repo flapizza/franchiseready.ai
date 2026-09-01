@@ -1,0 +1,5 @@
+import { notFound } from "next/navigation";
+import { updateContactAction } from "@/feature/contacts/actions/contact-actions";
+import { ContactForm } from "@/feature/contacts/components/ContactForm";
+import { resolveWorkspaceComposition } from "@/feature/platform/composition/resolveWorkspaceComposition";
+export default async function EditContactPage({params}:{params:Promise<{id:string}>}){const{id}=await params;const resolution=await resolveWorkspaceComposition();if(resolution.status!=="resolved")notFound();const repository=resolution.composition.dependencies.contacts;const[contact,assignees]=await Promise.all([repository.getById(id),repository.listAssignableConsultants()]);if(!contact)notFound();return <div className="mx-auto max-w-5xl space-y-6"><header><h1 className="text-3xl font-black">Edit {contact.displayName}</h1><p className="mt-2 text-sm text-slate-600">Changes update the permanent identity and any linked candidate compatibility fields.</p></header><ContactForm contact={contact} assignees={assignees} action={updateContactAction.bind(null,id)}/></div>}

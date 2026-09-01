@@ -48,6 +48,7 @@ export interface FeatureAvailability {
 export type WorkspaceFeature =
   | "mission-control"
   | "candidates"
+  | "contacts"
   | "assessments"
   | "discovery"
   | "tasks"

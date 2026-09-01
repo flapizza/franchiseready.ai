@@ -17,6 +17,10 @@ export function TopBar({ presentation }: { presentation: WorkspacePresentation }
     ? { eyebrow: "Candidate Strategy", title: "Engagement Playbook", description: "Review evidence-backed next steps and choose what happens." }
     : pathname === "/crm/communications"
     ? { eyebrow: "Consultant Workspace", title: "Communications", description: "Review replies, engagement, delivery issues, and candidate follow-up." }
+    : pathname === "/crm/contacts"
+    ? { eyebrow: "Relationship Workspace", title: "Contacts", description: "Manage permanent people identities across prospect and candidate contexts." }
+    : pathname.startsWith("/crm/contacts/")
+    ? { eyebrow: "Relationship Workspace", title: "Contact", description: "Review identity, ownership, lifecycle, and candidate participation." }
     : pathname === "/crm/team"
     ? { eyebrow: "Leadership Workspace", title: "Team Mission Control", description: "See candidate momentum, consultant execution, and the interventions that matter now." }
     : pathname === "/crm/calendar"
@@ -69,11 +73,11 @@ export function TopBar({ presentation }: { presentation: WorkspacePresentation }
 
         <div className="flex items-center gap-4">
 
-          <Link href="/crm/candidates/new" className="flex items-center gap-2 rounded-xl bg-slate-900 px-5 py-3 font-semibold text-white transition hover:bg-slate-800">
+          <Link href={pathname.startsWith("/crm/contacts") ? "/crm/contacts/new" : "/crm/candidates/new"} className="flex items-center gap-2 rounded-xl bg-slate-900 px-5 py-3 font-semibold text-white transition hover:bg-slate-800">
 
             <Plus size={18} />
 
-            New Candidate
+            {pathname.startsWith("/crm/contacts") ? "Add Contact" : "New Candidate"}
 
           </Link>
 

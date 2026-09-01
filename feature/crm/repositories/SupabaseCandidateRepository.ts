@@ -48,9 +48,19 @@ export class SupabaseCandidateRepository implements CandidateRepository {
   async save(candidate: CandidateRecord): Promise<CandidateRecord> {
     const existing = candidate.id.startsWith("cand_") ? await this.getById(candidate.id) : null;
     if (existing) {
+      const { data: persisted, error: persistedError } = await this.supabase.from("candidates")
+        .select("contact_id").eq("organization_id", this.workspace.organization.id).eq("public_id", candidate.id).single();
+      if (persistedError) throw new CandidateRepositoryError("Candidate could not be updated.");
+      if (persisted.contact_id) {
+        const { error: contactError } = await this.supabase.from("contacts").update({
+          first_name: candidate.firstName, last_name: candidate.lastName,
+          primary_email: candidate.email, primary_phone: candidate.phone || null,
+        }).eq("organization_id", this.workspace.organization.id).eq("id", persisted.contact_id);
+        if (contactError) throw new CandidateRepositoryError("Candidate contact identity could not be updated.");
+      }
       const { data, error } = await this.supabase.from("candidates").update({
-        first_name: candidate.firstName, last_name: candidate.lastName, email: candidate.email,
-        phone: candidate.phone || null, status: candidate.status, pipeline_stage_id: candidate.pipelineStageId ?? candidate.pipelineStage,
+        ...(persisted.contact_id ? {} : { first_name: candidate.firstName, last_name: candidate.lastName, email: candidate.email, phone: candidate.phone || null }),
+        status: candidate.status, pipeline_stage_id: candidate.pipelineStageId ?? candidate.pipelineStage,
       }).eq("organization_id", this.workspace.organization.id).eq("public_id", candidate.id).select("*").single();
       if (error) throw new CandidateRepositoryError("Candidate could not be updated.");
       return this.toRecord(data);

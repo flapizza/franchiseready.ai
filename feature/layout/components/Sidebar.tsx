@@ -46,6 +46,13 @@ export function Sidebar({ presentation }: { presentation: WorkspacePresentation 
           excludedSuffixes={["/strategy", "/presentation", "/referral"]}
         />
 
+        <NavigationItem
+          href={APP_ROUTES.contacts}
+          label="Contacts"
+          icon={<Users size={20} />}
+          exactMatch
+        />
+
         {presentation.capabilities.includes("hierarchy:view_descendants") && <NavigationItem
           href={APP_ROUTES.teamMissionControl}
           label="Team Command Center"
