@@ -1,0 +1,11 @@
+export const segmentFields=["lifecycle","tag","list","emailStatus","smsStatus","candidate","assignee","source","state"] as const;
+export const segmentOperators=["is","isNot","isAnyOf","has","doesNotHave"] as const;
+export type SegmentRule={field:typeof segmentFields[number];operator:typeof segmentOperators[number];value:string|string[]};
+export type SegmentCriteria={version:1;combinator:"and"|"or";rules:SegmentRule[]};
+export type Segment={id:string;name:string;description:string;criteria:SegmentCriteria;updatedAt:string};
+export type CampaignContent={version:1;heading:string;body:string;ctaLabel:string;ctaUrl:string;footer:string};
+export type CampaignStatus="draft"|"ready"|"planned"|"sending"|"sent";
+export type Campaign={id:string;name:string;description:string;subject:string;previewText:string;senderName:string;replyTo:string;audienceType:"segment"|"list"|null;audienceId:string;content:CampaignContent;status:CampaignStatus;updatedAt:string};
+export type AudienceContact={id:string;displayName:string;email:string;emailStatus:string};
+export type AudiencePreview={contacts:AudienceContact[];matching:number;eligible:number;unknown:number;optedOut:number;suppressed:number;missingEmail:number};
+export type MarketingOptions={segments:{id:string;name:string}[];lists:{id:string;name:string}[];tags:{id:string;name:string}[];assignees:{id:string;name:string}[]};

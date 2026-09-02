@@ -11,6 +11,7 @@ import { DemoCandidateResolutionService } from "@/feature/crm/services/DemoCandi
 import { DemoCandidateIntakeActivitySink } from "@/feature/crm/services/DemoCandidateIntakeActivitySink";
 import { SeedCandidateRepository } from "@/feature/crm/repositories/SeedCandidateRepository";
 import { SeedContactRepository } from "@/feature/contacts/repositories/SeedContactRepository";
+import { SeedMarketingRepository } from "@/feature/marketing/repositories/SeedMarketingRepository";
 import { demoConsultant } from "@/feature/demo/data/demoConsultant";
 import { SeedDemoScenarioRepository } from "@/feature/demo/repositories/SeedDemoScenarioRepository";
 import { DemoEngagementPlaybookRepository } from "@/feature/engagement-playbook/repositories/DemoEngagementPlaybookRepository";
@@ -69,6 +70,7 @@ export interface DemoWorkspaceDependencies {
   brands: SeedBrandRepository;
   candidates: SeedCandidateRepository;
   contacts: SeedContactRepository;
+  marketing: SeedMarketingRepository;
   scenarios: SeedDemoScenarioRepository;
   candidateActivities: DemoCandidateActivityRepository;
   pipeline: DemoConsultantPipelineRepository;
@@ -126,6 +128,7 @@ export class DemoWorkspaceComposer
     const dependencies: DemoWorkspaceDependencies = {
       assessments: new SeedAssessmentRepository(), conferenceAssessments: conferenceAssessmentStore,
       brands: new SeedBrandRepository(), candidates, contacts: new SeedContactRepository(candidates), scenarios: new SeedDemoScenarioRepository(),
+      marketing: new SeedMarketingRepository(),
       candidateActivities: new DemoCandidateActivityRepository(), pipeline: new DemoConsultantPipelineRepository(),
       tasks: new DemoTaskRepository(), calendar: new DemoCalendarRepository(), emailMessages: new DemoEmailRepository(),
       emailDelivery: new DemoEmailDeliveryService(), engagementPlaybook: new DemoEngagementPlaybookRepository(),

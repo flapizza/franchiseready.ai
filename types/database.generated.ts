@@ -648,6 +648,60 @@ export type Database = {
           },
         ]
       }
+      contact_segments: {
+        Row: {
+          created_at: string
+          created_by_membership_id: string
+          criteria: Json
+          criteria_version: number
+          description: string | null
+          id: string
+          name: string
+          organization_id: string
+          public_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by_membership_id: string
+          criteria: Json
+          criteria_version?: number
+          description?: string | null
+          id?: string
+          name: string
+          organization_id: string
+          public_id?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by_membership_id?: string
+          criteria?: Json
+          criteria_version?: number
+          description?: string | null
+          id?: string
+          name?: string
+          organization_id?: string
+          public_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contact_segments_created_by_membership_id_organization_id_fkey"
+            columns: ["created_by_membership_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization_memberships"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "contact_segments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contact_tag_memberships: {
         Row: {
           added_by_membership_id: string
@@ -1339,6 +1393,87 @@ export type Database = {
           },
         ]
       }
+      marketing_campaigns: {
+        Row: {
+          audience_public_id: string | null
+          audience_type:
+            | Database["public"]["Enums"]["marketing_audience_source"]
+            | null
+          content: Json
+          content_version: number
+          created_at: string
+          created_by_membership_id: string
+          description: string | null
+          id: string
+          name: string
+          organization_id: string
+          preview_text: string
+          public_id: string
+          reply_to: string
+          sender_name: string
+          status: Database["public"]["Enums"]["marketing_campaign_status"]
+          subject: string
+          updated_at: string
+        }
+        Insert: {
+          audience_public_id?: string | null
+          audience_type?:
+            | Database["public"]["Enums"]["marketing_audience_source"]
+            | null
+          content?: Json
+          content_version?: number
+          created_at?: string
+          created_by_membership_id: string
+          description?: string | null
+          id?: string
+          name: string
+          organization_id: string
+          preview_text?: string
+          public_id?: string
+          reply_to?: string
+          sender_name?: string
+          status?: Database["public"]["Enums"]["marketing_campaign_status"]
+          subject?: string
+          updated_at?: string
+        }
+        Update: {
+          audience_public_id?: string | null
+          audience_type?:
+            | Database["public"]["Enums"]["marketing_audience_source"]
+            | null
+          content?: Json
+          content_version?: number
+          created_at?: string
+          created_by_membership_id?: string
+          description?: string | null
+          id?: string
+          name?: string
+          organization_id?: string
+          preview_text?: string
+          public_id?: string
+          reply_to?: string
+          sender_name?: string
+          status?: Database["public"]["Enums"]["marketing_campaign_status"]
+          subject?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_campaigns_created_by_membership_id_organization__fkey"
+            columns: ["created_by_membership_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization_memberships"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "marketing_campaigns_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       membership_invitations: {
         Row: {
           accepted_at: string | null
@@ -1921,12 +2056,46 @@ export type Database = {
         }
         Returns: undefined
       }
+      resolve_campaign_audience: {
+        Args: {
+          page_limit?: number
+          page_offset?: number
+          source_id: string
+          source_kind: Database["public"]["Enums"]["marketing_audience_source"]
+        }
+        Returns: {
+          contact_public_id: string
+          display_name: string
+          eligible_count: number
+          email_status: string
+          matching_count: number
+          missing_email_count: number
+          opted_out_count: number
+          primary_email: string
+          suppressed_count: number
+          unknown_count: number
+        }[]
+      }
       resolve_membership_invitation: {
         Args: { presented_token: string }
         Returns: {
           intended_role: Database["public"]["Enums"]["membership_role"]
           organization_name: string
           resolution: string
+        }[]
+      }
+      resolve_segment: {
+        Args: {
+          page_limit?: number
+          page_offset?: number
+          target_criteria: Json
+        }
+        Returns: {
+          contact_public_id: string
+          display_name: string
+          email_status: string
+          primary_email: string
+          total_count: number
         }[]
       }
       revoke_assessment_invitation: {
@@ -2039,6 +2208,10 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      segment_rule_matches: {
+        Args: { contact_id: string; rule: Json }
+        Returns: boolean
+      }
       set_membership_onboarding_state: {
         Args: {
           proposed_completed_steps: string[]
@@ -2101,6 +2274,7 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      valid_segment_criteria: { Args: { input: Json }; Returns: boolean }
     }
     Enums: {
       assessment_session_status:
@@ -2142,6 +2316,13 @@ export type Database = {
         | "ambiguous"
       email_provider: "google" | "microsoft"
       email_recipient_kind: "to" | "cc" | "bcc"
+      marketing_audience_source: "segment" | "list"
+      marketing_campaign_status:
+        | "draft"
+        | "ready"
+        | "planned"
+        | "sending"
+        | "sent"
       marketing_permission_status:
         | "unknown"
         | "opted-in"
@@ -2171,7 +2352,6 @@ export type Database = {
     }
   }
 }
-
 type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
 
 type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
@@ -2337,6 +2517,14 @@ export const Constants = {
       ],
       email_provider: ["google", "microsoft"],
       email_recipient_kind: ["to", "cc", "bcc"],
+      marketing_audience_source: ["segment", "list"],
+      marketing_campaign_status: [
+        "draft",
+        "ready",
+        "planned",
+        "sending",
+        "sent",
+      ],
       marketing_permission_status: [
         "unknown",
         "opted-in",

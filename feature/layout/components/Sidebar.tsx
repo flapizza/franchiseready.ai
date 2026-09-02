@@ -12,6 +12,7 @@ import {
   Users,
   Network,
   MessagesSquare,
+  Megaphone,
 } from "lucide-react";
 
 import { BrandLockup } from "@/feature/branding/components/BrandLockup";
@@ -70,6 +71,7 @@ export function Sidebar({ presentation }: { presentation: WorkspacePresentation 
         <NavigationItem href={APP_ROUTES.calendar} label="Calendar" icon={<CalendarDays size={20} />} exactMatch />
 
         <NavigationItem href={APP_ROUTES.communications} label="Communications" icon={<MessagesSquare size={20} />} exactMatch />
+        <NavigationItem href={APP_ROUTES.campaigns} label="Marketing" icon={<Megaphone size={20} />} />
 
         <p className="px-4 pt-3 text-[10px] font-bold uppercase tracking-[0.22em] text-slate-600 [@media(min-height:900px)]:pt-5">AI Workspaces</p>
 

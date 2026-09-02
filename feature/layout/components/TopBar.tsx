@@ -15,6 +15,8 @@ export function TopBar({ presentation }: { presentation: WorkspacePresentation }
     ? { eyebrow: "Consultant Workspace", title: "Referral Studio", description: "Manage candidates ready for referral preparation and introduction." }
     : /^\/crm\/candidates\/[^/]+\/playbook$/.test(pathname)
     ? { eyebrow: "Candidate Strategy", title: "Engagement Playbook", description: "Review evidence-backed next steps and choose what happens." }
+    : pathname.startsWith("/crm/campaigns") || pathname.startsWith("/crm/segments")
+    ? { eyebrow: "Marketing Workspace", title: pathname.startsWith("/crm/segments") ? "Segments" : "Campaigns", description: "Build governed audiences and ready-to-send email campaigns without delivering them." }
     : pathname === "/crm/communications"
     ? { eyebrow: "Consultant Workspace", title: "Communications", description: "Review replies, engagement, delivery issues, and candidate follow-up." }
     : pathname === "/crm/contacts"
@@ -73,11 +75,11 @@ export function TopBar({ presentation }: { presentation: WorkspacePresentation }
 
         <div className="flex items-center gap-4">
 
-          <Link href={pathname.startsWith("/crm/contacts") ? "/crm/contacts/new" : "/crm/candidates/new"} className="flex items-center gap-2 rounded-xl bg-slate-900 px-5 py-3 font-semibold text-white transition hover:bg-slate-800">
+          <Link href={pathname.startsWith("/crm/campaigns") ? "/crm/campaigns/new" : pathname.startsWith("/crm/segments") ? "/crm/segments/new" : pathname.startsWith("/crm/contacts") ? "/crm/contacts/new" : "/crm/candidates/new"} className="flex items-center gap-2 rounded-xl bg-slate-900 px-5 py-3 font-semibold text-white transition hover:bg-slate-800">
 
             <Plus size={18} />
 
-            {pathname.startsWith("/crm/contacts") ? "Add Contact" : "New Candidate"}
+            {pathname.startsWith("/crm/campaigns") ? "New Campaign" : pathname.startsWith("/crm/segments") ? "New Segment" : pathname.startsWith("/crm/contacts") ? "Add Contact" : "New Candidate"}
 
           </Link>
 
