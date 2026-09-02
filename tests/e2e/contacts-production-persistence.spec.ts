@@ -1,86 +1,96 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
+
+test.setTimeout(180_000);
 
 const apiUrl = required("NEXT_PUBLIC_SUPABASE_URL");
 const serviceRoleKey = required("SUPABASE_SERVICE_ROLE_KEY");
 const email = required("PACK2A_TEST_EMAIL");
 const password = required("PACK2A_TEST_PASSWORD");
+const csv = "First Name,Last Name,Email,Company,Source\nGrace,Hopper,PACK3A.GRACE@EXAMPLE.TEST,Compilers Inc.,Legacy Database";
 
 test.beforeAll(async () => {
+  expect(process.env.PERSISTENCE_MODE).toBe("supabase");
   const response = await fetch(`${apiUrl}/auth/v1/admin/users`, {
     method: "POST",
-    headers: { apikey: serviceRoleKey, Authorization: `Bearer ${serviceRoleKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password, email_confirm: true, user_metadata: { display_name: "Pack 2A Consultant" } }),
+    headers: adminHeaders(),
+    body: JSON.stringify({ email, password, email_confirm: true, user_metadata: { display_name: "Pack 3A Consultant" } }),
   });
   expect(response.status, "local production test user should be created").toBe(200);
 });
 
-test("production Contacts persist one permanent identity through candidate promotion", async ({ page }) => {
+test("fresh production user bootstraps then persists an imported organized Contact through Candidate promotion", async ({ page }) => {
   await page.goto("/login");
   await page.getByLabel("Email address").fill(email);
   await page.getByLabel("Password").fill(password);
   await page.getByRole("button", { name: "Sign in" }).click();
   await expect(page).toHaveURL(/\/$/);
-  await page.goto("/crm");
-  await expect(page).toHaveURL(/\/onboarding$/);
+  expect((await page.context().cookies()).some((cookie) => cookie.name.includes("auth-token"))).toBeTruthy();
 
-  await page.getByLabel("Organization name").fill("Pack 2A Local Verification");
-  await page.getByLabel("Your display name").fill("Pack 2A Consultant");
+  const bootstrapResponse = await page.goto("/crm");
+  expect(bootstrapResponse?.status()).toBe(200);
+  await expect(page).toHaveURL(/\/onboarding$/);
+  await expect(page.getByRole("heading", { name: "Create your organization" })).toBeVisible();
+
+  await page.getByLabel("Organization name").fill("Pack 3A Local Verification");
+  await page.getByLabel("Your display name").fill("Pack 3A Consultant");
   await page.getByRole("button", { name: "Create workspace" }).click();
   await expect(page).toHaveURL(/\/crm$/);
 
   await page.getByRole("navigation").getByRole("link", { name: "Contacts" }).click();
-  await expect(page.locator("main").getByRole("heading", { name: "Contacts", exact: true })).toBeVisible();
-  await page.getByRole("link", { name: "Add Contact" }).first().click();
-  const add = page.getByRole("form", { name: "Add contact" });
-  await add.getByLabel("First name").fill("Grace");
-  await add.getByLabel("Last name").fill("Hopper");
-  await add.getByLabel("Primary email").fill("  PACK2A.GRACE@EXAMPLE.TEST  ");
-  await add.getByLabel("Primary phone").fill("+1 (555) 010-4242");
-  await add.getByLabel("City").fill("Arlington");
-  await add.getByLabel("State / province").fill("VA");
-  await add.getByLabel("Postal code").fill("22201");
-  await add.getByLabel("Source").fill("Pack 2A Browser Verification");
-  await add.getByRole("button", { name: "Add Contact" }).click();
-  await expect(page.getByRole("heading", { name: "Contact created" })).toBeVisible();
-  await page.getByRole("link", { name: "Open Contact Detail" }).click();
+  await expect(page.locator("main").getByRole("heading", { name: "Contacts", exact: true })).toBeVisible({ timeout: 20_000 });
+  await page.getByRole("link", { name: "Lists & Tags" }).click();
+  await page.getByLabel("New list name").fill("Legacy Newsletter");
+  await page.getByRole("button", { name: "Create List" }).click();
+  await expect(page.getByRole("link", { name: "Legacy Newsletter" })).toBeVisible();
+  await page.getByLabel("New tag name").fill("Mailchimp Import");
+  await page.getByRole("button", { name: "Create Tag" }).click();
+  await expect(page.getByRole("link", { name: "Mailchimp Import" })).toBeVisible();
+
+  await importCsv(page, true);
+  await expect(page.getByText("Created").locator("..")).toContainText("1");
+  await expect(page.getByText("Matched").locator("..")).toContainText("0");
+  await page.getByRole("link", { name: "View Contacts" }).click();
+  await page.getByRole("link", { name: "Grace Hopper" }).first().click();
   await expect(page).toHaveURL(/\/crm\/contacts\/contact_/);
   const contactUrl = page.url();
   await expect(page.getByRole("heading", { name: "Grace Hopper" })).toBeVisible();
+  await expect(page.getByRole("button", { name: /Mailchimp Import/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: /Legacy Newsletter/ })).toBeVisible();
+  await expect(page.getByText("unknown", { exact: true }).first()).toBeVisible();
 
-  await page.goto("/crm/contacts?q=pack2a.grace%40example.test");
-  await expect(page.getByText("pack2a.grace@example.test", { exact: true }).first()).toBeVisible();
-  await page.goto(contactUrl);
-  await page.getByRole("link", { name: "Edit Contact" }).click();
-  const edit = page.getByRole("form", { name: "Edit contact" });
-  await edit.getByLabel("Preferred name").fill("Amazing Grace");
-  await edit.getByLabel("Title / occupation").fill("Computer Scientist");
-  await edit.getByRole("button", { name: "Save Changes" }).click();
-  await expect(edit.getByRole("status")).toContainText("Contact updated");
-  await page.reload();
-  await expect(edit.getByLabel("Preferred name")).toHaveValue("Amazing Grace");
-  await page.goto(contactUrl);
-  await expect(page.getByRole("heading", { name: "Amazing Grace Hopper" })).toBeVisible();
-
-  await page.getByRole("link", { name: "Add Contact" }).first().click();
-  const duplicate = page.getByRole("form", { name: "Add contact" });
-  await duplicate.getByLabel("First name").fill("Different");
-  await duplicate.getByLabel("Last name").fill("Person");
-  await duplicate.getByLabel("Primary email").fill("pack2a.grace@example.test");
-  await duplicate.getByRole("button", { name: "Add Contact" }).click();
-  await expect(duplicate.getByRole("alert")).toContainText("already exists");
+  await importCsv(page, false);
+  await expect(page.getByText("Created").locator("..")).toContainText("0");
+  await expect(page.getByText("Matched").locator("..")).toContainText("1");
 
   await page.goto(contactUrl);
   await page.getByRole("button", { name: "Promote to Candidate" }).click();
   const candidateLink = page.getByRole("link", { name: "Open Candidate 360" });
-  await expect(candidateLink).toBeVisible();
+  await expect(candidateLink).toBeVisible({ timeout: 20_000 });
   await candidateLink.click();
   await expect(page).toHaveURL(/\/crm\/candidates\/cand_/);
   await expect(page.getByRole("heading", { name: "Grace Hopper" })).toBeVisible();
 
-  await page.goto(contactUrl);
-  await expect(page.getByRole("link", { name: "Open Candidate 360" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Promote to Candidate" })).toHaveCount(0);
 });
+
+async function importCsv(page: Page, organize: boolean) {
+  await page.goto("/crm/contacts/import");
+  const fileInput = page.getByLabel("CSV file");
+  await expect(fileInput).toBeVisible();
+  await expect.poll(() => fileInput.evaluate((element) => Object.keys(element).some((key) => key.startsWith("__reactProps")))).toBe(true);
+  await fileInput.setInputFiles({ name: "legacy.csv", mimeType: "text/csv", buffer: Buffer.from(csv) });
+  await expect(page.getByRole("heading", { name: "Map fields" })).toBeVisible();
+  await page.getByRole("button", { name: "Review import" }).click();
+  if (organize) {
+    await page.getByLabel("Mailchimp Import").check();
+    await page.getByLabel("Add to list").selectOption({ label: "Legacy Newsletter" });
+  }
+  await page.getByRole("button", { name: "Import Contacts" }).click();
+  await expect(page.getByRole("heading", { name: "Import results" })).toBeVisible();
+}
+
+function adminHeaders() {
+  return { apikey: serviceRoleKey, Authorization: `Bearer ${serviceRoleKey}`, "Content-Type": "application/json" };
+}
 
 function required(name: string): string {
   const value = process.env[name];

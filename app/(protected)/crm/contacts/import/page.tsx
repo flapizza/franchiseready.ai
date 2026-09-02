@@ -1,0 +1,2 @@
+import {notFound} from "next/navigation";import {ContactImporter} from "@/feature/contacts/components/ContactImporter";import {resolveWorkspaceComposition} from "@/feature/platform/composition/resolveWorkspaceComposition";
+export default async function ImportContactsPage(){const r=await resolveWorkspaceComposition();if(r.status!=="resolved")notFound();return <ContactImporter options={await r.composition.dependencies.contacts.organizationOptions()}/>}

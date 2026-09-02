@@ -1,9 +1,12 @@
 import { randomUUID } from "node:crypto";
 import type { CandidateRepository } from "@/feature/crm/repositories/CandidateRepository";
-import type { ContactInput, ContactListPage, ContactListQuery, ContactRecord } from "../models/Contact";
+import type { ContactInput, ContactLifecycleStatus, ContactListPage, ContactListQuery, ContactRecord } from "../models/Contact";
 import { ContactDuplicateError, ContactUnavailableError } from "../models/ContactErrors";
 import type { ContactRepository } from "./ContactRepository";
 import { demoContactStore } from "./DemoContactStore";
+
+const demoTags:{id:string;name:string}[]=[];const demoLists:{id:string;name:string;memberCount:number}[]=[];
+export function resetDemoAudienceOrganization(){demoTags.splice(0);demoLists.splice(0);}
 
 export class SeedContactRepository implements ContactRepository {
   constructor(private readonly candidates: CandidateRepository) {}
@@ -15,7 +18,13 @@ export class SeedContactRepository implements ContactRepository {
     const seededIds = new Set(seeded.map((contact) => contact.id));
     const contacts = [...seeded, ...demoContactStore.list().filter((contact) => !seededIds.has(contact.id))].filter((contact) =>
       (!normalized || [contact.displayName, contact.primaryEmail, contact.primaryPhone].some((value) => value.toLowerCase().includes(normalized))) &&
-      (!query.lifecycle || contact.lifecycleStatus === query.lifecycle));
+      (!query.lifecycle || contact.lifecycleStatus === query.lifecycle) &&
+      (!query.tagIds?.length || query.tagIds.every((id)=>contact.tags.some((tag)=>tag.id===id))) &&
+      (!query.listId || contact.lists.some((list)=>list.id===query.listId)) &&
+      (!query.emailStatus || contact.marketingEmailStatus===query.emailStatus) &&
+      (!query.smsStatus || contact.marketingSmsStatus===query.smsStatus) &&
+      (!query.candidateStatus || (query.candidateStatus==="candidate")===Boolean(contact.candidate)) &&
+      (!query.assignedMembershipId || contact.assignedMembershipId===query.assignedMembershipId));
     return { contacts: contacts.slice(0, query.limit), nextCursor: null };
   }
 
@@ -40,6 +49,7 @@ export class SeedContactRepository implements ContactRepository {
       titleOccupation: input.titleOccupation?.trim() ?? "", lifecycleStatus: input.lifecycleStatus,
       marketingEmailStatus: "unknown", marketingSmsStatus: "unknown", assignedMembershipId: input.assignedMembershipId || "consultant-demo",
       assignedConsultantName: "Jim Wood", createdAt: now, updatedAt: now, candidate: null,
+      tags: [], lists: [],
     });
   }
 
@@ -74,6 +84,12 @@ export class SeedContactRepository implements ContactRepository {
     demoContactStore.save({ ...contact, lifecycleStatus: "active-candidate", candidate: { publicId: candidateId, status: "active", pipelineStageId: "lead" }, updatedAt: now });
     return candidateId;
   }
+  async organizationOptions(){return {tags:demoTags,lists:demoLists};}
+  async createTag(name:string){if(demoTags.some(x=>x.name.trim().toLowerCase()===name.trim().toLowerCase()))throw new ContactDuplicateError("That tag already exists.");demoTags.push({id:`tag-demo-${randomUUID()}`,name:name.trim()});}
+  async createList(name:string){if(demoLists.some(x=>x.name.trim().toLowerCase()===name.trim().toLowerCase()))throw new ContactDuplicateError("That list already exists.");demoLists.push({id:`list-demo-${randomUUID()}`,name:name.trim(),memberCount:0});}
+  async renameList(publicId:string,name:string){const list=demoLists.find(x=>x.id===publicId);if(!list)throw new ContactUnavailableError("List could not be renamed.");list.name=name.trim();}
+  async bulkOrganize(ids:string[],operation:import("../models/Contact").ContactBulkOperation,target?:string){for(const id of ids){const c=await this.getById(id);if(!c)continue;if(operation==="lifecycle"&&target&&target!=="active-candidate")demoContactStore.save({...c,lifecycleStatus:target as ContactLifecycleStatus});if(operation==="add-tag"){const t=demoTags.find(x=>x.id===target);if(t&&!c.tags.some(x=>x.id===t.id))demoContactStore.save({...c,tags:[...c.tags,t]});}if(operation==="remove-tag")demoContactStore.save({...c,tags:c.tags.filter(x=>x.id!==target)});if(operation==="add-list"){const l=demoLists.find(x=>x.id===target);if(l&&!c.lists.some(x=>x.id===l.id))demoContactStore.save({...c,lists:[...c.lists,l]});}if(operation==="remove-list")demoContactStore.save({...c,lists:c.lists.filter(x=>x.id!==target)});}return ids.length;}
+  async importContacts(rows:ContactInput[],options:{tagIds:string[];listId?:string;defaultSource?:string}){const result={processed:rows.length,created:0,matched:0,invalid:0,errors:[] as {rowNumber:number;message:string}[]};for(const [i,row] of rows.entries())try{const email=row.primaryEmail?.trim().toLowerCase();let c=email?(await this.list({search:email,limit:50})).contacts.find(x=>x.primaryEmail.toLowerCase()===email):undefined;if(c)result.matched++;else{c=await this.create({...row,source:row.source||options.defaultSource||"CSV Import"});result.created++;}for(const t of options.tagIds)await this.bulkOrganize([c.id],"add-tag",t);if(options.listId)await this.bulkOrganize([c.id],"add-list",options.listId);}catch{result.invalid++;result.errors.push({rowNumber:i+2,message:"Row could not be imported; review its identity fields."});}return result;}
 
   private async assertUnique(email: string, except?: string) {
     if (email && (await this.list({ limit: 50 })).contacts.some((contact) => contact.id !== except && contact.primaryEmail.toLowerCase() === email)) {
@@ -92,6 +108,7 @@ export class SeedContactRepository implements ContactRepository {
       marketingEmailStatus: "unknown", marketingSmsStatus: "unknown", assignedMembershipId: candidate.consultantId,
       assignedConsultantName: "Jim Wood", createdAt: candidate.createdAt, updatedAt: candidate.updatedAt,
       candidate: { publicId: candidate.id, status: candidate.status, pipelineStageId: candidate.pipelineStageId ?? candidate.pipelineStage },
+      tags: [], lists: [],
     };
   }
 }

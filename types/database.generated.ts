@@ -544,6 +544,211 @@ export type Database = {
           },
         ]
       }
+      contact_list_memberships: {
+        Row: {
+          added_by_membership_id: string
+          contact_id: string
+          created_at: string
+          list_id: string
+          organization_id: string
+        }
+        Insert: {
+          added_by_membership_id: string
+          contact_id: string
+          created_at?: string
+          list_id: string
+          organization_id: string
+        }
+        Update: {
+          added_by_membership_id?: string
+          contact_id?: string
+          created_at?: string
+          list_id?: string
+          organization_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contact_list_memberships_added_by_membership_id_organizati_fkey"
+            columns: ["added_by_membership_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization_memberships"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "contact_list_memberships_contact_id_organization_id_fkey"
+            columns: ["contact_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "contact_list_memberships_list_id_organization_id_fkey"
+            columns: ["list_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "contact_lists"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "contact_list_memberships_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contact_lists: {
+        Row: {
+          created_at: string
+          created_by_membership_id: string
+          description: string | null
+          id: string
+          name: string
+          normalized_name: string | null
+          organization_id: string
+          public_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by_membership_id: string
+          description?: string | null
+          id?: string
+          name: string
+          normalized_name?: string | null
+          organization_id: string
+          public_id?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by_membership_id?: string
+          description?: string | null
+          id?: string
+          name?: string
+          normalized_name?: string | null
+          organization_id?: string
+          public_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contact_lists_created_by_membership_id_organization_id_fkey"
+            columns: ["created_by_membership_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization_memberships"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "contact_lists_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contact_tag_memberships: {
+        Row: {
+          added_by_membership_id: string
+          contact_id: string
+          created_at: string
+          organization_id: string
+          tag_id: string
+        }
+        Insert: {
+          added_by_membership_id: string
+          contact_id: string
+          created_at?: string
+          organization_id: string
+          tag_id: string
+        }
+        Update: {
+          added_by_membership_id?: string
+          contact_id?: string
+          created_at?: string
+          organization_id?: string
+          tag_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contact_tag_memberships_added_by_membership_id_organizatio_fkey"
+            columns: ["added_by_membership_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization_memberships"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "contact_tag_memberships_contact_id_organization_id_fkey"
+            columns: ["contact_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "contact_tag_memberships_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contact_tag_memberships_tag_id_organization_id_fkey"
+            columns: ["tag_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "contact_tags"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      contact_tags: {
+        Row: {
+          created_at: string
+          created_by_membership_id: string
+          id: string
+          name: string
+          normalized_name: string | null
+          organization_id: string
+          public_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by_membership_id: string
+          id?: string
+          name: string
+          normalized_name?: string | null
+          organization_id: string
+          public_id?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by_membership_id?: string
+          id?: string
+          name?: string
+          normalized_name?: string | null
+          organization_id?: string
+          public_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contact_tags_created_by_membership_id_organization_id_fkey"
+            columns: ["created_by_membership_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization_memberships"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "contact_tags_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contacts: {
         Row: {
           address_line_1: string | null
@@ -1516,6 +1721,15 @@ export type Database = {
           organization_name: string
           organization_public_id: string
         }[]
+      }
+      bulk_organize_contacts: {
+        Args: {
+          operation: string
+          target_contact_public_ids: string[]
+          target_lifecycle?: Database["public"]["Enums"]["contact_lifecycle_status"]
+          target_public_id?: string
+        }
+        Returns: number
       }
       can_access_candidate: {
         Args: { target_candidate_id: string }

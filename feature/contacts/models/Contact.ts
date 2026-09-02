@@ -14,6 +14,9 @@ export interface ContactCandidateRelationship {
   pipelineStageId: string;
 }
 
+export interface ContactTag { id: string; name: string }
+export interface ContactListSummary { id: string; name: string; memberCount: number }
+
 export interface ContactRecord {
   id: string;
   firstName: string;
@@ -39,6 +42,8 @@ export interface ContactRecord {
   createdAt: string;
   updatedAt: string;
   candidate: ContactCandidateRelationship | null;
+  tags: ContactTag[];
+  lists: ContactListSummary[];
 }
 
 export interface ContactInput {
@@ -63,9 +68,25 @@ export interface ContactInput {
 export interface ContactListQuery {
   search?: string;
   lifecycle?: ContactLifecycleStatus;
+  tagIds?: string[];
+  listId?: string;
+  emailStatus?: MarketingPermissionStatus;
+  smsStatus?: MarketingPermissionStatus;
+  candidateStatus?: "candidate" | "not-candidate";
+  assignedMembershipId?: string;
   cursor?: { updatedAt: string; internalId: string };
   limit: number;
 }
+
+export type ContactBulkOperation = "add-tag" | "remove-tag" | "add-list" | "remove-list" | "lifecycle";
+export interface ContactOrganizationOptions { tags: ContactTag[]; lists: ContactListSummary[] }
+
+export const importableContactFields = ["firstName","lastName","preferredName","primaryEmail","primaryPhone","addressLine1","city","stateProvince","postalCode","country","company","titleOccupation","source"] as const;
+export type ImportableContactField = typeof importableContactFields[number];
+export type ContactImportMapping = Partial<Record<ImportableContactField,string>>;
+export interface ContactImportRow { rowNumber:number; values:Record<string,string> }
+export interface ContactImportPreview { rows:ContactImportRow[]; valid:number; invalid:number; warnings:string[] }
+export interface ContactImportResult { processed:number; created:number; matched:number; invalid:number; errors:{rowNumber:number;message:string}[] }
 
 export interface ContactListPage {
   contacts: ContactRecord[];

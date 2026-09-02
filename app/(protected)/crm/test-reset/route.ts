@@ -5,6 +5,7 @@ import { isConferenceDemoAccessEnabled } from "@/lib/auth/demo-access";
 import { demoCandidateOverlayStore } from "@/feature/crm/repositories/DemoCandidateOverlayStore";
 import { conferenceAssessmentStore } from "@/feature/assessment-engine/conference/ConferenceAssessmentStore";
 import { demoContactStore } from "@/feature/contacts/repositories/DemoContactStore";
+import { resetDemoAudienceOrganization } from "@/feature/contacts/repositories/SeedContactRepository";
 
 export async function POST() {
   if (!isConferenceDemoAccessEnabled()) {
@@ -15,6 +16,7 @@ export async function POST() {
   demoCandidateOverlayStore.reset();
   conferenceAssessmentStore.clear();
   demoContactStore.reset();
+  resetDemoAudienceOrganization();
   revalidatePath("/crm");
   revalidatePath("/crm/candidates");
   revalidatePath("/crm/contacts");

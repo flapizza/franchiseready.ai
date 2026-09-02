@@ -3,15 +3,17 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database, Tables } from "@/types/database.generated";
 import type { AuthenticatedWorkspaceContext } from "@/feature/identity/models/WorkspaceIdentity";
-import type { ContactInput, ContactListPage, ContactListQuery, ContactRecord } from "../models/Contact";
+import type { ContactBulkOperation, ContactImportResult, ContactInput, ContactListPage, ContactListQuery, ContactOrganizationOptions, ContactRecord } from "../models/Contact";
 import { ContactAuthorizationError, ContactDuplicateError, ContactUnavailableError } from "../models/ContactErrors";
 import type { ContactRepository } from "./ContactRepository";
 
 type ContactRow = Tables<"contacts"> & {
   candidates: { public_id: string; status: string; pipeline_stage_id: string }[] | null;
+  contact_tag_memberships: { contact_tags: { public_id:string; name:string } | null }[] | null;
+  contact_list_memberships: { contact_lists: { public_id:string; name:string } | null }[] | null;
 };
 
-const select = "*, candidates(public_id,status,pipeline_stage_id)";
+const select = "*, candidates(public_id,status,pipeline_stage_id), contact_tag_memberships(contact_tags(public_id,name)), contact_list_memberships(contact_lists(public_id,name))";
 
 export class SupabaseContactRepository implements ContactRepository {
   constructor(
@@ -40,6 +42,12 @@ export class SupabaseContactRepository implements ContactRepository {
       .order("id", { ascending: false })
       .limit(limit + 1);
     if (query.lifecycle) request = request.eq("lifecycle_status", query.lifecycle);
+    if (query.emailStatus) request = request.eq("marketing_email_status", query.emailStatus);
+    if (query.smsStatus) request = request.eq("marketing_sms_status", query.smsStatus);
+    if (query.assignedMembershipId) request = request.eq("assigned_membership_id", query.assignedMembershipId);
+    if (query.candidateStatus === "candidate") request = request.not("candidates", "is", null);
+    if (query.tagIds?.length) request = request.in("contact_tag_memberships.contact_tags.public_id", query.tagIds);
+    if (query.listId) request = request.eq("contact_list_memberships.contact_lists.public_id", query.listId);
     if (query.search?.trim()) {
       const value = query.search.trim().replace(/[^\p{L}\p{N}@+.' -]/gu, " ").replace(/\s+/g, " ").slice(0, 100);
       request = request.or(`first_name.ilike.%${value}%,last_name.ilike.%${value}%,primary_email.ilike.%${value}%,primary_phone.ilike.%${value}%,company.ilike.%${value}%`);
@@ -103,6 +111,36 @@ export class SupabaseContactRepository implements ContactRepository {
     return candidateId;
   }
 
+  async organizationOptions(): Promise<ContactOrganizationOptions> {
+    const [{data:tags,error:tagError},{data:lists,error:listError}] = await Promise.all([
+      this.supabase.from("contact_tags").select("public_id,name").eq("organization_id",this.workspace.organization.id).order("name"),
+      this.supabase.from("contact_lists").select("public_id,name,contact_list_memberships(count)").eq("organization_id",this.workspace.organization.id).order("name"),
+    ]);
+    if(tagError||listError) throw new ContactUnavailableError("Contact organization options could not be loaded.");
+    return {tags:(tags??[]).map((x)=>({id:x.public_id,name:x.name})),lists:(lists??[]).map((x)=>({id:x.public_id,name:x.name,memberCount:x.contact_list_memberships?.[0]?.count??0}))};
+  }
+
+  async createTag(name:string) { const {error}=await this.supabase.from("contact_tags").insert({organization_id:this.workspace.organization.id,created_by_membership_id:this.workspace.membership.id,name:name.trim()}); if(error?.code==="23505")throw new ContactDuplicateError("That tag already exists.");if(error)throw new ContactUnavailableError("Tag could not be created."); }
+  async createList(name:string) { const {error}=await this.supabase.from("contact_lists").insert({organization_id:this.workspace.organization.id,created_by_membership_id:this.workspace.membership.id,name:name.trim()}); if(error?.code==="23505")throw new ContactDuplicateError("That list already exists.");if(error)throw new ContactUnavailableError("List could not be created."); }
+  async renameList(publicId:string,name:string) { const {error}=await this.supabase.from("contact_lists").update({name:name.trim()}).eq("organization_id",this.workspace.organization.id).eq("public_id",publicId);if(error)throw new ContactUnavailableError("List could not be renamed."); }
+  async bulkOrganize(ids:string[],operation:ContactBulkOperation,target?:string):Promise<number>{
+    const lifecycle=operation==="lifecycle"?target as ContactInput["lifecycleStatus"]:undefined;
+    const {data,error}=await this.supabase.rpc("bulk_organize_contacts",{target_contact_public_ids:ids,operation,target_public_id:operation==="lifecycle"?undefined:target,target_lifecycle:lifecycle});
+    if(error?.code==="42501")throw new ContactAuthorizationError("You are not authorized to organize this selection.");if(error)throw new ContactUnavailableError("The selected contacts could not be updated.");return data??0;
+  }
+  async importContacts(rows:ContactInput[],options:{tagIds:string[];listId?:string;defaultSource?:string}):Promise<ContactImportResult>{
+    const result:ContactImportResult={processed:rows.length,created:0,matched:0,invalid:0,errors:[]};
+    for(let offset=0;offset<rows.length;offset+=100){
+      for(const [index,row] of rows.slice(offset,offset+100).entries()) try{
+        const normalized=row.primaryEmail?.trim().toLowerCase();let contact:ContactRecord|undefined;
+        if(normalized){const existing=await this.list({search:normalized,limit:2});contact=existing.contacts.find(x=>x.primaryEmail.toLowerCase()===normalized);}
+        if(contact)result.matched++;else{contact=await this.create({...row,source:row.source||options.defaultSource||"CSV Import"});result.created++;}
+        for(const tag of options.tagIds)await this.bulkOrganize([contact.id],"add-tag",tag);
+        if(options.listId)await this.bulkOrganize([contact.id],"add-list",options.listId);
+      }catch{result.invalid++;result.errors.push({rowNumber:offset+index+2,message:"Row could not be imported; review its identity fields."});}
+    } return result;
+  }
+
   private toRow(input: ContactInput) {
     return {
       first_name: input.firstName.trim(), last_name: input.lastName.trim(), preferred_name: input.preferredName?.trim() || null,
@@ -136,6 +174,8 @@ export class SupabaseContactRepository implements ContactRepository {
         assignedConsultantName: names.get(row.assigned_membership_id) ?? "Assigned consultant",
         createdAt: row.created_at, updatedAt: row.updated_at,
         candidate: candidate ? { publicId: candidate.public_id, status: candidate.status, pipelineStageId: candidate.pipeline_stage_id } : null,
+        tags:(row.contact_tag_memberships??[]).flatMap((x)=>x.contact_tags?[{id:x.contact_tags.public_id,name:x.contact_tags.name}]:[]),
+        lists:(row.contact_list_memberships??[]).flatMap((x)=>x.contact_lists?[{id:x.contact_lists.public_id,name:x.contact_lists.name,memberCount:0}]:[]),
       };
     });
   }
