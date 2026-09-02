@@ -1474,6 +1474,291 @@ export type Database = {
           },
         ]
       }
+      marketing_delivery_events: {
+        Row: {
+          created_at: string
+          event_type: Database["public"]["Enums"]["marketing_delivery_event_type"]
+          id: string
+          metadata: Json
+          occurred_at: string
+          organization_id: string
+          provider: string
+          provider_event_id: string
+          provider_message_id: string | null
+          recipient_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_type: Database["public"]["Enums"]["marketing_delivery_event_type"]
+          id?: string
+          metadata?: Json
+          occurred_at: string
+          organization_id: string
+          provider: string
+          provider_event_id: string
+          provider_message_id?: string | null
+          recipient_id: string
+        }
+        Update: {
+          created_at?: string
+          event_type?: Database["public"]["Enums"]["marketing_delivery_event_type"]
+          id?: string
+          metadata?: Json
+          occurred_at?: string
+          organization_id?: string
+          provider?: string
+          provider_event_id?: string
+          provider_message_id?: string | null
+          recipient_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_delivery_events_recipient_id_organization_id_fkey"
+            columns: ["recipient_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_send_recipients"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      marketing_send_recipients: {
+        Row: {
+          accepted_at: string | null
+          claim_token: string | null
+          claimed_at: string | null
+          completed_at: string | null
+          contact_id: string
+          created_at: string
+          delivered_at: string | null
+          display_name: string
+          eligibility_reason: string
+          eligible_at_snapshot: boolean
+          id: string
+          last_error_code: string | null
+          normalized_email: string
+          organization_id: string
+          personalization: Json
+          provider_message_id: string | null
+          public_id: string
+          send_run_id: string
+          status: Database["public"]["Enums"]["marketing_recipient_status"]
+        }
+        Insert: {
+          accepted_at?: string | null
+          claim_token?: string | null
+          claimed_at?: string | null
+          completed_at?: string | null
+          contact_id: string
+          created_at?: string
+          delivered_at?: string | null
+          display_name: string
+          eligibility_reason: string
+          eligible_at_snapshot: boolean
+          id?: string
+          last_error_code?: string | null
+          normalized_email: string
+          organization_id: string
+          personalization?: Json
+          provider_message_id?: string | null
+          public_id?: string
+          send_run_id: string
+          status?: Database["public"]["Enums"]["marketing_recipient_status"]
+        }
+        Update: {
+          accepted_at?: string | null
+          claim_token?: string | null
+          claimed_at?: string | null
+          completed_at?: string | null
+          contact_id?: string
+          created_at?: string
+          delivered_at?: string | null
+          display_name?: string
+          eligibility_reason?: string
+          eligible_at_snapshot?: boolean
+          id?: string
+          last_error_code?: string | null
+          normalized_email?: string
+          organization_id?: string
+          personalization?: Json
+          provider_message_id?: string | null
+          public_id?: string
+          send_run_id?: string
+          status?: Database["public"]["Enums"]["marketing_recipient_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_send_recipients_contact_id_organization_id_fkey"
+            columns: ["contact_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "marketing_send_recipients_send_run_id_organization_id_fkey"
+            columns: ["send_run_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_send_runs"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      marketing_send_runs: {
+        Row: {
+          audience_public_id: string
+          audience_type: Database["public"]["Enums"]["marketing_audience_source"]
+          campaign_id: string
+          campaign_name: string
+          campaign_version: string
+          completed_at: string | null
+          content: Json
+          content_version: number
+          created_at: string
+          duplicate_count: number
+          eligible_count: number
+          id: string
+          idempotency_key: string
+          initiated_by_membership_id: string
+          matching_count: number
+          missing_email_count: number
+          opted_out_count: number
+          organization_id: string
+          preview_text: string
+          public_id: string
+          reply_to: string
+          sender_name: string
+          simulated: boolean
+          started_at: string | null
+          status: Database["public"]["Enums"]["marketing_send_status"]
+          subject: string
+          suppressed_count: number
+          unknown_count: number
+        }
+        Insert: {
+          audience_public_id: string
+          audience_type: Database["public"]["Enums"]["marketing_audience_source"]
+          campaign_id: string
+          campaign_name: string
+          campaign_version: string
+          completed_at?: string | null
+          content: Json
+          content_version: number
+          created_at?: string
+          duplicate_count: number
+          eligible_count: number
+          id?: string
+          idempotency_key: string
+          initiated_by_membership_id: string
+          matching_count: number
+          missing_email_count: number
+          opted_out_count: number
+          organization_id: string
+          preview_text: string
+          public_id?: string
+          reply_to: string
+          sender_name: string
+          simulated: boolean
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["marketing_send_status"]
+          subject: string
+          suppressed_count: number
+          unknown_count: number
+        }
+        Update: {
+          audience_public_id?: string
+          audience_type?: Database["public"]["Enums"]["marketing_audience_source"]
+          campaign_id?: string
+          campaign_name?: string
+          campaign_version?: string
+          completed_at?: string | null
+          content?: Json
+          content_version?: number
+          created_at?: string
+          duplicate_count?: number
+          eligible_count?: number
+          id?: string
+          idempotency_key?: string
+          initiated_by_membership_id?: string
+          matching_count?: number
+          missing_email_count?: number
+          opted_out_count?: number
+          organization_id?: string
+          preview_text?: string
+          public_id?: string
+          reply_to?: string
+          sender_name?: string
+          simulated?: boolean
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["marketing_send_status"]
+          subject?: string
+          suppressed_count?: number
+          unknown_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_send_runs_campaign_id_organization_id_fkey"
+            columns: ["campaign_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_campaigns"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "marketing_send_runs_initiated_by_membership_id_organizatio_fkey"
+            columns: ["initiated_by_membership_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization_memberships"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "marketing_send_runs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketing_unsubscribe_tokens: {
+        Row: {
+          contact_id: string
+          created_at: string
+          organization_id: string
+          recipient_id: string | null
+          token_hash: string
+          used_at: string | null
+        }
+        Insert: {
+          contact_id: string
+          created_at?: string
+          organization_id: string
+          recipient_id?: string | null
+          token_hash: string
+          used_at?: string | null
+        }
+        Update: {
+          contact_id?: string
+          created_at?: string
+          organization_id?: string
+          recipient_id?: string | null
+          token_hash?: string
+          used_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_unsubscribe_tokens_contact_id_organization_id_fkey"
+            columns: ["contact_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "marketing_unsubscribe_tokens_recipient_id_organization_id_fkey"
+            columns: ["recipient_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_send_recipients"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
       membership_invitations: {
         Row: {
           accepted_at: string | null
@@ -1874,6 +2159,40 @@ export type Database = {
         Args: { target_membership_id: string }
         Returns: boolean
       }
+      claim_campaign_recipients: {
+        Args: {
+          batch_size: number
+          claim_id: string
+          target_send_public_id: string
+        }
+        Returns: {
+          accepted_at: string | null
+          claim_token: string | null
+          claimed_at: string | null
+          completed_at: string | null
+          contact_id: string
+          created_at: string
+          delivered_at: string | null
+          display_name: string
+          eligibility_reason: string
+          eligible_at_snapshot: boolean
+          id: string
+          last_error_code: string | null
+          normalized_email: string
+          organization_id: string
+          personalization: Json
+          provider_message_id: string | null
+          public_id: string
+          send_run_id: string
+          status: Database["public"]["Enums"]["marketing_recipient_status"]
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "marketing_send_recipients"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       claim_outbound_email_attempt: {
         Args: { is_retry: boolean; target_message_public_id: string }
         Returns: {
@@ -1896,6 +2215,16 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      complete_campaign_recipient: {
+        Args: {
+          error_code: string
+          result_status: Database["public"]["Enums"]["marketing_recipient_status"]
+          target_claim: string
+          target_provider_message_id: string
+          target_recipient_public_id: string
+        }
+        Returns: undefined
+      }
       complete_discovery_session: {
         Args: {
           brand_strategy_readiness: string
@@ -1915,6 +2244,49 @@ export type Database = {
           target_message_public_id: string
         }
         Returns: undefined
+      }
+      confirm_campaign_send: {
+        Args: {
+          is_simulated: boolean
+          request_key: string
+          target_campaign_public_id: string
+        }
+        Returns: {
+          audience_public_id: string
+          audience_type: Database["public"]["Enums"]["marketing_audience_source"]
+          campaign_id: string
+          campaign_name: string
+          campaign_version: string
+          completed_at: string | null
+          content: Json
+          content_version: number
+          created_at: string
+          duplicate_count: number
+          eligible_count: number
+          id: string
+          idempotency_key: string
+          initiated_by_membership_id: string
+          matching_count: number
+          missing_email_count: number
+          opted_out_count: number
+          organization_id: string
+          preview_text: string
+          public_id: string
+          reply_to: string
+          sender_name: string
+          simulated: boolean
+          started_at: string | null
+          status: Database["public"]["Enums"]["marketing_send_status"]
+          subject: string
+          suppressed_count: number
+          unknown_count: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "marketing_send_runs"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       create_assessment_invitation: {
         Args: {
@@ -1971,6 +2343,45 @@ export type Database = {
         Returns: string
       }
       discovery_session_payload: { Args: { sid: string }; Returns: Json }
+      finish_campaign_send: {
+        Args: { target_send_public_id: string }
+        Returns: {
+          audience_public_id: string
+          audience_type: Database["public"]["Enums"]["marketing_audience_source"]
+          campaign_id: string
+          campaign_name: string
+          campaign_version: string
+          completed_at: string | null
+          content: Json
+          content_version: number
+          created_at: string
+          duplicate_count: number
+          eligible_count: number
+          id: string
+          idempotency_key: string
+          initiated_by_membership_id: string
+          matching_count: number
+          missing_email_count: number
+          opted_out_count: number
+          organization_id: string
+          preview_text: string
+          public_id: string
+          reply_to: string
+          sender_name: string
+          simulated: boolean
+          started_at: string | null
+          status: Database["public"]["Enums"]["marketing_send_status"]
+          subject: string
+          suppressed_count: number
+          unknown_count: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "marketing_send_runs"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       get_authorized_membership_ids: {
         Args: { target_organization_id: string }
         Returns: {
@@ -2048,12 +2459,28 @@ export type Database = {
           candidate_public_id: string
         }[]
       }
+      record_marketing_delivery_event: {
+        Args: {
+          event_id: string
+          event_metadata?: Json
+          event_provider: string
+          event_time: string
+          message_id: string
+          target_recipient_public_id: string
+          target_type: Database["public"]["Enums"]["marketing_delivery_event_type"]
+        }
+        Returns: boolean
+      }
       regenerate_assessment_analysis: {
         Args: {
           replacement_analysis: Json
           replacement_analysis_version: number
           target_candidate_public_id: string
         }
+        Returns: undefined
+      }
+      register_marketing_unsubscribe_token: {
+        Args: { target_recipient_public_id: string; token_digest: string }
         Returns: undefined
       }
       resolve_campaign_audience: {
@@ -2208,10 +2635,6 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      segment_rule_matches: {
-        Args: { contact_id: string; rule: Json }
-        Returns: boolean
-      }
       set_membership_onboarding_state: {
         Args: {
           proposed_completed_steps: string[]
@@ -2274,6 +2697,10 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      unsubscribe_marketing: {
+        Args: { token_digest: string }
+        Returns: boolean
+      }
       valid_segment_criteria: { Args: { input: Json }; Returns: boolean }
     }
     Enums: {
@@ -2323,11 +2750,34 @@ export type Database = {
         | "planned"
         | "sending"
         | "sent"
+      marketing_delivery_event_type:
+        | "accepted"
+        | "delivered"
+        | "soft-bounce"
+        | "hard-bounce"
+        | "rejected"
+        | "complaint"
+        | "provider-failure"
+        | "unsubscribed"
       marketing_permission_status:
         | "unknown"
         | "opted-in"
         | "opted-out"
         | "suppressed"
+      marketing_recipient_status:
+        | "pending"
+        | "processing"
+        | "accepted"
+        | "delivered"
+        | "bounced"
+        | "failed"
+        | "suppressed"
+      marketing_send_status:
+        | "queued"
+        | "sending"
+        | "completed"
+        | "partially-failed"
+        | "failed"
       membership_invitation_status: "pending" | "accepted" | "revoked"
       membership_onboarding_status: "not-started" | "in-progress" | "completed"
       membership_role: "owner" | "admin" | "manager" | "consultant"
@@ -2352,6 +2802,7 @@ export type Database = {
     }
   }
 }
+
 type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
 
 type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
@@ -2525,11 +2976,37 @@ export const Constants = {
         "sending",
         "sent",
       ],
+      marketing_delivery_event_type: [
+        "accepted",
+        "delivered",
+        "soft-bounce",
+        "hard-bounce",
+        "rejected",
+        "complaint",
+        "provider-failure",
+        "unsubscribed",
+      ],
       marketing_permission_status: [
         "unknown",
         "opted-in",
         "opted-out",
         "suppressed",
+      ],
+      marketing_recipient_status: [
+        "pending",
+        "processing",
+        "accepted",
+        "delivered",
+        "bounced",
+        "failed",
+        "suppressed",
+      ],
+      marketing_send_status: [
+        "queued",
+        "sending",
+        "completed",
+        "partially-failed",
+        "failed",
       ],
       membership_invitation_status: ["pending", "accepted", "revoked"],
       membership_onboarding_status: ["not-started", "in-progress", "completed"],

@@ -4,7 +4,8 @@ import process from "node:process";
 const requestedTests = process.argv.slice(2);
 const requiresProductionComposition = requestedTests.some((argument) =>
   argument.includes("contacts-production-persistence.spec.ts")
-  || argument.includes("marketing-production-persistence.spec.ts"),
+  || argument.includes("marketing-production-persistence.spec.ts")
+  || argument.includes("marketing-provider-unavailable.spec.ts"),
 );
 
 const environment = {

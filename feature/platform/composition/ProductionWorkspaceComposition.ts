@@ -11,6 +11,8 @@ import { GoogleConnectionProvider } from "@/feature/connected-email/providers/go
 import { SupabaseCandidateRepository } from "@/feature/crm/repositories/SupabaseCandidateRepository";
 import { SupabaseContactRepository } from "@/feature/contacts/repositories/SupabaseContactRepository";
 import { SupabaseMarketingRepository } from "@/feature/marketing/repositories/SupabaseMarketingRepository";
+import { SupabaseMarketingDeliveryRepository } from "@/feature/marketing/delivery/SupabaseMarketingDeliveryRepository";
+import { UnavailableMarketingDeliveryProvider } from "@/feature/marketing/delivery/providers";
 import { ProductionCandidateResolutionService } from "@/feature/crm/services/ProductionCandidateResolutionService";
 import { ProductionCandidateCRMRuntime } from "@/feature/crm/runtime/ProductionCandidateCRMRuntime";
 import { SupabaseDiscoveryRepository } from "@/feature/discovery/production/SupabaseDiscoveryRepository";
@@ -70,6 +72,8 @@ export interface ProductionWorkspaceDependencies {
   candidates: SupabaseCandidateRepository;
   contacts: SupabaseContactRepository;
   marketing: SupabaseMarketingRepository;
+  marketingDelivery: SupabaseMarketingDeliveryRepository;
+  marketingDeliveryProvider: UnavailableMarketingDeliveryProvider;
   assessments: SupabaseAssessmentRepository;
   discovery: SupabaseDiscoveryRepository;
   emailAccounts: ConnectedEmailAccountRepository;
@@ -142,11 +146,11 @@ export async function createProductionWorkspaceComposition(
       features: productionFeatures,
       temporaryDataIndicator: null,
     },
-    dependencies: (() => { const candidates = new SupabaseCandidateRepository(client, context); return {
+    dependencies: (() => { const candidates = new SupabaseCandidateRepository(client, context); const marketing=new SupabaseMarketingRepository(client,context); return {
       workspaceContext: context,
       candidates,
       contacts: new SupabaseContactRepository(client, context),
-      marketing: new SupabaseMarketingRepository(client, context),
+      marketing, marketingDelivery:new SupabaseMarketingDeliveryRepository(client,context,marketing), marketingDeliveryProvider:new UnavailableMarketingDeliveryProvider(),
       assessments: new SupabaseAssessmentRepository(client, context),
       discovery: new SupabaseDiscoveryRepository(client),
       emailAccounts: new ConnectedEmailAccountRepository(),

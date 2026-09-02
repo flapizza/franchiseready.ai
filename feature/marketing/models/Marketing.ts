@@ -7,5 +7,5 @@ export type CampaignContent={version:1;heading:string;body:string;ctaLabel:strin
 export type CampaignStatus="draft"|"ready"|"planned"|"sending"|"sent";
 export type Campaign={id:string;name:string;description:string;subject:string;previewText:string;senderName:string;replyTo:string;audienceType:"segment"|"list"|null;audienceId:string;content:CampaignContent;status:CampaignStatus;updatedAt:string};
 export type AudienceContact={id:string;displayName:string;email:string;emailStatus:string};
-export type AudiencePreview={contacts:AudienceContact[];matching:number;eligible:number;unknown:number;optedOut:number;suppressed:number;missingEmail:number};
+export type AudiencePreview={contacts:AudienceContact[];matching:number;eligible:number;unknown:number;optedOut:number;suppressed:number;missingEmail:number;duplicates:number};
 export type MarketingOptions={segments:{id:string;name:string}[];lists:{id:string;name:string}[];tags:{id:string;name:string}[];assignees:{id:string;name:string}[]};

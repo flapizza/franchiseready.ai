@@ -12,6 +12,8 @@ import { DemoCandidateIntakeActivitySink } from "@/feature/crm/services/DemoCand
 import { SeedCandidateRepository } from "@/feature/crm/repositories/SeedCandidateRepository";
 import { SeedContactRepository } from "@/feature/contacts/repositories/SeedContactRepository";
 import { SeedMarketingRepository } from "@/feature/marketing/repositories/SeedMarketingRepository";
+import { SeedMarketingDeliveryRepository } from "@/feature/marketing/delivery/SeedMarketingDeliveryRepository";
+import { LocalMarketingDeliveryProvider } from "@/feature/marketing/delivery/providers";
 import { demoConsultant } from "@/feature/demo/data/demoConsultant";
 import { SeedDemoScenarioRepository } from "@/feature/demo/repositories/SeedDemoScenarioRepository";
 import { DemoEngagementPlaybookRepository } from "@/feature/engagement-playbook/repositories/DemoEngagementPlaybookRepository";
@@ -71,6 +73,8 @@ export interface DemoWorkspaceDependencies {
   candidates: SeedCandidateRepository;
   contacts: SeedContactRepository;
   marketing: SeedMarketingRepository;
+  marketingDelivery: SeedMarketingDeliveryRepository;
+  marketingDeliveryProvider: LocalMarketingDeliveryProvider;
   scenarios: SeedDemoScenarioRepository;
   candidateActivities: DemoCandidateActivityRepository;
   pipeline: DemoConsultantPipelineRepository;
@@ -125,10 +129,11 @@ export class DemoWorkspaceComposer
     }
 
     const candidates = new SeedCandidateRepository();
+    const marketing = new SeedMarketingRepository();
     const dependencies: DemoWorkspaceDependencies = {
       assessments: new SeedAssessmentRepository(), conferenceAssessments: conferenceAssessmentStore,
       brands: new SeedBrandRepository(), candidates, contacts: new SeedContactRepository(candidates), scenarios: new SeedDemoScenarioRepository(),
-      marketing: new SeedMarketingRepository(),
+      marketing, marketingDelivery: new SeedMarketingDeliveryRepository(marketing), marketingDeliveryProvider: new LocalMarketingDeliveryProvider(),
       candidateActivities: new DemoCandidateActivityRepository(), pipeline: new DemoConsultantPipelineRepository(),
       tasks: new DemoTaskRepository(), calendar: new DemoCalendarRepository(), emailMessages: new DemoEmailRepository(),
       emailDelivery: new DemoEmailDeliveryService(), engagementPlaybook: new DemoEngagementPlaybookRepository(),
