@@ -2471,6 +2471,17 @@ export type Database = {
         }
         Returns: boolean
       }
+      record_marketing_provider_event: {
+        Args: {
+          event_id: string
+          event_metadata?: Json
+          event_provider: string
+          event_time: string
+          message_id: string
+          target_type: Database["public"]["Enums"]["marketing_delivery_event_type"]
+        }
+        Returns: boolean
+      }
       regenerate_assessment_analysis: {
         Args: {
           replacement_analysis: Json

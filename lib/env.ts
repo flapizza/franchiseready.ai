@@ -20,6 +20,12 @@ const googleOAuthEnvironmentSchema = z.object({
   GOOGLE_TOKEN_ENCRYPTION_KEY: z.string().min(1),
 });
 
+const resendEnvironmentSchema = z.object({
+  RESEND_API_KEY: z.string().min(1),
+  RESEND_WEBHOOK_SECRET: z.string().regex(/^whsec_[A-Za-z0-9+/=_-]+$/),
+  RESEND_FROM_EMAIL: z.email(),
+});
+
 function parseEnvironment<T extends z.ZodType>(schema: T): z.output<T> {
   const result = schema.safeParse(process.env);
 
@@ -94,6 +100,15 @@ export function getGoogleOAuthEnvironment() {
     throw new Error("Google OAuth credential encryption requires a managed KMS cipher in production.");
   }
   return environment;
+}
+
+export type ResendEnvironment = z.infer<typeof resendEnvironmentSchema>;
+
+export function getResendEnvironment(
+  environment: NodeJS.ProcessEnv = process.env,
+): ResendEnvironment | null {
+  const result = resendEnvironmentSchema.safeParse(environment);
+  return result.success ? result.data : null;
 }
 
 export type PersistenceMode = z.infer<typeof persistenceModeSchema>;

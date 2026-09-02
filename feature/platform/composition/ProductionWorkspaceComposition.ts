@@ -12,7 +12,8 @@ import { SupabaseCandidateRepository } from "@/feature/crm/repositories/Supabase
 import { SupabaseContactRepository } from "@/feature/contacts/repositories/SupabaseContactRepository";
 import { SupabaseMarketingRepository } from "@/feature/marketing/repositories/SupabaseMarketingRepository";
 import { SupabaseMarketingDeliveryRepository } from "@/feature/marketing/delivery/SupabaseMarketingDeliveryRepository";
-import { UnavailableMarketingDeliveryProvider } from "@/feature/marketing/delivery/providers";
+import type { MarketingDeliveryProvider } from "@/feature/marketing/delivery/MarketingDelivery";
+import { createProductionMarketingDeliveryProvider } from "@/feature/marketing/delivery/resend/provider-factory";
 import { ProductionCandidateResolutionService } from "@/feature/crm/services/ProductionCandidateResolutionService";
 import { ProductionCandidateCRMRuntime } from "@/feature/crm/runtime/ProductionCandidateCRMRuntime";
 import { SupabaseDiscoveryRepository } from "@/feature/discovery/production/SupabaseDiscoveryRepository";
@@ -73,7 +74,7 @@ export interface ProductionWorkspaceDependencies {
   contacts: SupabaseContactRepository;
   marketing: SupabaseMarketingRepository;
   marketingDelivery: SupabaseMarketingDeliveryRepository;
-  marketingDeliveryProvider: UnavailableMarketingDeliveryProvider;
+  marketingDeliveryProvider: MarketingDeliveryProvider;
   assessments: SupabaseAssessmentRepository;
   discovery: SupabaseDiscoveryRepository;
   emailAccounts: ConnectedEmailAccountRepository;
@@ -150,7 +151,7 @@ export async function createProductionWorkspaceComposition(
       workspaceContext: context,
       candidates,
       contacts: new SupabaseContactRepository(client, context),
-      marketing, marketingDelivery:new SupabaseMarketingDeliveryRepository(client,context,marketing), marketingDeliveryProvider:new UnavailableMarketingDeliveryProvider(),
+      marketing, marketingDelivery:new SupabaseMarketingDeliveryRepository(client,context,marketing), marketingDeliveryProvider:createProductionMarketingDeliveryProvider(),
       assessments: new SupabaseAssessmentRepository(client, context),
       discovery: new SupabaseDiscoveryRepository(client),
       emailAccounts: new ConnectedEmailAccountRepository(),
