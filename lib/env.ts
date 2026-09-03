@@ -20,10 +20,37 @@ const googleOAuthEnvironmentSchema = z.object({
   GOOGLE_TOKEN_ENCRYPTION_KEY: z.string().min(1),
 });
 
+const emailAddressSchema = z.email();
+
+function normalizeResendSenderMailbox(value: string): string | null {
+  const mailbox = value.trim();
+  if (!mailbox || /[\u0000-\u001f\u007f]/.test(mailbox)) return null;
+
+  if (emailAddressSchema.safeParse(mailbox).success) return mailbox;
+
+  const match = /^([^<>]+)<([^<>]+)>$/.exec(mailbox);
+  if (!match) return null;
+
+  const displayName = match[1].trim();
+  const address = match[2].trim();
+  if (!/^[A-Za-z0-9][A-Za-z0-9 .'-]{0,99}$/.test(displayName)) return null;
+  if (!emailAddressSchema.safeParse(address).success) return null;
+
+  return `${displayName} <${address}>`;
+}
+
+const resendSenderMailboxSchema = z.string().transform((value, context) => {
+  const mailbox = normalizeResendSenderMailbox(value);
+  if (mailbox) return mailbox;
+
+  context.addIssue({ code: "custom", message: "Invalid sender mailbox" });
+  return z.NEVER;
+});
+
 const resendEnvironmentSchema = z.object({
   RESEND_API_KEY: z.string().min(1),
   RESEND_WEBHOOK_SECRET: z.string().regex(/^whsec_[A-Za-z0-9+/=_-]+$/),
-  RESEND_FROM_EMAIL: z.email(),
+  RESEND_FROM_EMAIL: resendSenderMailboxSchema,
 });
 
 function parseEnvironment<T extends z.ZodType>(schema: T): z.output<T> {

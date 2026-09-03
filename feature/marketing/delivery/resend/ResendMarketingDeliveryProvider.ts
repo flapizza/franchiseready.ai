@@ -32,7 +32,7 @@ export class ResendMarketingDeliveryProvider implements MarketingDeliveryProvide
           "Idempotency-Key": `frangroove/${input.deliveryKey}`,
         },
         body: JSON.stringify({
-          from: `${safeDisplayName(input.senderName)} <${this.configuration.fromEmail}>`,
+          from: formatSenderMailbox(this.configuration.fromEmail, input.senderName),
           to: [input.to],
           reply_to: input.replyTo,
           subject: input.subject,
@@ -57,6 +57,9 @@ export class ResendMarketingDeliveryProvider implements MarketingDeliveryProvide
   }
 }
 
+function formatSenderMailbox(mailbox: string, senderName: string) {
+  return mailbox.includes("<") ? mailbox : `${safeDisplayName(senderName)} <${mailbox}>`;
+}
 function safeDisplayName(value: string) { return value.replace(/[\r\n<>]/g, " ").trim().slice(0, 100) || "FranGroove"; }
 function safeTags(metadata: Record<string, string>) { return Object.entries(metadata).filter(([name,value])=>/^[A-Za-z0-9_-]{1,50}$/.test(name)&&/^[A-Za-z0-9_-]{1,256}$/.test(value)).slice(0,10).map(([name,value])=>({name,value})); }
 function retryableStatus(status: number) { return status===408||status===409||status===425||status===429||status>=500; }
