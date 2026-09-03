@@ -53,6 +53,10 @@ const resendEnvironmentSchema = z.object({
   RESEND_FROM_EMAIL: resendSenderMailboxSchema,
 });
 
+const campaignDeliveryWorkerEnvironmentSchema = z.object({
+  CAMPAIGN_DELIVERY_WORKER_SECRET: z.string().min(32),
+});
+
 function parseEnvironment<T extends z.ZodType>(schema: T): z.output<T> {
   const result = schema.safeParse(process.env);
 
@@ -135,6 +139,13 @@ export function getResendEnvironment(
   environment: NodeJS.ProcessEnv = process.env,
 ): ResendEnvironment | null {
   const result = resendEnvironmentSchema.safeParse(environment);
+  return result.success ? result.data : null;
+}
+
+export function getCampaignDeliveryWorkerEnvironment(
+  environment: NodeJS.ProcessEnv = process.env,
+) {
+  const result = campaignDeliveryWorkerEnvironmentSchema.safeParse(environment);
   return result.success ? result.data : null;
 }
 
