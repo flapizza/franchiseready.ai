@@ -10,6 +10,8 @@ const eslintConfig = defineConfig([
     // Default ignores of eslint-config-next:
     ".next/**",
     ".next-dev/**",
+    "public-unsubscribe/.next/**",
+    "public-unsubscribe/node_modules/**",
     "out/**",
     "build/**",
     "next-env.d.ts",

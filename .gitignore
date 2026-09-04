@@ -2,6 +2,7 @@
 
 # dependencies
 /node_modules
+/public-unsubscribe/node_modules
 /.pnp
 .pnp.*
 .yarn/*
@@ -18,6 +19,7 @@
 
 # next.js
 /.next/
+/public-unsubscribe/.next/
 /.next-dev/
 /out/
 
