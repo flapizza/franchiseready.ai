@@ -13,7 +13,7 @@ export const heroContent = {
   title: "The AI Operating System for Franchise Consultants.",
 
   description:
-    "FranchiseReady AI helps consultants prepare for Discovery meetings, understand candidates faster, generate transparent brand recommendations, and deliver higher-quality candidates—all from one intelligent platform.",
+    "FranGroove AI helps consultants prepare for Discovery meetings, understand candidates faster, generate transparent brand recommendations, and deliver higher-quality candidates—all from one intelligent platform.",
 
   primaryCta: {
     label: "See the Platform",
@@ -130,7 +130,7 @@ export const howItWorksContent = {
 export const ctaContent = {
   title: "Ready to Transform Your Franchise Consulting Business?",
   description:
-    "Schedule a personalized demonstration and see how FranchiseReady AI can transform every stage of your franchise consulting process.",
+    "Schedule a personalized demonstration and see how FranGroove AI can transform every stage of your franchise consulting process.",
   href: "/request-demo",
   label: "Request a Demo",
 };

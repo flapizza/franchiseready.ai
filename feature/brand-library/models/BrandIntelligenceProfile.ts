@@ -1,17 +1,117 @@
-export type BrandFactSource = "brand-profile" | "brand-provided" | "approved-material" | "fdd" | "consultant-maintained" | "unverified";
-export type PresentationApproval = "approved-for-presentation" | "internal-only" | "needs-review" | "unavailable";
-export interface GovernedBrandFact<T> { value: T | null; source: BrandFactSource; approval: PresentationApproval; verifiedAt: string | null }
-export interface BrandMaterialReference { kind: "website" | "brochure" | "video" | "fdd" | "territory-map" | "validation-contact" | "financial-disclosure"; label: string; url: string | null; approval: PresentationApproval }
-export interface BrandIntelligenceProfile {
-  brandId: string; brandName: string; demoClassification: "existing-demo-profile" | "curated-demo-concept"; category: GovernedBrandFact<string>; website: GovernedBrandFact<string>;
-  overview: GovernedBrandFact<string>; ownerRole: GovernedBrandFact<string>; customerType: GovernedBrandFact<string>;
-  businessModel: GovernedBrandFact<string>; operatingEnvironment: GovernedBrandFact<string>;
-  businessDevelopment: GovernedBrandFact<{ level: "low" | "moderate" | "high" | "very-high"; description: string }>;
-  staffingModel: GovernedBrandFact<string>; revenueModel: GovernedBrandFact<string>; territoryModel: GovernedBrandFact<string>;
-  financial: { totalInvestmentMin: GovernedBrandFact<number>; totalInvestmentMax: GovernedBrandFact<number>; minimumLiquidCapital: GovernedBrandFact<number>; minimumNetWorth: GovernedBrandFact<number>; franchiseFee: GovernedBrandFact<number>; royalty: GovernedBrandFact<string>; marketingFund: GovernedBrandFact<string>; financingNotes: GovernedBrandFact<string> };
-  trainingSupport: { initialTraining: GovernedBrandFact<string>; launchSupport: GovernedBrandFact<string>; ongoingSupport: GovernedBrandFact<string>; businessDevelopmentSupport: GovernedBrandFact<string>; technologySupport: GovernedBrandFact<string> };
-  differentiators: GovernedBrandFact<string[]>; commonConcerns: GovernedBrandFact<string[]>; approvedTalkingPoints: GovernedBrandFact<string[]>; canonicalQuestions: GovernedBrandFact<string[]>;
-  referralContact: GovernedBrandFact<{ name: string; email: string; title: string }>;
-  materials: BrandMaterialReference[]; completeness: "profile-complete" | "mostly-profiled" | "needs-brand-information";
-  version: { id: string; effectiveAt: string; approvedBy: string | null };
+export type EvidenceSourceType = "primary" | "secondary" | "consultant-provided" | "inferred" | "legacy-demo";
+export type EvidenceVerification = "verified" | "reviewed" | "unverified" | "conflicting";
+
+export interface BrandEvidence {
+  id: string;
+  sourceType: EvidenceSourceType;
+  title: string;
+  sourceDate?: string;
+  sourceUrl?: string;
+  documentReference?: string;
+  fddReference?: { item?: string; page?: string };
+  retrievedAt?: string;
+  verification: EvidenceVerification;
+  confidence?: "high" | "medium" | "low";
+  notes?: string;
 }
+
+export type PresentationApproval = "approved-for-presentation" | "internal-only" | "needs-review" | "unavailable";
+
+export interface BrandFact<T> {
+  value: T | null;
+  verification: EvidenceVerification | "unknown";
+  approval: PresentationApproval;
+  evidence: BrandEvidence[];
+  notes?: string;
+}
+
+export type GovernedBrandFact<T> = BrandFact<T>;
+export type BrandProfileCompletenessStatus = "sufficiently-populated" | "partially-populated" | "minimal" | "unknown-not-reviewed";
+
+export interface BrandProfileCompleteness {
+  status: BrandProfileCompletenessStatus;
+  knownFields: number;
+  totalFields: number;
+  evidencedFields: number;
+  verifiedFields: number;
+  missingFields: string[];
+}
+
+export type FitLevel = "low" | "moderate" | "high" | "very-high";
+export type Suitability = "not-suited" | "possible" | "well-suited" | "unknown";
+export type OperatingLocation = "home-based" | "office" | "retail" | "mobile" | "flexible" | "unknown";
+export interface MoneyRange { minimum: number | null; maximum: number | null; currency: "USD" }
+export interface RecurringFee { name: string; amount: string }
+
+export interface BrandIntelligenceProfile {
+  id: string;
+  name: string;
+  demoClassification: "existing-demo-profile" | "curated-demo-concept";
+  brandStatus: "active" | "inactive" | "concept" | "unknown";
+  profileStatus: "reviewed" | "in-review" | "not-reviewed";
+  category: BrandFact<string>;
+  industry: BrandFact<string>;
+  description: BrandFact<string>;
+  website: BrandFact<string>;
+  franchisor: BrandFact<string>;
+  economics: {
+    franchiseFee: BrandFact<number>;
+    initialInvestment: BrandFact<MoneyRange>;
+    minimumLiquidCapital: BrandFact<number>;
+    minimumNetWorth: BrandFact<number>;
+    royalty: BrandFact<string>;
+    marketingFund: BrandFact<string>;
+    otherRecurringFees: BrandFact<RecurringFee[]>;
+  };
+  characteristics: {
+    customerModel: BrandFact<"B2B" | "B2C" | "mixed">;
+    businessType: BrandFact<"service" | "retail" | "food" | "professional" | "other">;
+    operatingLocations: BrandFact<OperatingLocation[]>;
+    ownerOperatorSuitability: BrandFact<Suitability>;
+    semiAbsenteeSuitability: BrandFact<Suitability>;
+    executiveSuitability: BrandFact<Suitability>;
+    staffingIntensity: BrandFact<FitLevel>;
+    salesIntensity: BrandFact<FitLevel>;
+    operationalComplexity: BrandFact<FitLevel>;
+    customerAcquisitionModel: BrandFact<string>;
+    recurringRevenue: BrandFact<boolean>;
+    locationDependence: BrandFact<FitLevel>;
+    territoryModel: BrandFact<string>;
+  };
+  fit: {
+    leadership: BrandFact<FitLevel>;
+    salesComfort: BrandFact<FitLevel>;
+    networkingBusinessDevelopment: BrandFact<FitLevel>;
+    operationalManagement: BrandFact<FitLevel>;
+    peopleManagement: BrandFact<FitLevel>;
+    analyticalAptitude: BrandFact<FitLevel>;
+    relationshipBuilding: BrandFact<FitLevel>;
+    communityOrientation: BrandFact<FitLevel>;
+    desiredLifestyle: BrandFact<string>;
+    timeCommitment: BrandFact<string>;
+    financialSuitability: BrandFact<string>;
+    priorIndustryExperience: BrandFact<string>;
+  };
+  support: {
+    initialTraining: BrandFact<string>;
+    ongoingSupport: BrandFact<string>;
+    marketingSupport: BrandFact<string>;
+    salesSupport: BrandFact<string>;
+    technologySupport: BrandFact<string>;
+    fieldSupport: BrandFact<string>;
+  };
+  system: {
+    approximateSize: BrandFact<string>;
+    unitMix: BrandFact<string>;
+    geography: BrandFact<string>;
+    maturity: BrandFact<string>;
+  };
+  differentiators: BrandFact<string[]>;
+  considerations: BrandFact<string[]>;
+  discoveryQuestions: BrandFact<string[]>;
+  completeness: BrandProfileCompleteness;
+  consultantIntelligence: ConsultantBrandIntelligence;
+  evidence: BrandEvidence[];
+  version: { id: string; effectiveAt: string | null; approvedBy: string | null };
+}
+import type { ConsultantBrandIntelligence } from "./ConsultantBrandIntelligence.ts";

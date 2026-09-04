@@ -16,7 +16,7 @@ test("primary workspace navigation uses valid queues and correct active states",
     { name: "Candidates", path: "/crm/candidates", heading: "Candidates" },
     { name: "Discovery Copilot", path: "/crm/discovery", heading: "Discovery work queue" },
     { name: "Brand Strategy", path: "/crm/strategy", heading: "Brand Strategy" },
-    { name: "Brand Library", path: "/crm/brands", heading: "Brand Library" },
+    { name: "Brand Intelligence", path: "/crm/brands", heading: "Brand Intelligence" },
     { name: "Referral Studio", path: "/crm/referrals", heading: "Referral Studio" },
   ]) {
     const destination = new RegExp(`${workspace.path}$`);
@@ -27,10 +27,10 @@ test("primary workspace navigation uses valid queues and correct active states",
     await expect(navigation.locator('[aria-current="page"]')).toHaveCount(1);
   }
 
-  await page.getByRole("navigation").getByRole("link", { name: "Brand Library" }).click();
+  await page.getByRole("navigation").getByRole("link", { name: "Brand Intelligence" }).click();
   await page.getByRole("link", { name: /Open .* Brand Profile/ }).first().click();
   await expect(page).toHaveURL(/\/crm\/brands\/[^/]+$/);
-  await expect(navigation.getByRole("link", { name: "Brand Library" })).toHaveAttribute("aria-current", "page");
+  await expect(navigation.getByRole("link", { name: "Brand Intelligence" })).toHaveAttribute("aria-current", "page");
   await expect(navigation.locator('[aria-current="page"]')).toHaveCount(1);
 
   await page.goto("/crm/candidates/candidate-demo/strategy");

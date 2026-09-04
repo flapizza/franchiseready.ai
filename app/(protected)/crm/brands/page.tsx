@@ -1,12 +1,12 @@
-import Link from "next/link";
-import { presentationValue } from "@/feature/brand-library/runtime/BrandIntelligenceRuntime";
-import { resolveWorkspaceComposition } from "@/feature/platform/composition/resolveWorkspaceComposition";
+import { BrandLibraryWorkspace } from "@/feature/brand-library/components/BrandLibraryWorkspace";
 import { WorkspaceFeatureUnavailable } from "@/feature/platform/components/WorkspaceFeatureUnavailable";
+import { resolveWorkspaceComposition } from "@/feature/platform/composition/resolveWorkspaceComposition";
 
-const money = (value: number | null) => value === null ? "Not Yet Available" : value.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
 export default async function BrandsPage() {
-  const resolution=await resolveWorkspaceComposition();
-  if(resolution.status!=="resolved" || !("runtimes" in resolution.composition))return <WorkspaceFeatureUnavailable title="Brand Library"/>;
+  const resolution = await resolveWorkspaceComposition();
+  if (resolution.status !== "resolved" || !("runtimes" in resolution.composition)) {
+    return <WorkspaceFeatureUnavailable title="Brand Intelligence" detail="Brand Intelligence persistence is not enabled for this workspace yet." />;
+  }
   const profiles = await resolution.composition.runtimes.createBrandIntelligence().getAll();
-  return <main className="mx-auto max-w-7xl space-y-6 p-6 lg:p-10"><header><p className="text-xs font-black uppercase tracking-[0.2em] text-teal-600">Brand Intelligence</p><h1 className="mt-1 text-3xl font-black">Brand Library</h1><p className="mt-2 text-sm text-slate-600">A deliberately contrasting conference portfolio. Curated concepts are clearly labeled and contain no financial-performance claims.</p></header><section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">{profiles.map((profile) => <article key={profile.brandId} aria-label={`${profile.brandName} brand card`} className="rounded-2xl"><Link href={`/crm/brands/${profile.brandId}`} aria-label={`Open ${profile.brandName} Brand Profile`} className="block h-full cursor-pointer rounded-2xl border bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-200"><div className="flex items-start justify-between gap-3"><p className="text-xs font-black uppercase text-blue-600">{presentationValue(profile.category)}</p><span className={`rounded-full px-2 py-1 text-[10px] font-black uppercase ${profile.demoClassification === "curated-demo-concept" ? "bg-violet-50 text-violet-700" : "bg-slate-100 text-slate-600"}`}>{profile.demoClassification === "curated-demo-concept" ? "Curated Demo" : "Existing Demo Profile"}</span></div><h2 className="mt-1 text-xl font-black">{profile.brandName}</h2><p className="mt-3 text-sm text-slate-600">{presentationValue(profile.overview)}</p><dl className="mt-4 grid grid-cols-2 gap-3 text-xs"><div><dt className="font-black text-slate-400">Owner Role</dt><dd>{presentationValue(profile.ownerRole) ?? "Not Yet Available"}</dd></div><div><dt className="font-black text-slate-400">Investment</dt><dd>{money(presentationValue(profile.financial.totalInvestmentMin))}–{money(presentationValue(profile.financial.totalInvestmentMax))}</dd></div><div><dt className="font-black text-slate-400">Customer</dt><dd>{presentationValue(profile.customerType)}</dd></div><div><dt className="font-black text-slate-400">Staffing</dt><dd className="capitalize">{presentationValue(profile.staffingModel)}</dd></div></dl></Link></article>)}</section></main>;
+  return <BrandLibraryWorkspace profiles={profiles} />;
 }

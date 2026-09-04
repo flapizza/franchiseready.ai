@@ -1,8 +1,8 @@
-import type { BrandRepository } from "./BrandRepository";
+import type { BrandRepository } from "./BrandRepository.ts";
 
-import type { BrandProfile } from "../models/BrandProfile";
+import type { BrandProfile } from "../models/BrandProfile.ts";
 
-import { demoBrands } from "../data/demoBrands";
+import { demoBrands } from "../data/demoBrands.ts";
 
 export class SeedBrandRepository
   implements BrandRepository

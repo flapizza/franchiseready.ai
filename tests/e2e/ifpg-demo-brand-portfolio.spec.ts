@@ -11,10 +11,9 @@ async function enterDemoAndReset(page: Page) {
 test("expanded Brand Library presents six contrasting and clearly labeled concepts", async ({ page }) => {
   await enterDemoAndReset(page);
   await page.goto("/crm/brands");
-  await expect(page.getByRole("heading", { name: "Brand Library" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Brand Intelligence", exact: true })).toBeVisible();
   await expect(page.locator('article[aria-label$=" brand card"]')).toHaveCount(6);
-  await expect(page.getByText("Curated Demo", { exact: true })).toHaveCount(3);
-  await expect(page.getByText("Existing Demo Profile", { exact: true })).toHaveCount(3);
+  await expect(page.getByText("concept", { exact: true })).toHaveCount(3);
   const routeWise = page.getByLabel("RouteWise Mobile Services brand card");
   await expect(routeWise).toContainText("Mobile Consumer Services");
   await expect(routeWise).toContainText("Owner-operator");
@@ -22,8 +21,8 @@ test("expanded Brand Library presents six contrasting and clearly labeled concep
   await page.getByRole("link", { name: "Open BrightPath Home Services Brand Profile" }).click();
   await expect(page).toHaveURL(/\/crm\/brands\/brightpath-home-services$/);
   await expect(page.getByRole("heading", { name: "BrightPath Home Services" })).toBeVisible();
-  await expect(page.getByText("Curated manager-led home-services concept", { exact: false })).toBeVisible();
-  await expect(page.getByText("Local service hub coordinating technicians", { exact: false })).toBeVisible();
+  await expect(page.getByText("Curated manager-led home-services concept", { exact: false }).first()).toBeVisible();
+  await expect(page.getByText("Local service hub coordinating technicians", { exact: false }).first()).toBeVisible();
   await expect(page.getByText("Curated concept: technician recruiting and local-market activation", { exact: true })).toBeVisible();
 });
 

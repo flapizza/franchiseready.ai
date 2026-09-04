@@ -91,7 +91,7 @@ export function Sidebar({ presentation }: { presentation: WorkspacePresentation 
 
         <NavigationItem
           href={APP_ROUTES.brandLibrary}
-          label="Brand Library"
+          label="Brand Intelligence"
           icon={<Library size={20} />}
         />
 

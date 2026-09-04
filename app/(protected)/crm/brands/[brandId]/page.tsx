@@ -1,25 +1,14 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import type { GovernedBrandFact } from "@/feature/brand-library/models/BrandIntelligenceProfile";
-import { presentationValue } from "@/feature/brand-library/runtime/BrandIntelligenceRuntime";
-import { resolveWorkspaceComposition } from "@/feature/platform/composition/resolveWorkspaceComposition";
+import { BrandProfileWorkspace } from "@/feature/brand-library/components/BrandProfileWorkspace";
 import { WorkspaceFeatureUnavailable } from "@/feature/platform/components/WorkspaceFeatureUnavailable";
+import { resolveWorkspaceComposition } from "@/feature/platform/composition/resolveWorkspaceComposition";
 
-const source = (fact: GovernedBrandFact<unknown>) => ({ "brand-profile": "Brand Profile", "brand-provided": "Brand Provided", "approved-material": "Approved Material", fdd: "FDD", "consultant-maintained": "Consultant Maintained", unverified: "Unverified" })[fact.source];
-const display = (fact: GovernedBrandFact<unknown>) => fact.value === null ? fact.approval === "needs-review" ? "Needs Verification" : "Not Yet Available" : typeof fact.value === "number" ? fact.value.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }) : typeof fact.value === "object" ? JSON.stringify(fact.value) : String(fact.value);
-const Fact = ({ label, fact }: { label: string; fact: GovernedBrandFact<unknown> }) => <div className="rounded-xl bg-slate-50 p-4"><p className="text-[10px] font-black uppercase text-slate-400">{label}</p><p className="mt-1 text-sm font-bold">{display(fact)}</p><p className="mt-2 text-[10px] font-bold uppercase text-teal-700">{source(fact)} · {fact.approval.replaceAll("-", " ")}</p></div>;
-
-export default async function BrandPage({ params }: { params: Promise<{ brandId: string }> }) {
+export default async function BrandPage({ params }: PageProps<"/crm/brands/[brandId]">) {
   const resolution = await resolveWorkspaceComposition();
-  if (resolution.status !== "resolved" || !("runtimes" in resolution.composition)) return <WorkspaceFeatureUnavailable title="Brand profile" />;
+  if (resolution.status !== "resolved" || !("runtimes" in resolution.composition)) {
+    return <WorkspaceFeatureUnavailable title="Brand Intelligence" detail="Brand Intelligence persistence is not enabled for this workspace yet." />;
+  }
   const profile = await resolution.composition.runtimes.createBrandIntelligence().getById((await params).brandId);
   if (!profile) notFound();
-  return <main className="mx-auto max-w-6xl space-y-6 p-6 lg:p-10">
-    <header><Link href="/crm/brands" className="text-sm font-bold text-slate-500">← Brand Library</Link><div className="mt-5 flex flex-wrap items-center gap-3"><p className="text-xs font-black uppercase tracking-[0.2em] text-teal-600">Governed Brand Intelligence</p><span className={`rounded-full px-2 py-1 text-[10px] font-black uppercase ${profile.demoClassification === "curated-demo-concept" ? "bg-violet-50 text-violet-700" : "bg-slate-100 text-slate-600"}`}>{profile.demoClassification === "curated-demo-concept" ? "Curated Demo Concept" : "Existing Demo Profile"}</span></div><h1 className="mt-1 text-3xl font-black">{profile.brandName}</h1><p className="mt-2 text-sm text-slate-600">{presentationValue(profile.overview) ?? "Not Yet Profiled"}</p></header>
-    <section><h2 className="text-xl font-black">Business Model & Operations</h2><div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4"><Fact label="Owner Role" fact={profile.ownerRole} /><Fact label="Customer Type" fact={profile.customerType} /><Fact label="Operating Environment" fact={profile.operatingEnvironment} /><Fact label="Staffing" fact={profile.staffingModel} /><Fact label="Revenue" fact={profile.revenueModel} /><Fact label="Business Development" fact={profile.businessDevelopment} /><Fact label="Territory Structure" fact={profile.territoryModel} /></div></section>
-    <section><h2 className="text-xl font-black">Financial Requirements</h2><div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4"><Fact label="Minimum Investment" fact={profile.financial.totalInvestmentMin} /><Fact label="Maximum Investment" fact={profile.financial.totalInvestmentMax} /><Fact label="Liquid Capital" fact={profile.financial.minimumLiquidCapital} /><Fact label="Franchise Fee" fact={profile.financial.franchiseFee} /><Fact label="Royalty" fact={profile.financial.royalty} /></div></section>
-    <section><h2 className="text-xl font-black">Training & Support</h2><div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4"><Fact label="Initial Training" fact={profile.trainingSupport.initialTraining} /><Fact label="Launch Support" fact={profile.trainingSupport.launchSupport} /><Fact label="Ongoing Support" fact={profile.trainingSupport.ongoingSupport} /><Fact label="Technology Support" fact={profile.trainingSupport.technologySupport} /></div></section>
-    <section className="grid gap-4 md:grid-cols-2"><article className="rounded-2xl border bg-white p-5"><h2 className="font-black">Differentiators & Talking Points</h2><ul className="mt-3 space-y-2 text-sm">{(presentationValue(profile.differentiators) ?? []).map((item) => <li key={item}>• {item}</li>)}</ul></article><article className="rounded-2xl border bg-white p-5"><h2 className="font-black">Discovery Questions</h2><ul className="mt-3 space-y-2 text-sm">{(presentationValue(profile.canonicalQuestions) ?? []).map((item) => <li key={item}>• {item}</li>)}</ul></article></section>
-    <section><h2 className="text-xl font-black">Materials</h2><div className="mt-3 grid gap-3 sm:grid-cols-2">{profile.materials.map((item) => <div key={item.kind} className="rounded-xl border bg-white p-4"><p className="font-bold">{item.label}</p><p className="text-xs text-slate-500">{item.url ?? "Not Yet Available"} · {item.approval.replaceAll("-", " ")}</p></div>)}</div></section>
-  </main>;
+  return <BrandProfileWorkspace profile={profile} />;
 }

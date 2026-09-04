@@ -229,29 +229,29 @@ export class CandidateBrandStrategyRuntime {
     const selected = strategy.recommendations.filter((item) => item.selectedForPresentation).sort((a, b) => (a.presentationOrder ?? 999) - (b.presentationOrder ?? 999));
     if (!strategy.available || selected.length === 0) return { available: false, reason: "Add at least one brand to the Presentation Set first.", candidateId, candidateName: strategy.candidate.fullName, historical: strategy.workflow.historical, completed: false, briefs: [], activeIndex: 0 };
     const byId = new Map(brands.map((brand) => [brand.id, brand]));
-    const governedById = new Map(governedProfiles.map((profile) => [profile.brandId, profile]));
+    const governedById = new Map(governedProfiles.map((profile) => [profile.id, profile]));
     const briefs = selected.map((item, index) => {
       const brand = byId.get(item.brandId);
       const governed = governedById.get(item.brandId);
       if (!brand || !governed) throw new Error(`Canonical brand profile missing for ${item.brandId}.`);
       const facts = [
-        { label: "Industry", value: presentationValue(governed.category) ?? "Not Yet Available" },
-        { label: "Business Model", value: presentationValue(governed.businessModel) ?? "Not Yet Available" },
-        { label: "Customer Type", value: presentationValue(governed.customerType) ?? "Not Yet Available" },
-        { label: "Owner Role", value: presentationValue(governed.ownerRole) ?? "Not Yet Available" },
-        { label: "Staffing Model", value: presentationValue(governed.staffingModel) ?? "Not Yet Available" },
-        { label: "Revenue Model", value: presentationValue(governed.revenueModel) ?? "Not Yet Available" },
-        { label: "Investment Range", value: `${money(presentationValue(governed.financial.totalInvestmentMin) ?? brand.investment.minimum)}–${money(presentationValue(governed.financial.totalInvestmentMax) ?? brand.investment.maximum)}` },
-        { label: "Training & Support", value: presentationValue(governed.trainingSupport.initialTraining) ?? "Not Yet Profiled" },
+        { label: "Industry", value: presentationValue(governed.industry) ?? "Not Yet Available" },
+        { label: "Business Model", value: presentationValue(governed.characteristics.customerModel) ?? "Not Yet Available" },
+        { label: "Customer Type", value: presentationValue(governed.characteristics.customerAcquisitionModel) ?? "Not Yet Available" },
+        { label: "Owner Role", value: presentationValue(governed.characteristics.executiveSuitability) === "well-suited" ? "Executive / manager-run" : presentationValue(governed.characteristics.ownerOperatorSuitability) === "well-suited" ? "Owner-operator" : "Not Yet Available" },
+        { label: "Staffing Model", value: presentationValue(governed.characteristics.staffingIntensity) ?? "Not Yet Available" },
+        { label: "Revenue Model", value: presentationValue(governed.characteristics.recurringRevenue) === null ? "Not Yet Available" : presentationValue(governed.characteristics.recurringRevenue) ? "Recurring-revenue characteristics" : "Transaction-based" },
+        { label: "Investment Range", value: `${money(presentationValue(governed.economics.initialInvestment)?.minimum ?? brand.investment.minimum)}–${money(presentationValue(governed.economics.initialInvestment)?.maximum ?? brand.investment.maximum)}` },
+        { label: "Training & Support", value: presentationValue(governed.support.initialTraining) ?? "Not Yet Profiled" },
       ];
       const evidence = item.evidence.slice(0, 5).map((entry): PresentationTalkingPoint => ({ text: `${entry.title}: ${entry.description}`, source: entry.source === "meeting" ? "Discovery" : entry.category === "financial" ? "Financial Profile" : "Assessment" }));
       return { candidateId, candidateName: strategy.candidate.fullName, brandId: item.brandId, brandName: item.brandName,
         presentationOrder: index + 1, presentationCount: selected.length, aiRank: item.rank, aiMatch: item.score, recommendationConfidence: item.confidence,
-        overview: presentationValue(governed.overview) ?? "Not Yet Profiled", facts, differentiators: presentationValue(governed.differentiators) ?? [], matchRationale: item.rationale, fitFactors: evidence,
+        overview: presentationValue(governed.description) ?? "Not Yet Profiled", facts, differentiators: presentationValue(governed.differentiators) ?? [], matchRationale: item.rationale, fitFactors: evidence,
         emphasize: [...item.fitDimensions.slice().sort((a, b) => b.alignment - a.alignment).slice(0, 2).map((fit) => ({ text: `Connect ${fit.label.toLowerCase()} (${fit.candidateValue}%) to this ownership model.`, source: "Assessment" as const })),
           ...[...item.presentationGuidance.emphasize, ...item.presentationGuidance.leadWith].slice(0, 3).map((text) => ({ text, source: "Brand Intelligence" as const }))],
         concerns: item.concerns.slice(0, 4).map((text) => ({ text, source: /investment|financial/i.test(text) ? "Financial Profile" as const : "Brand Intelligence" as const })),
-        questions: this.presentationQuestions.build(presentationValue(governed.canonicalQuestions) ?? [], strategy.openConcerns),
+        questions: this.presentationQuestions.build(presentationValue(governed.discoveryQuestions) ?? [], strategy.openConcerns),
         candidateReaction: item.candidateReaction, consultantNotes: item.consultantNotes, shortlistDisposition: item.shortlistDisposition, presentedAt: item.presentedAt };
     });
     const activeIndex = Math.max(0, requestedBrandId ? briefs.findIndex((item) => item.brandId === requestedBrandId) : briefs.findIndex((item) => !item.presentedAt));

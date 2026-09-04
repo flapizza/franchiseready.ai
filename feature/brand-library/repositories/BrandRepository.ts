@@ -1,4 +1,4 @@
-import type { BrandProfile } from "../models/BrandProfile";
+import type { BrandProfile } from "../models/BrandProfile.ts";
 
 export interface BrandRepository {
   getAll(): Promise<BrandProfile[]>;
