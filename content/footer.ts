@@ -32,12 +32,12 @@ export const footerNavigation = [
         href: "#company",
       },
       {
-        label: "Resources",
-        href: "#resources",
+        label: "Workflow",
+        href: "#workflow",
       },
       {
-        label: "Contact",
-        href: "mailto:hello@franchiseready.ai",
+        label: "Availability",
+        href: "#demo",
       },
     ],
   },

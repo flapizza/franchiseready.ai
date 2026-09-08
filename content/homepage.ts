@@ -13,7 +13,7 @@ export const heroContent = {
   title: "The AI Operating System for Franchise Consultants.",
 
   description:
-    "FranGroove AI helps consultants prepare for Discovery meetings, understand candidates faster, generate transparent brand recommendations, and deliver higher-quality candidates—all from one intelligent platform.",
+    "Candidate CRM and Discovery workflows for franchise consultants, with a growing vision for transparent brand intelligence. Controlled rollout is underway.",
 
   primaryCta: {
     label: "See the Platform",
@@ -21,8 +21,8 @@ export const heroContent = {
   },
 
   secondaryCta: {
-    label: "Request a Demo",
-    href: "#demo",
+    label: "Explore the Workflow",
+    href: "#workflow",
   },
 };
 
@@ -101,36 +101,35 @@ export const howItWorksContent = {
       title: "Candidate Intelligence Assessment",
 
       description:
-        "Candidates complete a consultant-branded assessment that captures financial readiness, leadership experience, business goals, and ownership motivations.",
+        "Organize candidate goals, financial readiness, and ownership motivations. External assessment invitations are not yet available for Production use.",
     },
 
     {
       title: "Consultant Briefing",
 
       description:
-        "Before Discovery, AI prepares the consultant with meeting objectives, buying signals, discussion priorities, and potential risks.",
+        "Use assessment findings and recorded observations to prepare discussion priorities. Automated AI briefings are part of the product vision.",
     },
 
     {
       title: "AI Discovery Copilot",
 
       description:
-        "During Discovery, AI analyzes the conversation in real time, surfaces opportunities, and continuously updates candidate intelligence.",
+        "Capture observations and next steps during Discovery. Live AI conversation analysis is a planned capability, not a currently available service.",
     },
 
     {
       title: "AI Brand Strategy",
 
       description:
-        "Generate transparent recommendations supported by evidence and automatically produce professional referral packages for franchisors.",
+        "Explore the planned evidence-led brand strategy and referral workflow. Production matching and automated referral delivery are not yet available.",
     },
   ],
 };
 
 export const ctaContent = {
-  title: "Ready to Transform Your Franchise Consulting Business?",
-  description:
-    "Schedule a personalized demonstration and see how FranGroove AI can transform every stage of your franchise consulting process.",
-  href: "/request-demo",
-  label: "Request a Demo",
+ title: "A more connected consulting practice starts here.",
+ description: "FranGroove is in controlled rollout. Public demo scheduling and sales contact are not open yet. Explore the product vision above; existing invited users can access their workspace.",
+ href: "https://app.frangroove.com/login",
+ label: "Existing user? Log in",
 };

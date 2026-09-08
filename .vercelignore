@@ -24,3 +24,6 @@
 # Reviewed non-runtime repository artifacts
 /feature.zip
 /manual-layout-problem.png
+
+/marketing/.next/
+/marketing/next-env.d.ts

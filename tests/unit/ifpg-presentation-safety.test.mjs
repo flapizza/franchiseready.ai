@@ -19,13 +19,15 @@ test("conference-visible candidate intelligence uses FranGroove branding", async
   }
 });
 
-test("demo seed links and public scheduling placeholder cannot navigate externally", async () => {
+test("demo seed links remain inert and public availability does not collect requests", async () => {
   const calendar = await read("feature/calendar/repositories/DemoCalendarRepository.ts");
-  const requestDemo = await read("app/request-demo/page.tsx");
+  const requestDemo = await read("components/marketing/demo-availability.tsx");
   assert.doesNotMatch(calendar, /meet\.google\.com\/demo-john|zoom\.us\/j\/demo/);
   assert.match(calendar, /Conference demo · no external meeting/);
   assert.doesNotMatch(requestDemo, /YOUR-CALENDLY-LINK|calendly\.com/);
-  assert.match(requestDemo, /Scheduling Link Coming Soon/);
+  assert.match(requestDemo, /not open yet/);
+  assert.doesNotMatch(requestDemo, /<form|<input|mailto:/);
+  assert.match(requestDemo, /https:\/\/app\.frangroove\.com\/login/);
 });
 
 test("demo candidate deletion is hidden and delivery actions disclose simulation", async () => {

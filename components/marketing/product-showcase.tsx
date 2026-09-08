@@ -1,5 +1,4 @@
 import {
-  ArrowRight,
   BrainCircuit,
   LayoutDashboard,
   Presentation,
@@ -240,7 +239,7 @@ function Candidate360Preview() {
 
         <div className="rounded-2xl bg-slate-900 p-5">
           <div className="text-xs uppercase tracking-wide text-slate-500">
-            AI Confidence
+            Illustrative Score
           </div>
 
           <div className="mt-3 text-4xl font-black text-blue-400">
@@ -250,7 +249,7 @@ function Candidate360Preview() {
 
         <div className="rounded-2xl bg-slate-900 p-5">
           <div className="text-xs uppercase tracking-wide text-slate-500">
-            Award Probability
+            Example Readiness
           </div>
 
           <div className="mt-3 text-4xl font-black text-white">
@@ -264,7 +263,7 @@ function Candidate360Preview() {
           </div>
 
           <div className="mt-3 text-xl font-bold text-white">
-            ERA Group
+            Example concept
           </div>
         </div>
 
@@ -352,7 +351,7 @@ function ShowcaseCard({
           {subtitle}
         </p>
 
-        <h3 className="mt-4 text-5xl font-black tracking-tight text-ink">
+        <h3 className="mt-4 text-3xl sm:text-5xl font-black tracking-tight text-ink">
           {title}
         </h3>
 
@@ -360,14 +359,7 @@ function ShowcaseCard({
           {description}
         </p>
 
-        <button
-          type="button"
-          className="mt-8 inline-flex items-center gap-2 rounded-xl bg-brand px-6 py-3 font-semibold text-brand-foreground transition-all hover:gap-3 hover:bg-brand-strong"
-        >
-          Learn More
-
-          <ArrowRight className="h-4 w-4" />
-        </button>
+        <p className="mt-8 text-sm font-semibold text-brand">Illustrative product preview · Not a live workspace</p>
 
       </div>
 
@@ -389,16 +381,16 @@ export function ProductShowcase() {
         <div className="mx-auto max-w-4xl text-center">
 
           <p className="text-sm font-semibold uppercase tracking-[0.30em] text-brand">
-            See FranGroove AI
+            Explore the FranGroove product vision
           </p>
 
-          <h2 className="mt-6 text-5xl font-black tracking-tight text-ink">
+          <h2 className="mt-6 text-3xl sm:text-5xl font-black tracking-tight text-ink">
             Built for the way franchise
             consultants actually work.
           </h2>
 
           <p className="mx-auto mt-8 max-w-3xl text-xl leading-9 text-muted">
-            Every screen has been designed around the
+            These illustrative screens show planned experiences around the
             real workflow of professional franchise
             consultants—from first assessment to
             successful franchise award.

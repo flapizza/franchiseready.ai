@@ -51,7 +51,7 @@ export function Cta({
           </div>
 
           <p className="mt-8 text-sm text-slate-400">
-            30-minute personalized demo • No obligation • Questions answered live
+            Public demo scheduling coming soon. No request is submitted here.
           </p>
 
         </div>

@@ -31,7 +31,7 @@ function MissionControlPreview() {
 
       <div className="overflow-hidden rounded-[32px] border border-slate-200 bg-white shadow-[0_40px_120px_rgba(15,23,42,.18)]">
 
-        <div className="flex items-center justify-between border-b border-slate-200 px-8 py-6">
+        <div className="flex flex-wrap gap-4 items-center justify-between border-b border-slate-200 px-8 py-6">
 
           <div>
 
@@ -183,11 +183,11 @@ export function Hero({
 
             </div>
 
-            <h1 className="mt-8 text-6xl font-black tracking-tight text-slate-900 lg:text-7xl">
+            <h1 className="mt-8 text-4xl sm:text-6xl font-black tracking-tight text-slate-900 lg:text-7xl">
 
               Fran<span className="text-teal-500">Groove</span> AI
 
-              <span className="mt-6 block text-5xl leading-tight lg:text-6xl">
+              <span className="mt-6 block text-3xl sm:text-5xl leading-tight lg:text-6xl">
                 {title}
               </span>
 
@@ -231,16 +231,14 @@ export function Hero({
 
               <p className="mt-4 leading-8 text-slate-600">
                 FranGroove AI is built exclusively for franchise consultants.
-                Our recommendation engine is never influenced by paid placement,
-                sponsorships, or franchisor preferences—every recommendation is
-                driven by candidate fit and consultant success.
+                Our product direction puts candidate fit first. Transparent, evidence-led recommendations remain a development goal, guided by consultant judgment.
               </p>
 
             </div>
 
           </div>
 
-          <MissionControlPreview />
+          <div><p className="mb-4 text-sm font-semibold text-slate-600">Illustrative product preview · Planned Mission Control experience</p><MissionControlPreview /></div>
 
         </div>
 

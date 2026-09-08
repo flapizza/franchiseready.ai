@@ -26,14 +26,14 @@ const defaultItems: NavigationItem[] = [
 export function Navbar({
   brand = "FranGroove AI",
   items = defaultItems,
-  loginHref = "#login",
-  primaryHref = "/request-demo",
-  primaryLabel = "Book Demo",
+  loginHref = "https://app.frangroove.com/login",
+  primaryHref = "#demo",
+  primaryLabel = "Availability",
 }: NavbarProps) {
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200/70 bg-white/85 backdrop-blur-xl">
 
-      <Container className="flex min-h-20 items-center justify-between gap-8 py-3">
+      <Container className="flex min-h-20 items-center justify-between flex-wrap gap-3 py-3">
 
         <Link
           href="/"
@@ -80,7 +80,7 @@ export function Navbar({
 
         <nav
           aria-label="Main navigation"
-          className="hidden items-center gap-10 lg:flex"
+          className="order-last flex w-full flex-wrap items-center justify-center gap-4 lg:order-none lg:w-auto lg:gap-8"
         >
           {items.map((item) => (
             <Link
@@ -111,7 +111,7 @@ export function Navbar({
             </span>
 
             <span className="sm:hidden">
-              Demo
+              {primaryLabel}
             </span>
 
             <ArrowRight className="h-4 w-4 text-teal-400" />

@@ -50,20 +50,17 @@ export function PlatformOverview() {
         <div className="mx-auto max-w-4xl text-center">
 
           <p className="text-sm font-semibold uppercase tracking-[0.30em] text-brand">
-            One Platform. Every Stage.
+            Product vision · Capabilities in development
           </p>
 
-          <h2 className="mt-6 text-5xl font-black tracking-tight text-ink">
+          <h2 className="mt-6 text-3xl sm:text-5xl font-black tracking-tight text-ink">
             Everything a franchise consultant
             <br />
             needs in one intelligent workspace.
           </h2>
 
           <p className="mx-auto mt-8 max-w-3xl text-xl leading-9 text-muted">
-            FranGroove AI combines candidate intelligence,
-            Discovery meeting guidance, brand recommendations,
-            CRM workflows, and automated referral packages into
-            a single AI-powered platform.
+            Candidate CRM, contacts, and recorded Discovery workflows form the foundation. The modules below describe our direction; live AI guidance, Production matching, and automated referrals are not commercially available.
           </p>
 
         </div>
@@ -75,7 +72,7 @@ export function PlatformOverview() {
               <LayoutDashboard className="h-7 w-7 text-brand" />
             }
             title="Mission Control"
-            description="Know exactly which candidates need your attention, what meetings are scheduled, and where every opportunity stands."
+            description="Planned: know exactly which candidates need your attention, what meetings are scheduled, and where every opportunity stands."
           />
 
           <PlatformCard
@@ -83,7 +80,7 @@ export function PlatformOverview() {
               <Presentation className="h-7 w-7 text-brand" />
             }
             title="Discovery Copilot"
-            description="Receive live AI guidance during Discovery meetings, including buying signals, suggested questions, and risk detection."
+            description="Planned: receive live AI guidance during Discovery meetings, including buying signals, suggested questions, and risk detection."
           />
 
           <PlatformCard
@@ -99,7 +96,7 @@ export function PlatformOverview() {
               <BrainCircuit className="h-7 w-7 text-brand" />
             }
             title="AI Brand Strategy"
-            description="Generate transparent brand recommendations backed by explainable AI reasoning and supporting evidence."
+            description="Planned: generate transparent brand recommendations backed by explainable AI reasoning and supporting evidence."
           />
 
           <PlatformCard
@@ -107,7 +104,7 @@ export function PlatformOverview() {
               <Network className="h-7 w-7 text-brand" />
             }
             title="Candidate Intelligence Graph"
-            description="Every assessment, meeting, and recommendation contributes to a living intelligence model that grows with every interaction."
+            description="Product vision: every assessment, meeting, and recommendation contributes to a living intelligence model that grows with every interaction."
           />
 
           <PlatformCard
@@ -115,7 +112,7 @@ export function PlatformOverview() {
               <Briefcase className="h-7 w-7 text-brand" />
             }
             title="Referral Packages"
-            description="Automatically generate professional candidate summaries that franchisors can immediately understand and act upon."
+            description="Planned: automatically generate professional candidate summaries that franchisors can immediately understand and act upon."
           />
 
         </div>

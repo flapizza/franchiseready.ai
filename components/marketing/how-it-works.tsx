@@ -72,14 +72,12 @@ export function HowItWorks({
             {eyebrow}
           </p>
 
-          <h2 className="mt-6 text-5xl font-black tracking-tight text-ink">
+          <h2 className="mt-6 text-3xl sm:text-5xl font-black tracking-tight text-ink">
             {title}
           </h2>
 
           <p className="mx-auto mt-8 max-w-3xl text-xl leading-9 text-muted">
-            FranGroove AI follows the same workflow professional franchise
-            consultants use every day—only faster, smarter, and supported by
-            transparent AI.
+            Our product direction follows the work of franchise consultants, from candidate understanding to thoughtful brand evaluation. Availability varies by capability.
           </p>
 
         </div>

@@ -46,17 +46,14 @@ export function ConsultantTrust() {
             Built Exclusively for Consultants
           </p>
 
-          <h2 className="mt-6 text-5xl font-black tracking-tight text-ink">
+          <h2 className="mt-6 text-3xl sm:text-5xl font-black tracking-tight text-ink">
             Independent Intelligence.
             <br />
             Consultant First.
           </h2>
 
           <p className="mx-auto mt-8 max-w-3xl text-xl leading-9 text-muted">
-            FranGroove AI was built exclusively for professional franchise
-            consultants. We intentionally do not license our recommendation
-            engine to franchisors, ensuring every recommendation remains
-            independent and focused entirely on candidate success.
+            FranGroove is designed for professional franchise consultants. Our guiding principle is to keep candidate goals and consultant judgment at the center of the workflow.
           </p>
 
         </div>
@@ -65,8 +62,8 @@ export function ConsultantTrust() {
 
           <TrustCard
             icon={<ShieldCheck className="h-7 w-7 text-brand" />}
-            title="Independent Recommendations"
-            description="Recommendations cannot be influenced by sponsorships, paid placement, or brand participation. Every recommendation is based solely on candidate fit."
+            title="Independent by Design"
+            description="Our product direction prioritizes candidate goals and consultant judgment, rather than paid brand placement."
           />
 
           <TrustCard
@@ -78,7 +75,7 @@ export function ConsultantTrust() {
           <TrustCard
             icon={<Brain className="h-7 w-7 text-brand" />}
             title="Explainable AI"
-            description="Every recommendation includes transparent reasoning and supporting evidence so consultants understand exactly why a brand was recommended."
+            description="Our goal is evidence-led reasoning that consultants can inspect. Production AI recommendations are not yet available."
           />
 
         </div>

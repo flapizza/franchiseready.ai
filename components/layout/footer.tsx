@@ -51,10 +51,7 @@ export function Footer({
             </div>
 
             <p className="mt-8 max-w-md leading-8 text-slate-400">
-              FranGroove AI helps professional franchise consultants
-              understand candidates faster, conduct better Discovery meetings,
-              generate transparent brand recommendations, and deliver stronger
-              candidates to franchisors.
+              FranGroove AI brings candidate records and consulting workflows into one workspace, with guided intelligence features in development.
             </p>
 
             <p className="mt-8 text-sm text-slate-500">
@@ -96,23 +93,7 @@ export function Footer({
             © 2026 FranGroove AI. All rights reserved.
           </p>
 
-          <div className="flex items-center gap-6">
-
-            <Link
-              href="/privacy"
-              className="transition-colors hover:text-white"
-            >
-              Privacy
-            </Link>
-
-            <Link
-              href="/terms"
-              className="transition-colors hover:text-white"
-            >
-              Terms
-            </Link>
-
-          </div>
+          <p>Public information site · No contact forms or mailing list.</p>
 
         </div>
 

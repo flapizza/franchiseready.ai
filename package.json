@@ -13,7 +13,9 @@
     "test:unit": "node --experimental-strip-types --test tests/unit/*.test.mjs",
     "test:e2e": "node scripts/run-e2e.mjs",
     "test:e2e:ui": "node scripts/run-e2e.mjs --ui",
-    "test:e2e:headed": "node scripts/run-e2e.mjs --headed"
+    "test:e2e:headed": "node scripts/run-e2e.mjs --headed",
+    "build:marketing": "next build marketing",
+    "start:marketing": "next start marketing"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.5.7",
