@@ -32,9 +32,7 @@ export async function proxy(request: NextRequest) {
   if (isAuthEntryPath(pathname) && isAuthenticated) {
     return redirectWithSession(
       new URL(
-        hasDemoSession
-          ? APP_ROUTES.missionControl
-          : AUTH_ROUTES.home,
+        APP_ROUTES.missionControl,
         request.url,
       ),
       session.response,
