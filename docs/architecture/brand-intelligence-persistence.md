@@ -195,3 +195,73 @@ Checkpoint 2 results: 49 focused unit/regression tests passed; eight integration
 Checkpoint 2 adds the three persistence modules (`BrandFactRegistry`, `BrandIntelligenceDTO`, `mapBrandIntelligence`), the canonical interface/repository/factory, two fixture helpers, two unit test files and one integration test file. It extends `BrandIntelligenceProfile.ts` with optional governance/provenance/editorial metadata and updates this report. Checkpoint 1 migration, DB tests, generated types and initial path test are preserved. No matching/runtime/UI implementation or hosted resources changed.
 
 Next: review this read boundary, then authorize explicit canonical UI composition and production-domain presentation labels. Continue to keep matching isolated. Source ingestion, authoring, historical repository APIs, backward-compatible registry evolution and editorial gap-state presentation require separate decisions. Hosted migration, fixture import, commit/push and deployment remain outside this authorization.
+
+## Checkpoint 3: canonical consultant UI with local persistence
+
+The consultant library and profile routes now support the existing `PERSISTENCE_MODE=supabase` composition. This checkpoint validates that composition against the local Docker stack only. Hosted Preview migration, data loading, promotion and deployment remain a separate approval. The earlier checkpoint descriptions above record their original scope.
+
+Both `/crm/brands` and `/crm/brands/[brandId]` resolve the normal workspace session. Production composition passes the authenticated server client and resolved organization/membership to `createPersistedBrandIntelligenceRepository`, then to `ConsultantBrandIntelligenceRuntime`. The runtime supplies canonical profiles to the existing library and profile components. Demo composition retains its existing source. No request-time service-role client, environment fallback, new tenant selector, or separate persistence-mode flag is introduced.
+
+```text
+Brand routes -> resolveWorkspaceComposition -> authenticated workspace
+  -> production dependencies.brandIntelligence
+  -> canonical repository -> validated mapping -> existing consultant UI
+CandidateBrandStrategyRuntime -> SeedBrandRepository (unchanged)
+```
+
+Normal workspace resolution continues to handle no active membership, suspended membership and multiple active organizations; it does not guess an organization. The repository independently verifies membership and limits restricted inventory to the resolved workspace. Shared inventory stays global. Canonical persistence never reconstructs legacy matching inputs. John, Sarah, Jared and Elena retain the committed matching expectations, including exact rankings, scores, eligibility, rationale and numeric inputs.
+
+### Deterministic local fixture workflow
+
+`scripts/local-brand-intelligence.mjs` reuses `sixBrandFixtures()` from the existing repository-test fixture builder. That builder derives normalized rows from the existing six canonical demo definitions, avoiding a second maintained dataset: ERA Group, Schooley Mitchell, ActionCOACH, RouteWise Mobile Services, BrightPath Home Services, and Harbor & Hound Market.
+
+The runner obtains local CLI status and rejects non-loopback API URLs before writing. It provisions a synthetic local consultant and organization, uses the service role only for local fixture administration, publishes each deterministic version through the existing lifecycle, and verifies all six through an authenticated application repository. A second load reuses published versions and repeats semantic comparisons. An incomplete publication fails explicitly and requires a disposable local reset; it is not silently repaired. Source claims remain unverified, unknowns remain explicit, and fixture review does not invent external evidence. Persisted fixture profiles display `Local demo profile`; ordinary persisted profiles display `Brand profile`.
+
+The synthetic consultant receives a `Local Consultant` display name through the existing authenticated profile RPC only when its profile is absent. Repeated fixture loads do not create duplicate consultant profiles or repeat that profile-save event. This supplies normal workspace presentation without changing the shell.
+
+```text
+npx supabase db reset --local --no-seed
+npx supabase test db --local
+node --experimental-strip-types --test tests/integration/brand-intelligence-repository.test.mjs
+npx supabase db reset --local --no-seed
+node scripts/local-brand-intelligence.mjs
+node scripts/local-brand-intelligence.mjs
+node scripts/local-brand-intelligence.mjs e2e
+```
+
+Integration tests deliberately mutate disposable inventory, so reset before loading UI fixtures. Use `node scripts/local-brand-intelligence.mjs dev` to start the local persisted experience. The runner injects loopback Supabase configuration into the child process, leaves `.env.local` unchanged, and disables Resend credentials in that process. No hosted credentials are required.
+
+### Missing records, failures and query bounds
+
+Unknown/inaccessible public IDs and slugs, and identities without a publication, return the existing not-found behavior. Unpublished catalog entries are omitted from the rendered library. Repository, authorization and malformed-data errors fail closed with a generic Brand Intelligence error; the route boundary exposes no raw database details and uses this installed Next.js version's `unstable_retry` callback. It preserves the existing application error-panel styling. Tests temporarily revoke a local authenticated read grant, check both route boundaries, restore the grant in `finally`, and verify retry recovers persisted content.
+
+Library search and filters operate over the accessible catalog. The runtime loads catalog batches of 100, follows stable slug cursors, and rejects repeated cursors. It does not call individual profile readers while listing. Repository content reads retain 500-row pagination and the existing 20,000-row relation bound per catalog page. Six profiles require six repository requests; twelve profiles crossing 500 facts require seven. A runtime test loads 150 profiles in two catalog calls with individual lookups prohibited. These counts exclude ordinary page authentication/workspace resolution. No caching was added.
+
+Persisted E2E covers search/filter/card navigation, all six consultant summaries and completeness counts, slug/public-ID routes, inaccessible profiles, error recovery, browser errors, and desktop screenshots of the library, ERA Group and RouteWise. Fixture mapping tests compare fact/provenance semantics and every derived consultant section, preserving economics, operating characteristics, fit/friction, evidence and gaps.
+
+### Recovery and local acceptance results (September 8, 2026)
+
+Recovery resumed the exact seven modified/four untracked files reported after the crash at `018fffc4f96c3abdc09b843719ba6d5954de6ff7`. Surviving work was preserved; the fixture runner and E2E coverage were completed and this document updated. The foundation migration, generated types, canonical matching inputs and frozen matching expectations remain unchanged.
+
+| Validation | Result |
+| --- | --- |
+| Clean local reset/apply | Passed twice; foundation migration applied both times |
+| Full pgTAP suite | 20 files, 492 assertions passed |
+| Repository integration | 8 tests passed, including tenant/multi-org isolation and query counts |
+| Focused Brand Intelligence/composition/matching/portfolio units | 53 passed |
+| Complete application unit suite | 224 passed, including the focused suite |
+| Deterministic UI fixture | Repeated loads passed; exactly six shared brands, six published version-1 profiles, one consultant profile |
+| Persisted Chromium E2E | 3 passed, including both route errors and successful retry |
+| Brand Intelligence/Strategy/Presentation/portfolio and CRM routing E2E | 17 passed on unchanged full rerun |
+| TypeScript | `npx tsc --noEmit --incremental false` passed |
+| Optimized production bundles | Persisted and demo E2E builds passed; 43 static pages each |
+| ESLint | `npm run lint` passed after generated artifact cleanup, without rule changes |
+| Whitespace validation | `git diff --check` passed |
+
+The first new error-boundary assertion matched Next.js's route announcer as well as the error panel; the selector now targets the panel. RouteWise screenshots now explicitly await completed navigation. One initial existing CRM routing test timed out navigating David Thompson; all 17 regression tests passed on an unchanged rerun. No matching expectations or CRM implementation were modified. Treat that isolated timing failure as an existing-test stability observation, not evidence that matching changed.
+
+Focused visual inspection covered the library, persisted ERA Group and persisted RouteWise at 1440 and 1280 pixels. Brand content, readiness, summary and fit/friction presentation remained consistent, with no horizontal page overflow. The existing shared header still wraps at 1280 pixels; shell layout work remains outside this checkpoint. Screenshots and the initial CRM failure trace were copied to a temporary evidence directory outside the worktree before generated test output cleanup.
+
+Happy-path persisted browsing reported no console/page errors or hydration failures. The deliberate permission-failure test produced only the expected generic server errors; both routes failed closed and recovered after the local grant was restored. Final local inspection confirmed the authenticated definition-read grant restored and all six fixtures still published. No ordinary Brand Intelligence request uses the service role, and no persistence failure falls back to demo data.
+
+The local stack was stopped using the normal CLI workflow with volumes preserved. Only the inspected ignored Edge Runtime `supabase/.temp/start-secrets` directory and generated `test-results` output were removed; pre-existing metadata, `.env.local`, and build caches were preserved. `.env.local` remains ignored and untracked. No Docker/cloud configuration, hosted database, Preview, Production, Vercel, Resend or DNS was changed. No commit, push or deployment was performed. Hosted promotion and the future Matching Input Contract remain separately authorized work.

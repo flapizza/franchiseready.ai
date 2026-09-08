@@ -6,7 +6,7 @@ import type { BrandIntelligenceRepository } from "./BrandIntelligenceRepository.
 import { SupabaseBrandIntelligenceRepository } from "./SupabaseBrandIntelligenceRepository.ts";
 
 /** Explicit opt-in for a user-scoped local or hosted client. No env selection or fallback.
- * Not registered in the current workspace/UI or candidate-matching composition. */
+ * Used by authenticated workspace composition, never candidate matching. */
 export function createPersistedBrandIntelligenceRepository(client: SupabaseClient<Database>, workspace: AuthenticatedWorkspaceContext): BrandIntelligenceRepository {
   return new SupabaseBrandIntelligenceRepository(client, workspace);
 }

@@ -11,6 +11,8 @@ import type {
   FitLevel,
 } from "../models/BrandIntelligenceProfile.ts";
 
+import type { BrandIntelligenceRepository } from "../repositories/BrandIntelligenceRepository.ts";
+
 type CanonicalProfile = Omit<BrandIntelligenceProfile, "consultantIntelligence">;
 
 type MaterialFact = {
@@ -193,6 +195,41 @@ function diligenceGaps(profile: CanonicalProfile): DiligenceGap[] {
 }
 
 export class ConsultantBrandIntelligenceRuntime {
+  private readonly repository?: BrandIntelligenceRepository;
+  constructor(repository?: BrandIntelligenceRepository) { this.repository = repository; }
+
+  /** Load catalog pages in batches so client filters cover the whole accessible catalog.
+   * Reconstruction (including approved editorial overrides) remains in the repository. */
+  async getAll(): Promise<BrandIntelligenceProfile[]> {
+    try {
+      if (!this.repository) throw new Error("Repository required");
+      const profiles: BrandIntelligenceProfile[] = [];
+      const cursors = new Set<string>();
+      let afterSlug: string | undefined;
+      do {
+        const page = await this.repository.list({ limit: 100, afterSlug });
+        profiles.push(...page.brands.flatMap((brand) => brand.profile ? [brand.profile] : []));
+        if (!page.nextCursor) return profiles;
+        if (cursors.has(page.nextCursor)) throw new Error("Catalog pagination did not advance");
+        cursors.add(page.nextCursor);
+        afterSlug = page.nextCursor;
+      } while (true);
+    } catch {
+      throw new Error("Brand Intelligence could not be loaded.");
+    }
+  }
+
+  async getById(idOrSlug: string): Promise<BrandIntelligenceProfile | null> {
+    try {
+      if (!this.repository) throw new Error("Repository required");
+      return await (idOrSlug.startsWith("brand_")
+        ? this.repository.getById(idOrSlug)
+        : this.repository.getBySlug(idOrSlug));
+    } catch {
+      throw new Error("Brand Intelligence could not be loaded.");
+    }
+  }
+
   derive(profile: CanonicalProfile): ConsultantBrandIntelligence {
     const summary = businessSummary(profile);
     return {

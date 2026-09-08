@@ -5,10 +5,13 @@ import { resolveWorkspaceComposition } from "@/feature/platform/composition/reso
 
 export default async function BrandPage({ params }: PageProps<"/crm/brands/[brandId]">) {
   const resolution = await resolveWorkspaceComposition();
-  if (resolution.status !== "resolved" || !("runtimes" in resolution.composition)) {
-    return <WorkspaceFeatureUnavailable title="Brand Intelligence" detail="Brand Intelligence persistence is not enabled for this workspace yet." />;
+  if (resolution.status !== "resolved") {
+    return <WorkspaceFeatureUnavailable title="Brand Intelligence" detail="Select an active workspace to open Brand Intelligence." />;
   }
-  const profile = await resolution.composition.runtimes.createBrandIntelligence().getById((await params).brandId);
+  const runtime = "runtimes" in resolution.composition
+    ? resolution.composition.runtimes.createBrandIntelligence()
+    : resolution.composition.dependencies.brandIntelligence;
+  const profile = await runtime.getById((await params).brandId);
   if (!profile) notFound();
   return <BrandProfileWorkspace profile={profile} />;
 }

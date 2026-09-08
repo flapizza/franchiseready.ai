@@ -126,5 +126,6 @@ test("matching remains isolated on legacy source with no reverse reconstruction"
   const runtime = await readFile(new URL("../../feature/brand-strategy/runtime/CandidateBrandStrategyRuntime.ts", import.meta.url), "utf8");
   const production = await readFile(new URL("../../feature/platform/composition/ProductionWorkspaceComposition.ts", import.meta.url), "utf8");
   assert.match(runtime, /brands: BrandRepository = new SeedBrandRepository\(\)/);
-  assert.doesNotMatch(runtime + production, /SupabaseBrandIntelligenceRepository|createPersistedBrandIntelligenceRepository|mapBrandIntelligence/);
+  assert.doesNotMatch(runtime, /SupabaseBrandIntelligenceRepository|createPersistedBrandIntelligenceRepository|mapBrandIntelligence/);
+  assert.match(production, /brandIntelligence: new ConsultantBrandIntelligenceRuntime\(createPersistedBrandIntelligenceRepository\(client, context\)\)/);
 });

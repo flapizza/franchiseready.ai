@@ -1,4 +1,6 @@
 import "server-only";
+import { ConsultantBrandIntelligenceRuntime } from "@/feature/brand-library/runtime/ConsultantBrandIntelligenceRuntime";
+import { createPersistedBrandIntelligenceRepository } from "@/feature/brand-library/repositories/createPersistedBrandIntelligenceRepository";
 
 import { SupabaseAssessmentRepository } from "@/feature/assessment-engine/production/SupabaseAssessmentRepository";
 import { ProductionCommunicationsWorkspaceRuntime } from "@/feature/communications/runtime/ProductionCommunicationsWorkspaceRuntime";
@@ -61,7 +63,7 @@ const productionFeatures: WorkspaceFeatureAvailability = {
   calendar: unavailable,
   communications: available({ status: "not-evaluated" }),
   "team-mission-control": unavailable,
-  "brand-intelligence": unavailable,
+  "brand-intelligence": available(),
   "brand-strategy": unavailable,
   referrals: unavailable,
   "consultant-settings": available(),
@@ -69,6 +71,7 @@ const productionFeatures: WorkspaceFeatureAvailability = {
 };
 
 export interface ProductionWorkspaceDependencies {
+  brandIntelligence: ConsultantBrandIntelligenceRuntime;
   workspaceContext: AuthenticatedWorkspaceContext;
   candidates: SupabaseCandidateRepository;
   contacts: SupabaseContactRepository;
@@ -149,6 +152,7 @@ export async function createProductionWorkspaceComposition(
     },
     dependencies: (() => { const candidates = new SupabaseCandidateRepository(client, context); const marketing=new SupabaseMarketingRepository(client,context); return {
       workspaceContext: context,
+      brandIntelligence: new ConsultantBrandIntelligenceRuntime(createPersistedBrandIntelligenceRepository(client, context)),
       candidates,
       contacts: new SupabaseContactRepository(client, context),
       marketing, marketingDelivery:new SupabaseMarketingDeliveryRepository(client,context,marketing), marketingDeliveryProvider:createProductionMarketingDeliveryProvider(),

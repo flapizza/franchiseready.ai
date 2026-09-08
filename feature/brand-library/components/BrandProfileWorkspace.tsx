@@ -20,7 +20,7 @@ export function BrandProfileWorkspace({ profile }: { profile: BrandIntelligenceP
     <header className="overflow-hidden rounded-3xl bg-slate-950 p-7 text-white shadow-xl sm:p-9">
       <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
         <div className="max-w-3xl">
-          <div className="flex flex-wrap gap-2"><Pill>{profile.category.value ?? "Category unknown"}</Pill><Pill>{profile.demoClassification === "curated-demo-concept" ? "Curated demo concept" : "Existing demo profile"}</Pill></div>
+          <div className="flex flex-wrap gap-2"><Pill>{profile.category.value ?? "Category unknown"}</Pill><Pill>{profile.version.origin === "local-test-fixture" ? "Local demo profile" : profile.demoClassification === "curated-demo-concept" ? "Curated demo concept" : profile.demoClassification === "existing-demo-profile" ? "Existing demo profile" : "Brand profile"}</Pill></div>
           <h1 className="mt-5 text-4xl font-black tracking-tight">{profile.name}</h1>
           <p className="mt-4 text-base leading-7 text-slate-300">{profile.description.value ?? "No reviewed description is available."}</p>
         </div>
@@ -59,7 +59,7 @@ export function BrandProfileWorkspace({ profile }: { profile: BrandIntelligenceP
 
     <section className="rounded-2xl border border-slate-300 bg-slate-100 p-5">
       <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-600">Detailed Brand Intelligence record</p>
-      <p className="mt-2 text-sm text-slate-600">Known demo facts below remain unverified unless explicitly marked verified. Unknown facts are shown separately and the evidence ledger records why each value exists.</p>
+      <p className="mt-2 text-sm text-slate-600">Known facts below remain unverified unless explicitly marked verified. Unknown facts are shown separately and the evidence ledger records why each value exists.</p>
     </section>
 
     <Section eyebrow="Business architecture" title="How this business operates"><FactGrid items={[
