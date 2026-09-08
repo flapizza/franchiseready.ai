@@ -15,7 +15,7 @@ test("public marketing layout, links, metadata, and server route isolation", asy
    await page.waitForLoadState("networkidle");
    assert.match(await page.title(), /FranGroove/);
    assert.ok(await page.locator("h1").evaluate(n => parseFloat(getComputedStyle(n).fontSize) >= 36), "Marketing typography must be styled");
-   assert.equal(await page.locator('link[rel="canonical"]').count(), 0);
+   assert.equal(await page.locator('link[rel="canonical"]').getAttribute('href'), 'https://frangroove.com');
    assert.equal(await page.locator('meta[name="robots"]').getAttribute('content'), 'index, follow');
    const text = await page.locator('body').innerText();
    assert.match(text, /franchise consultants/i);
@@ -40,6 +40,7 @@ test("public marketing layout, links, metadata, and server route isolation", asy
   }
   const demo = await page.goto(origin+'/request-demo');
   assert.equal(demo.status(),200);
+  assert.equal(await page.locator('link[rel="canonical"]').getAttribute('href'), 'https://frangroove.com/request-demo');
   assert.equal(await page.locator('form').count(),0);
   assert.match(await page.locator('body').innerText(),/not open yet/);
  } finally {await browser.close();}

@@ -22,7 +22,7 @@ availability is explicit; no form, mailbox, scheduling integration, or email
 submission is implied. Product mockups are illustrative and planned functionality
 is identified rather than sold as currently available.
 
-Marketing metadata permits indexing but deliberately omits a canonical URL and
-metadataBase until the separately authorized apex/www cutover. At that checkpoint,
-set the canonical origin to `https://frangroove.com`; do not make the temporary
-Vercel hostname canonical. No application indexing policy is changed here.
+Marketing metadata permits indexing and uses `https://frangroove.com` as its
+metadata base. Each public page declares its own canonical path, so the generated
+Vercel hostname is never canonical. Vercel redirects `www.frangroove.com` to the
+apex with a permanent 308 redirect. Application indexing policy is unchanged.
