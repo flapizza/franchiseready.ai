@@ -235,6 +235,360 @@ export type Database = {
           },
         ]
       }
+      brand_consultant_items: {
+        Row: {
+          approval: string
+          created_at: string
+          created_by: string
+          explanation: string
+          id: string
+          label: string
+          origin: string
+          origin_reference: string
+          position: number
+          profile_id: string
+          review_state: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          section: string
+          source_facts: string[]
+        }
+        Insert: {
+          approval?: string
+          created_at?: string
+          created_by: string
+          explanation: string
+          id?: string
+          label: string
+          origin: string
+          origin_reference: string
+          position: number
+          profile_id: string
+          review_state?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          section: string
+          source_facts: string[]
+        }
+        Update: {
+          approval?: string
+          created_at?: string
+          created_by?: string
+          explanation?: string
+          id?: string
+          label?: string
+          origin?: string
+          origin_reference?: string
+          position?: number
+          profile_id?: string
+          review_state?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          section?: string
+          source_facts?: string[]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "brand_consultant_items_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "brand_profile_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      brand_evidence: {
+        Row: {
+          brand_id: string
+          confidence: string | null
+          created_at: string
+          created_by: string
+          document_reference: string | null
+          fdd_item: string | null
+          id: string
+          notes: string | null
+          page_reference: string | null
+          retrieved_at: string | null
+          reviewed_at: string | null
+          source_date: string | null
+          source_type: string
+          source_url: string | null
+          supersedes_id: string | null
+          title: string
+          verification: string
+        }
+        Insert: {
+          brand_id: string
+          confidence?: string | null
+          created_at?: string
+          created_by: string
+          document_reference?: string | null
+          fdd_item?: string | null
+          id?: string
+          notes?: string | null
+          page_reference?: string | null
+          retrieved_at?: string | null
+          reviewed_at?: string | null
+          source_date?: string | null
+          source_type: string
+          source_url?: string | null
+          supersedes_id?: string | null
+          title: string
+          verification?: string
+        }
+        Update: {
+          brand_id?: string
+          confidence?: string | null
+          created_at?: string
+          created_by?: string
+          document_reference?: string | null
+          fdd_item?: string | null
+          id?: string
+          notes?: string | null
+          page_reference?: string | null
+          retrieved_at?: string | null
+          reviewed_at?: string | null
+          source_date?: string | null
+          source_type?: string
+          source_url?: string | null
+          supersedes_id?: string | null
+          title?: string
+          verification?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "brand_evidence_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brand_identities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "brand_evidence_supersedes_id_brand_id_fkey"
+            columns: ["supersedes_id", "brand_id"]
+            isOneToOne: false
+            referencedRelation: "brand_evidence"
+            referencedColumns: ["id", "brand_id"]
+          },
+        ]
+      }
+      brand_fact_definitions: {
+        Row: {
+          allowed_values: string[] | null
+          fact_key: string
+          value_kind: string
+        }
+        Insert: {
+          allowed_values?: string[] | null
+          fact_key: string
+          value_kind: string
+        }
+        Update: {
+          allowed_values?: string[] | null
+          fact_key?: string
+          value_kind?: string
+        }
+        Relationships: []
+      }
+      brand_fact_evidence: {
+        Row: {
+          brand_id: string
+          evidence_id: string
+          fact_key: string
+          is_primary: boolean
+          position: number
+          profile_id: string
+        }
+        Insert: {
+          brand_id: string
+          evidence_id: string
+          fact_key: string
+          is_primary?: boolean
+          position?: number
+          profile_id: string
+        }
+        Update: {
+          brand_id?: string
+          evidence_id?: string
+          fact_key?: string
+          is_primary?: boolean
+          position?: number
+          profile_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "brand_fact_evidence_evidence_id_brand_id_fkey"
+            columns: ["evidence_id", "brand_id"]
+            isOneToOne: false
+            referencedRelation: "brand_evidence"
+            referencedColumns: ["id", "brand_id"]
+          },
+          {
+            foreignKeyName: "brand_fact_evidence_profile_id_brand_id_fkey"
+            columns: ["profile_id", "brand_id"]
+            isOneToOne: false
+            referencedRelation: "brand_profile_versions"
+            referencedColumns: ["id", "brand_id"]
+          },
+          {
+            foreignKeyName: "brand_fact_evidence_profile_id_fact_key_fkey"
+            columns: ["profile_id", "fact_key"]
+            isOneToOne: false
+            referencedRelation: "brand_profile_facts"
+            referencedColumns: ["profile_id", "fact_key"]
+          },
+        ]
+      }
+      brand_identities: {
+        Row: {
+          created_at: string
+          id: string
+          lifecycle: string
+          name: string
+          public_id: string
+          slug: string
+          updated_at: string
+          visibility: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          lifecycle?: string
+          name: string
+          public_id?: string
+          slug: string
+          updated_at?: string
+          visibility?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          lifecycle?: string
+          name?: string
+          public_id?: string
+          slug?: string
+          updated_at?: string
+          visibility?: string
+        }
+        Relationships: []
+      }
+      brand_profile_facts: {
+        Row: {
+          approval: string
+          confidence: string | null
+          fact_key: string
+          knowledge_state: string
+          notes: string | null
+          profile_id: string
+          review_state: string
+          value: Json | null
+          verification: string
+        }
+        Insert: {
+          approval?: string
+          confidence?: string | null
+          fact_key: string
+          knowledge_state?: string
+          notes?: string | null
+          profile_id: string
+          review_state?: string
+          value?: Json | null
+          verification?: string
+        }
+        Update: {
+          approval?: string
+          confidence?: string | null
+          fact_key?: string
+          knowledge_state?: string
+          notes?: string | null
+          profile_id?: string
+          review_state?: string
+          value?: Json | null
+          verification?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "brand_profile_facts_fact_key_fkey"
+            columns: ["fact_key"]
+            isOneToOne: false
+            referencedRelation: "brand_fact_definitions"
+            referencedColumns: ["fact_key"]
+          },
+          {
+            foreignKeyName: "brand_profile_facts_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "brand_profile_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      brand_profile_versions: {
+        Row: {
+          based_on_profile_id: string | null
+          brand_id: string
+          brand_name: string
+          created_at: string
+          created_by: string
+          effective_at: string | null
+          id: string
+          origin: string
+          published_at: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+          version_number: number
+        }
+        Insert: {
+          based_on_profile_id?: string | null
+          brand_id: string
+          brand_name: string
+          created_at?: string
+          created_by: string
+          effective_at?: string | null
+          id?: string
+          origin: string
+          published_at?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          version_number: number
+        }
+        Update: {
+          based_on_profile_id?: string | null
+          brand_id?: string
+          brand_name?: string
+          created_at?: string
+          created_by?: string
+          effective_at?: string | null
+          id?: string
+          origin?: string
+          published_at?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "brand_profile_versions_based_on_profile_id_brand_id_fkey"
+            columns: ["based_on_profile_id", "brand_id"]
+            isOneToOne: false
+            referencedRelation: "brand_profile_versions"
+            referencedColumns: ["id", "brand_id"]
+          },
+          {
+            foreignKeyName: "brand_profile_versions_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brand_identities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       candidate_assignment_history: {
         Row: {
           candidate_id: string
@@ -1939,6 +2293,45 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "organization_memberships"
             referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      organization_brands: {
+        Row: {
+          brand_id: string
+          created_at: string
+          organization_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          brand_id: string
+          created_at?: string
+          organization_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          brand_id?: string
+          created_at?: string
+          organization_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_brands_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brand_identities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_brands_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
           },
         ]
       }

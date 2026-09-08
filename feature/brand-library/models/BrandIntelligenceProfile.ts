@@ -10,6 +10,12 @@ export interface BrandEvidence {
   documentReference?: string;
   fddReference?: { item?: string; page?: string };
   retrievedAt?: string;
+  reviewedAt?: string;
+  supersedesId?: string;
+  createdAt?: string;
+  createdBy?: string;
+  position?: number;
+  isPrimary?: boolean;
   verification: EvidenceVerification;
   confidence?: "high" | "medium" | "low";
   notes?: string;
@@ -23,6 +29,9 @@ export interface BrandFact<T> {
   approval: PresentationApproval;
   evidence: BrandEvidence[];
   notes?: string;
+  knowledgeState?: "known" | "unknown";
+  reviewState?: "not-reviewed" | "reviewed";
+  confidence?: "high" | "medium" | "low";
 }
 
 export type GovernedBrandFact<T> = BrandFact<T>;
@@ -46,7 +55,8 @@ export interface RecurringFee { name: string; amount: string }
 export interface BrandIntelligenceProfile {
   id: string;
   name: string;
-  demoClassification: "existing-demo-profile" | "curated-demo-concept";
+  demoClassification: "existing-demo-profile" | "curated-demo-concept" | "not-demo";
+  slug?: string;
   brandStatus: "active" | "inactive" | "concept" | "unknown";
   profileStatus: "reviewed" | "in-review" | "not-reviewed";
   category: BrandFact<string>;
@@ -112,6 +122,25 @@ export interface BrandIntelligenceProfile {
   completeness: BrandProfileCompleteness;
   consultantIntelligence: ConsultantBrandIntelligence;
   evidence: BrandEvidence[];
-  version: { id: string; effectiveAt: string | null; approvedBy: string | null };
+  version: { id: string; effectiveAt: string | null; approvedBy: string | null;
+    number?: number; status?: "published"; publishedAt?: string; reviewedAt?: string;
+    createdAt?: string; updatedAt?: string; createdBy?: string; origin?: string; basedOnProfileId?: string };
+  editorialItems?: BrandEditorialItem[];
+}
+export interface BrandEditorialItem {
+  id: string;
+  section: "businessSummary" | "franchiseeRole" | "strongFit" | "potentialFriction" | "diligenceGap" | "note";
+  position: number;
+  label: string;
+  explanation: string;
+  sourceFacts: string[];
+  origin: "editorial" | "ai-assisted";
+  originReference: string;
+  createdBy: string;
+  createdAt: string;
+  reviewState: "not-reviewed" | "reviewed";
+  reviewedBy: string | null;
+  reviewedAt: string | null;
+  approval: "approved-for-presentation" | "internal-only" | "needs-review";
 }
 import type { ConsultantBrandIntelligence } from "./ConsultantBrandIntelligence.ts";
