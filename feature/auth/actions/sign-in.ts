@@ -1,7 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { AUTH_ROUTES } from "@/lib/auth/constants";
+import { APP_ROUTES } from "@/lib/auth/constants";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import type { ActionResult } from "@/feature/auth/types/actions";
 import { runAuthAction } from "@/feature/auth/utils/action";
@@ -13,7 +13,7 @@ export async function signIn(
   _previousState: ActionResult,
   formData: FormData,
 ): Promise<ActionResult> {
-  const nextPath = getSafeReturnPath(String(formData.get("next") ?? ""));
+  const nextPath = getSafeReturnPath(String(formData.get("next") || APP_ROUTES.missionControl));
   const result = await runAuthAction("sign-in", async () => {
     const parsed = signInSchema.safeParse(readFormData(formData));
     if (!parsed.success) {
@@ -31,7 +31,7 @@ export async function signIn(
   });
 
   if (result.status === "success") {
-    redirect(nextPath || AUTH_ROUTES.home);
+    redirect(nextPath);
   }
 
   return result;
