@@ -1,4 +1,4 @@
-export type AuthActionField = "email" | "password" | "confirmPassword";
+export type AuthActionField = "email" | "password" | "confirmPassword" | "currentPassword";
 
 export type ActionResult<TField extends string = AuthActionField> =
   | { status: "idle"; message?: never; fieldErrors?: never }

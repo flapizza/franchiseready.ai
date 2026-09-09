@@ -14,21 +14,21 @@ export function isProtectedPath(pathname: string) {
 }
 
 export function getSafeReturnPath(value: string | null, fallback = AUTH_ROUTES.home) {
-  if (!value) {
-    return fallback;
-  }
-
   const trustedOrigin = "https://franchiseready.local";
-
-  try {
-    const resolved = new URL(value, trustedOrigin);
-
-    if (resolved.origin !== trustedOrigin) {
-      return fallback;
+  function localPath(input: string | null): string | null {
+    if (!input || !input.startsWith("/") || input.startsWith("//") || /[\\\s\u0000-\u001f\u007f]/.test(input)) return null;
+    try {
+      const resolved = new URL(input, trustedOrigin);
+      decodeURIComponent(resolved.pathname); // Reject malformed percent escapes.
+      // Reject encoded path separators, controls and nested escapes. Query values
+      // are data; preserve them without interpreting them as a destination.
+      if (/%(?:2f|5c|25|0[0-9a-f]|1[0-9a-f]|7f)/i.test(resolved.pathname)) return null;
+      const path = `${resolved.pathname}${resolved.search}`;
+      if (resolved.origin !== trustedOrigin || path.startsWith("//") || new URL(path, trustedOrigin).origin !== trustedOrigin) return null;
+      return path;
+    } catch {
+      return null;
     }
-
-    return `${resolved.pathname}${resolved.search}`;
-  } catch {
-    return fallback;
   }
+  return localPath(value) ?? localPath(fallback) ?? AUTH_ROUTES.home;
 }

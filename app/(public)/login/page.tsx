@@ -6,9 +6,9 @@ import { enterConferenceDemo } from "@/feature/auth/actions/enter-conference-dem
 import { demoConsultant } from "@/feature/demo/data/demoConsultant";
 import { isConferenceDemoAccessEnabled } from "@/lib/auth/demo-access";
 
-export default async function LoginPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
+export default async function LoginPage({ searchParams }: { searchParams: Promise<{ next?: string; password?: string }> }) {
   const demoAccessEnabled = isConferenceDemoAccessEnabled();
-  const { next } = await searchParams;
+  const { next, password } = await searchParams;
 
   return (
     <AuthShell
@@ -16,6 +16,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
       description="Sign in to continue to FranGroove AI."
       footer={<><span>New here? </span><Link href={AUTH_ROUTES.signup} className="font-semibold text-brand hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand">Create an account</Link></>}
     >
+      {password === "updated" ? <p role="status" className="mb-4 rounded-lg bg-brand-soft p-3 text-sm">Your password has been updated. Sign in with your new password.</p> : null}
       <LoginForm nextPath={next} />
       {demoAccessEnabled ? (
         <>
@@ -34,7 +35,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
           </form>
         </>
       ) : null}
-      <Link href={AUTH_ROUTES.forgotPassword} className="mt-5 inline-block text-sm font-medium text-brand hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand">Forgot your password?</Link>
+      <Link href={AUTH_ROUTES.forgotPassword} className="mt-5 inline-block text-sm font-medium text-brand hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand">Forgot password?</Link>
     </AuthShell>
   );
 }
