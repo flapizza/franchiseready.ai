@@ -84,7 +84,7 @@ export function Sidebar({ presentation }: { presentation: WorkspacePresentation 
 
         <NavigationItem
           href={APP_ROUTES.brandStrategy}
-          label="Brand Strategy"
+          label={presentation.kind === "production" ? "Brand Referral Engine" : "Brand Strategy"}
           icon={<BrainCircuit size={20} />}
           activeSuffixes={["/strategy", "/presentation"]}
         />
@@ -97,7 +97,7 @@ export function Sidebar({ presentation }: { presentation: WorkspacePresentation 
 
         <NavigationItem
           href={APP_ROUTES.referralStudio}
-          label="Referral Studio"
+          label={presentation.kind === "production" ? "Handoff Preview" : "Referral Studio"}
           icon={<FileText size={20} />}
           activeSuffixes={["/referral"]}
         />

@@ -1,0 +1,21 @@
+import Link from "next/link";
+import type { PersistedCandidateWorkspace } from "@/feature/crm/models/PersistedCandidateWorkspace";
+import { fitLabels, type BrandReferralResult } from "@/feature/brand-strategy/production/BrandReferralEngine";
+
+export function PersistedHandoffPreview({ row, brand }: { row: PersistedCandidateWorkspace; brand: BrandReferralResult | null }) {
+  const base = `/crm/candidates/${encodeURIComponent(row.candidate.id)}`, a = row.assessment?.analysis;
+  return <div className="min-w-0 space-y-6" data-handoff-preview><nav aria-label="Candidate journey" className="flex flex-wrap gap-4 text-sm font-bold text-blue-700"><Link className="py-2" href="/crm">Mission Control</Link><Link className="py-2" href="/crm/candidates">Pipeline</Link><Link className="py-2" href={base}>Candidate 360</Link><Link className="py-2" href={`${base}/strategy`}>Brand Referral Engine</Link></nav>
+    <header className="rounded-3xl bg-slate-950 p-6 text-white sm:p-8"><p className="text-xs font-bold uppercase tracking-widest text-teal-300">Preparation only · Nothing transmitted</p><h1 className="mt-3 text-3xl font-black">Referral / Handoff Preview</h1><p className="mt-3 text-xl">{row.candidate.firstName} {row.candidate.lastName}{brand ? ` · ${brand.name}` : ""}</p><p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300">Brand selection applies to this preview only. No saved shortlist, referral approval, email or franchisor notification is created.</p></header>
+    {!a || !brand ? <section className="rounded-2xl border bg-white p-6"><p>{!a ? "Complete the trusted assessment before preparing a handoff." : "Select a brand in the Brand Referral Engine to prepare its handoff preview."}</p><Link className="mt-4 inline-flex min-h-11 items-center font-bold text-blue-700" href={`${base}/strategy`}>Review candidate brand fit</Link></section> : <>
+      {brand.concept && <p className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm">This is a concept Brand Intelligence profile. Do not represent it as a verified live franchise opportunity.</p>}
+      <section className="grid gap-4 md:grid-cols-2"><Block title="Candidate goals" values={a.ownershipProfile.motivations} /><Block title="Ownership preferences" values={a.ownershipProfile.operatingPreferences} /><Block title="Financial context" values={[`Liquid capital: ${a.financial.liquidCapital}`, `Net worth: ${a.financial.netWorth}`, `Investment preference: ${a.financial.investmentRange}`, `Brand financial compatibility: ${fitLabels[brand.financial]}`, a.financial.disclaimer]} /><Block title="Candidate Intelligence" values={[a.executiveSummary, ...a.ownershipProfile.strengths]} /></section>
+      <Block title={`Why consider ${brand.name}?`} values={[`${brand.band}. ${brand.evidenceLabel}`, ...brand.strengths.map(f => f.explanation)]} />
+      <Block title="Concerns and unknowns to carry forward" values={[...brand.concerns.map(f => f.explanation), ...brand.unknowns.map(f => f.explanation), "Current territory availability, current disclosures, funding validation and candidate consent must be established before any introduction."]} />
+      <Block title="Discovery context" values={row.discovery ? [row.discovery.summary, ...row.discovery.observations.map(o => `${o.topic} — ${o.status}: ${o.finding}${o.followUpNeeded ? " Follow-up required." : ""}`)] : ["No persisted Discovery session is available."]} />
+      <Block title="Consultant next step" values={[brand.nextStep]} />
+      <p className="text-xs text-slate-500">Sources: trusted assessment completed {row.assessment?.completedAt?.slice(0, 10)}; current Discovery observations; Brand Intelligence publication {brand.versionId}. This preview recomputes from current accessible evidence.</p>
+      <Link className="inline-flex min-h-11 items-center rounded-xl bg-teal-700 px-5 text-sm font-bold text-white" href={`${base}/strategy`}>Return to Brand Referral Engine</Link>
+    </>}
+  </div>;
+}
+function Block({ title, values }: { title: string; values: string[] }) { return <section className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6"><h2 className="text-lg font-black">{title}</h2><ul className="mt-3 space-y-3 text-sm leading-6 text-slate-600">{values.filter(Boolean).map((v, i) => <li className="break-words" key={i}>{v}</li>)}</ul></section>; }

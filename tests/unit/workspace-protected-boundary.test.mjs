@@ -18,12 +18,17 @@ test("production-backed candidate, Discovery, assessment, and email paths use co
 });
 
 test("production-unavailable domains render or return explicit unavailable states",async()=>{
-  for(const file of ["app/(protected)/crm/page.tsx","app/(protected)/crm/tasks/page.tsx","app/(protected)/crm/calendar/page.tsx","app/(protected)/crm/team/page.tsx","app/(protected)/crm/brands/page.tsx","app/(protected)/crm/candidates/[candidateId]/referral/page.tsx"]){
+  for(const file of ["app/(protected)/crm/tasks/page.tsx","app/(protected)/crm/calendar/page.tsx","app/(protected)/crm/team/page.tsx","app/(protected)/crm/brands/page.tsx"]){
     assert.match(await source(file),/WorkspaceFeatureUnavailable/);
   }
   for(const file of ["feature/tasks/actions/task-actions.ts","feature/calendar/actions/calendar-actions.ts","feature/pipeline/actions/pipeline-actions.ts","feature/referral-package/actions/referral-studio.ts"]){
     assert.match(await source(file),/not available in this workspace/);
   }
+});
+
+test("persisted Mission Control and handoff use authorized workspace dependencies",async()=>{
+  assert.match(await source("app/(protected)/crm/page.tsx"),/dependencies\.candidateWorkspace\.load/);
+  assert.match(await source("app/(protected)/crm/candidates/[candidateId]/referral/page.tsx"),/dependencies\.candidateWorkspace\.get/);
 });
 
 test("candidate mutation actor and tenant context are derived from resolved composition",async()=>{

@@ -11,7 +11,11 @@ import type { WorkspacePresentation } from "../models/WorkspacePresentation";
 
 export function TopBar({ presentation }: { presentation: WorkspacePresentation }) {
   const pathname = usePathname();
-  const context = pathname === "/crm/referrals"
+  const context = presentation.kind === "production" && (pathname === "/crm/strategy" || /^\/crm\/candidates\/[^/]+\/strategy$/.test(pathname))
+    ? { eyebrow: "Consultant Decision Support", title: "Brand Referral Engine", description: "Compare candidate fit, evidence and unknowns before an introduction." }
+    : presentation.kind === "production" && (pathname === "/crm/referrals" || /^\/crm\/candidates\/[^/]+\/referral$/.test(pathname))
+    ? { eyebrow: "Preparation Only", title: "Handoff Preview", description: "Review the candidate and selected brand. Nothing is transmitted." }
+    : pathname === "/crm/referrals"
     ? { eyebrow: "Consultant Workspace", title: "Referral Studio", description: "Manage candidates ready for referral preparation and introduction." }
     : /^\/crm\/candidates\/[^/]+\/playbook$/.test(pathname)
     ? { eyebrow: "Candidate Strategy", title: "Engagement Playbook", description: "Review evidence-backed next steps and choose what happens." }

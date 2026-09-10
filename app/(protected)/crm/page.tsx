@@ -1,14 +1,15 @@
 import { MissionControlPage } from "@/feature/mission-control/components/MissionControlPage";
 import { notFound } from "next/navigation";
 import { resolveWorkspaceComposition } from "@/feature/platform/composition/resolveWorkspaceComposition";
-import { WorkspaceFeatureUnavailable } from "@/feature/platform/components/WorkspaceFeatureUnavailable";
+import { PersistedMissionControlPage } from "@/feature/mission-control/components/PersistedMissionControlPage";
+import { buildPersistedMissionControl } from "@/feature/mission-control/runtime/PersistedMissionControl";
 
 export const dynamic = "force-dynamic";
 
 export default async function CRMPage() {
   const resolution = await resolveWorkspaceComposition();
   if (resolution.status !== "resolved") notFound();
-  if (!("runtimes" in resolution.composition)) return <WorkspaceFeatureUnavailable title="Mission Control"/>;
+  if (!("runtimes" in resolution.composition)) return <PersistedMissionControlPage state={buildPersistedMissionControl(await resolution.composition.dependencies.candidateWorkspace.load())} />;
   const runtime = resolution.composition.runtimes.createMissionControl();
 
   const state =

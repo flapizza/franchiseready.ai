@@ -11,6 +11,7 @@ import { OAuthTransactionRepository } from "@/feature/connected-email/repositori
 import { GoogleConnectionService } from "@/feature/connected-email/services/GoogleConnectionService";
 import { GoogleConnectionProvider } from "@/feature/connected-email/providers/google/GoogleConnectionProvider";
 import { SupabaseCandidateRepository } from "@/feature/crm/repositories/SupabaseCandidateRepository";
+import { SupabaseCandidateWorkspaceRepository } from "@/feature/crm/repositories/SupabaseCandidateWorkspaceRepository";
 import { SupabaseContactRepository } from "@/feature/contacts/repositories/SupabaseContactRepository";
 import { SupabaseMarketingRepository } from "@/feature/marketing/repositories/SupabaseMarketingRepository";
 import { SupabaseMarketingDeliveryRepository } from "@/feature/marketing/delivery/SupabaseMarketingDeliveryRepository";
@@ -54,7 +55,7 @@ const unavailable: FeatureAvailability = {
 };
 
 const productionFeatures: WorkspaceFeatureAvailability = {
-  "mission-control": unavailable,
+  "mission-control": available(),
   candidates: available(),
   contacts: available(),
   assessments: available(),
@@ -64,7 +65,7 @@ const productionFeatures: WorkspaceFeatureAvailability = {
   communications: available({ status: "not-evaluated" }),
   "team-mission-control": unavailable,
   "brand-intelligence": available(),
-  "brand-strategy": unavailable,
+  "brand-strategy": available(),
   referrals: unavailable,
   "consultant-settings": available(),
   "pipeline-settings": unavailable,
@@ -74,6 +75,7 @@ export interface ProductionWorkspaceDependencies {
   brandIntelligence: ConsultantBrandIntelligenceRuntime;
   workspaceContext: AuthenticatedWorkspaceContext;
   candidates: SupabaseCandidateRepository;
+  candidateWorkspace: SupabaseCandidateWorkspaceRepository;
   contacts: SupabaseContactRepository;
   marketing: SupabaseMarketingRepository;
   marketingDelivery: SupabaseMarketingDeliveryRepository;
@@ -150,10 +152,11 @@ export async function createProductionWorkspaceComposition(
       features: productionFeatures,
       temporaryDataIndicator: null,
     },
-    dependencies: (() => { const candidates = new SupabaseCandidateRepository(client, context); const marketing=new SupabaseMarketingRepository(client,context); return {
+    dependencies: (() => { const candidates = new SupabaseCandidateRepository(client, context); const candidateWorkspace = new SupabaseCandidateWorkspaceRepository(client, context, candidates); const marketing=new SupabaseMarketingRepository(client,context); return {
       workspaceContext: context,
       brandIntelligence: new ConsultantBrandIntelligenceRuntime(createPersistedBrandIntelligenceRepository(client, context)),
       candidates,
+      candidateWorkspace,
       contacts: new SupabaseContactRepository(client, context),
       marketing, marketingDelivery:new SupabaseMarketingDeliveryRepository(client,context,marketing), marketingDeliveryProvider:createProductionMarketingDeliveryProvider(),
       assessments: new SupabaseAssessmentRepository(client, context),
@@ -167,7 +170,7 @@ export async function createProductionWorkspaceComposition(
       emailDelivery: new ProductionEmailMessageService(context),
       communications: new ProductionCommunicationsWorkspaceRuntime(context),
       candidateResolution: new ProductionCandidateResolutionService(candidates),
-      candidateCRM: new ProductionCandidateCRMRuntime(candidates),
+      candidateCRM: new ProductionCandidateCRMRuntime(candidates, candidateWorkspace),
       consultantProfile,
       organizationSettings: new ProductionOrganizationSettingsRepository(client, context),
       membershipOnboarding: new ProductionMembershipOnboardingRepository(client, context),

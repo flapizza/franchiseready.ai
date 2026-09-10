@@ -1,5 +1,6 @@
 import { Candidate360Runtime } from "../runtime/Candidate360Runtime";
 import { notFound } from "next/navigation";
+import Link from "next/link";
 
 import { CandidateHeader } from "./CandidateHeader";
 import { ExecutiveSummary } from "./ExecutiveSummary";
@@ -31,7 +32,7 @@ export async function Candidate360Page({
   const productionAssessment=isProduction&&!("runtimes" in composition)?composition.dependencies.assessments.getForCandidate(candidateId):null;
   const resolvedAssessment=await productionAssessment;
   let productionDiscovery=null;
-  if(isProduction&&resolvedAssessment?.analysis&&!("runtimes" in composition)){try{productionDiscovery=(await composition.dependencies.discovery.getOrCreate(candidateId)).session}catch{productionDiscovery=null}}
+  if(isProduction&&resolvedAssessment?.analysis&&!("runtimes" in composition)){productionDiscovery=(await composition.dependencies.candidateWorkspace.get(candidateId))?.discovery ?? null}
   const runtime = "runtimes" in composition
     ? composition.runtimes.createCandidate360()
     : new Candidate360Runtime({ candidates: composition.dependencies.candidates, rootOnly: true, productionAssessment: resolvedAssessment });
@@ -67,6 +68,7 @@ export async function Candidate360Page({
       <CandidateHeader
         candidate={candidate}
       />
+      {candidate.rootOnly && <nav aria-label="Candidate journey" className="flex flex-wrap gap-3"><Link href="/crm" className="inline-flex min-h-11 items-center rounded-xl border bg-white px-4 text-sm font-bold text-blue-700">Mission Control</Link><Link href="/crm/candidates" className="inline-flex min-h-11 items-center rounded-xl border bg-white px-4 text-sm font-bold text-blue-700">Pipeline</Link>{resolvedAssessment?.analysis && <><Link href={`/crm/candidates/${candidate.id}/strategy`} className="inline-flex min-h-11 items-center rounded-xl bg-teal-700 px-4 text-sm font-bold text-white">Brand Referral Engine</Link><Link href={`/crm/candidates/${candidate.id}/referral`} className="inline-flex min-h-11 items-center rounded-xl border bg-white px-4 text-sm font-bold text-blue-700">Handoff Preview</Link></>}</nav>}
 
       {!candidate.rootOnly && candidate.id === "candidate-demo" && <DemoCandidateJourney candidateId={candidate.id} />}
 
@@ -76,7 +78,7 @@ export async function Candidate360Page({
 
       {candidate.hasIntelligence && <div id="assessment-intelligence" className="scroll-mt-24"><ExecutiveSummary candidate={candidate} /></div>}
 
-      {candidate.hasIntelligence && <ReadinessScorecard
+      {candidate.hasIntelligence && !candidate.rootOnly && <ReadinessScorecard
         candidate={candidate}
       />}
       {resolvedAssessment?.analysis && <ProductionCandidateIntelligence analysis={resolvedAssessment.analysis} candidateId={candidateId} completedAt={resolvedAssessment.completedAt}/>}

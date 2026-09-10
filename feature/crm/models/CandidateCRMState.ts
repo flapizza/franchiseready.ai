@@ -16,6 +16,7 @@ export interface CandidateCRMItem {
   stageLabel: string;
   readiness: number | null;
   readinessLabel: string;
+  readinessKind?: "assessment";
   bestBrand: string | null;
   lastActivityLabel: string;
   nextAction: string;
@@ -42,6 +43,7 @@ export interface CandidateCRMStage {
 }
 
 export interface CandidateCRMState {
+  readinessHeading?: string;
   candidates: CandidateCRMItem[];
   stages: CandidateCRMStage[];
 }

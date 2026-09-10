@@ -38,8 +38,9 @@ test("demo composition owns all four runtime factories", async () => {
 test("production composition neither imports nor exposes demo runtime factories", async () => {
   const production = await source("feature/platform/composition/ProductionWorkspaceComposition.ts");
   assert.doesNotMatch(production, /DemoWorkspaceRuntimeFactory|createMissionControl|createCandidateCRM|createEngagementPlaybook/);
-  assert.match(production, /"mission-control": unavailable/);
-  assert.match(production, /"brand-strategy": unavailable/);
+  assert.match(production, /"mission-control": available\(\)/);
+  assert.match(production, /"brand-strategy": available\(\)/);
+  assert.match(production, /new SupabaseCandidateWorkspaceRepository\(client, context, candidates\)/);
 });
 
 test("callers use explicit composition or explicit root-only production injection", async () => {

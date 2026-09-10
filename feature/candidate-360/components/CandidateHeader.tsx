@@ -41,18 +41,19 @@ export function CandidateHeader({
           {candidate.hasIntelligence && <div className="grid gap-3 sm:grid-cols-2">
 
             <ScoreCard
-              label="Buying Confidence"
+              label={candidate.rootOnly ? "Profile Confidence" : "Buying Confidence"}
               value={candidate.buyingConfidence}
               color="emerald"
               compact={!candidate.rootOnly}
             />
 
-            <ScoreCard
+            {!candidate.rootOnly && <ScoreCard
               label="Candidate Readiness"
               value={candidate.recommendationConfidence}
               color="blue"
               compact={!candidate.rootOnly}
-            />
+            />}
+            {candidate.rootOnly && <p className="max-w-xs self-center text-sm leading-6 text-slate-300">Confidence in the ownership profile derived from assessment responses. This is not a franchise-readiness or business-success score.</p>}
 
           </div>}
 
