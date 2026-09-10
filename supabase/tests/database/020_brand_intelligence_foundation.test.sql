@@ -37,8 +37,8 @@ select throws_ok($$insert into public.brand_profile_versions(brand_id,version_nu
 select throws_ok($$update public.brand_profile_versions set status='published' where id=md5('bi-shared-v1')::uuid$$,'23514',null,'cannot skip review');
 select throws_ok($$update public.brand_profile_versions set status='reviewed',reviewed_by='reviewer',reviewed_at=now() where id=md5('bi-shared-v1')::uuid$$,'23514',null,'review requires explicit governed facts');
 insert into public.brand_profile_facts(profile_id,fact_key)
-select p.id,d.fact_key from public.brand_profile_versions p cross join public.brand_fact_definitions d;
-select is((select count(*) from public.brand_profile_facts where knowledge_state='unknown' and review_state='not-reviewed' and verification='unknown' and value is null),100::bigint,'unknown and not-reviewed are explicit');
+select p.id,d.fact_key from public.brand_profile_versions p cross join public.brand_fact_definitions d where p.id in (md5('bi-shared-v1')::uuid,md5('bi-private-v1')::uuid,md5('bi-shared-v2')::uuid);
+select is((select count(*) from public.brand_profile_facts where profile_id in (md5('bi-shared-v1')::uuid,md5('bi-private-v1')::uuid,md5('bi-shared-v2')::uuid) and knowledge_state='unknown' and review_state='not-reviewed' and verification='unknown' and value is null),100::bigint,'unknown and not-reviewed are explicit');
 select throws_ok($$insert into public.brand_profile_facts(profile_id,fact_key) values(md5('bi-shared-v1')::uuid,'caller.arbitrary')$$,'23503',null,'arbitrary paths rejected');
 select throws_ok($$insert into public.brand_fact_definitions(fact_key,value_kind) values('callerPath','text')$$,'42501',null,'service role cannot invent keys');
 select throws_ok($$update public.brand_profile_facts set value='false' where profile_id=md5('bi-shared-v1')::uuid and fact_key='characteristics.recurringRevenue'$$,'23514',null,'unknown cannot silently become false');
@@ -53,7 +53,7 @@ select lives_ok($$update public.brand_profile_facts set value='{"minimum":null,"
 select throws_ok($$update public.brand_profile_facts set value='[1]',knowledge_state='known',verification='unverified' where profile_id=md5('bi-shared-v1')::uuid and fact_key='differentiators'$$,'23514',null,'typed string arrays enforced');
 select throws_ok($$update public.brand_profile_facts set value='[{"name":"Fee","amount":20}]',knowledge_state='known',verification='unverified' where profile_id=md5('bi-shared-v1')::uuid and fact_key='economics.otherRecurringFees'$$,'23514',null,'fee structure enforced');
 select throws_ok($$update public.brand_profile_facts set verification='verified' where profile_id=md5('bi-shared-v1')::uuid and fact_key='characteristics.recurringRevenue'$$,'23514',null,'verification requires review');
-update public.brand_profile_facts set value='"Service"',knowledge_state='known',verification='unverified' where fact_key in ('category','industry');
+update public.brand_profile_facts set value='"Service"',knowledge_state='known',verification='unverified' where profile_id in (md5('bi-shared-v1')::uuid,md5('bi-private-v1')::uuid,md5('bi-shared-v2')::uuid) and fact_key in ('category','industry');
 insert into public.brand_evidence(id,brand_id,source_type,title,created_by)
 values(md5('bi-source-1')::uuid,md5('bi-shared')::uuid,'primary','Document A','fixture'),
  (md5('bi-source-2')::uuid,md5('bi-shared')::uuid,'secondary','Document B','fixture'),
@@ -75,17 +75,17 @@ select throws_ok($$insert into public.brand_consultant_items(profile_id,section,
 insert into public.brand_consultant_items(profile_id,section,position,label,explanation,source_facts,origin,origin_reference,created_by)
 values(md5('bi-shared-v1')::uuid,'strongFit',0,'Signal','Explanation',array['category'],'editorial','review-1','fixture');
 select throws_ok($$delete from public.brand_profile_facts where profile_id=md5('bi-shared-v1')::uuid and fact_key='category'$$,'23503',null,'editorial source cannot become dangling');
-update public.brand_profile_facts set review_state='reviewed';
+update public.brand_profile_facts set review_state='reviewed' where profile_id in (md5('bi-shared-v1')::uuid,md5('bi-private-v1')::uuid,md5('bi-shared-v2')::uuid);
 select throws_ok($$update public.brand_profile_versions set status='reviewed',reviewed_by='reviewer',reviewed_at=now(),effective_at=now() where id=md5('bi-shared-v1')::uuid$$,'23514',null,'unreviewed editorial item blocks review');
-update public.brand_consultant_items set review_state='reviewed',reviewed_by='reviewer',reviewed_at=now();
+update public.brand_consultant_items set review_state='reviewed',reviewed_by='reviewer',reviewed_at=now() where profile_id in (md5('bi-shared-v1')::uuid,md5('bi-private-v1')::uuid,md5('bi-shared-v2')::uuid);
 update public.brand_profile_facts set verification='verified' where profile_id=md5('bi-shared-v1')::uuid and fact_key='category';
 select throws_ok($$update public.brand_profile_versions set status='reviewed',reviewed_by='reviewer',reviewed_at=now(),effective_at=now() where id=md5('bi-shared-v1')::uuid$$,'23514',null,'verified fact requires verified evidence before approval');
 insert into public.brand_fact_evidence(profile_id,fact_key,evidence_id,brand_id)
 select md5('bi-shared-v1')::uuid,'category',id,brand_id from public.brand_evidence where supersedes_id=md5('bi-source-1')::uuid;
-update public.brand_profile_versions set status='reviewed',reviewed_by='reviewer',reviewed_at=now(),effective_at=now();
+update public.brand_profile_versions set status='reviewed',reviewed_by='reviewer',reviewed_at=now(),effective_at=now() where id in (md5('bi-shared-v1')::uuid,md5('bi-private-v1')::uuid,md5('bi-shared-v2')::uuid);
 select throws_ok($$update public.brand_profile_facts set notes='changed' where profile_id=md5('bi-shared-v1')::uuid$$,'23514',null,'review freezes facts');
-update public.brand_profile_versions set status='published';
-select is((select count(*) from public.brand_profile_versions where status='published'),2::bigint,'reviewed profiles published');
+update public.brand_profile_versions set status='published' where id in (md5('bi-shared-v1')::uuid,md5('bi-private-v1')::uuid,md5('bi-shared-v2')::uuid);
+select is((select count(*) from public.brand_profile_versions where id in (md5('bi-shared-v1')::uuid,md5('bi-private-v1')::uuid,md5('bi-shared-v2')::uuid) and status='published'),2::bigint,'reviewed profiles published');
 select throws_ok($$update public.brand_profile_versions set brand_name='Rewrite' where id=md5('bi-shared-v1')::uuid$$,'23514',null,'published metadata immutable');
 select throws_ok($$update public.brand_profile_versions set status='draft' where id=md5('bi-shared-v1')::uuid$$,'23514',null,'published cannot return to draft');
 select throws_ok($$delete from public.brand_profile_versions where id=md5('bi-shared-v1')::uuid$$,'23514',null,'published profile deletion denied');
@@ -104,10 +104,10 @@ select is((select version_number from public.brand_profile_versions where brand_
 reset role;
 set local role authenticated;
 select set_config('request.jwt.claim.sub',md5('bi-user-1')::text,true);
-select is((select count(*) from public.brand_identities),2::bigint,'tenant A sees shared and provisioned brand');
-select is((select count(*) from public.brand_profile_versions),2::bigint,'tenant reads published profiles only');
-select is((select count(*) from public.brand_profile_facts),100::bigint,'draft facts not exposed');
-select is((select count(*) from public.brand_evidence),4::bigint,'only attached published sources exposed');
+select is((select count(*) from public.brand_identities where id in (md5('bi-shared')::uuid,md5('bi-private')::uuid)),2::bigint,'tenant A sees shared and provisioned brand');
+select is((select count(*) from public.brand_profile_versions where brand_id in (md5('bi-shared')::uuid,md5('bi-private')::uuid)),2::bigint,'tenant reads published profiles only');
+select is((select count(*) from public.brand_profile_facts where profile_id in (md5('bi-shared-v1')::uuid,md5('bi-private-v1')::uuid,md5('bi-shared-v2')::uuid)),100::bigint,'draft facts not exposed');
+select is((select count(*) from public.brand_evidence where brand_id in (md5('bi-shared')::uuid,md5('bi-private')::uuid)),4::bigint,'only attached published sources exposed');
 select is((select count(*) from public.organization_brands),1::bigint,'tenant sees own association');
 select throws_ok($$insert into public.brand_identities(slug,name) values('tenant-created','Bad')$$,'42501',null,'tenant owner cannot create global brands');
 select throws_ok($$update public.brand_profile_facts set notes='bad'$$,'42501',null,'read does not grant fact writes');
@@ -115,18 +115,18 @@ select throws_ok($$insert into public.organization_brands(organization_id,brand_
 select throws_ok($$update public.organization_brands set organization_id=md5('bi-org-2')::uuid$$,'42501',null,'cross-tenant reassignment denied');
 select throws_ok($$delete from public.organization_brands$$,'42501',null,'tenant cannot alter platform grants');
 select set_config('request.jwt.claim.sub',md5('bi-user-2')::text,true);
-select is((select count(*) from public.brand_identities),1::bigint,'tenant B sees shared catalog only');
-select is((select count(*) from public.brand_profile_versions),1::bigint,'tenant B cannot read private profile');
-select is((select count(*) from public.brand_profile_facts),50::bigint,'private facts isolated');
-select is((select count(*) from public.brand_evidence),3::bigint,'private sources isolated');
+select is((select count(*) from public.brand_identities where id in (md5('bi-shared')::uuid,md5('bi-private')::uuid)),1::bigint,'tenant B sees shared catalog only');
+select is((select count(*) from public.brand_profile_versions where brand_id in (md5('bi-shared')::uuid,md5('bi-private')::uuid)),1::bigint,'tenant B cannot read private profile');
+select is((select count(*) from public.brand_profile_facts where profile_id in (md5('bi-shared-v1')::uuid,md5('bi-private-v1')::uuid,md5('bi-shared-v2')::uuid)),50::bigint,'private facts isolated');
+select is((select count(*) from public.brand_evidence where brand_id in (md5('bi-shared')::uuid,md5('bi-private')::uuid)),3::bigint,'private sources isolated');
 select is((select count(*) from public.organization_brands),0::bigint,'association data isolated');
 select throws_ok($$update public.brand_profile_versions set status='draft' where brand_id=md5('bi-private')::uuid$$,'42501',null,'cross-tenant mutation denied');
 select set_config('request.jwt.claim.sub',md5('bi-user-3')::text,true);
-select is((select count(*) from public.brand_identities),0::bigint,'suspended member gets no catalog');
+select is((select count(*) from public.brand_identities where id in (md5('bi-shared')::uuid,md5('bi-private')::uuid)),0::bigint,'suspended member gets no catalog');
 select set_config('request.jwt.claim.sub',md5('bi-user-4')::text,true);
-select is((select count(*) from public.brand_identities),0::bigint,'authenticated nonmember gets no catalog');
+select is((select count(*) from public.brand_identities where id in (md5('bi-shared')::uuid,md5('bi-private')::uuid)),0::bigint,'authenticated nonmember gets no catalog');
 select set_config('request.jwt.claims',jsonb_build_object('sub',md5('bi-user-1')::text,'is_anonymous',true)::text,true);
-select is((select count(*) from public.brand_identities),0::bigint,'anonymous auth identity denied even with membership');
+select is((select count(*) from public.brand_identities where id in (md5('bi-shared')::uuid,md5('bi-private')::uuid)),0::bigint,'anonymous auth identity denied even with membership');
 select set_config('request.jwt.claims','{}',true);
 reset role;
 set local role anon;

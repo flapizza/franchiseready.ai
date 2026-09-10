@@ -19,5 +19,5 @@ export type AssessmentReport = {
   subtitle: string;
   sections: ReportSection[];
   disclaimer: string;
-  source: ConferenceAnalysis;
+  source: Pick<ConferenceAnalysis, "ownershipProfile" | "financial" | "instrumentVersion" | "analysisVersion">;
 };

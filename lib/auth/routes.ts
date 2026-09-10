@@ -8,9 +8,14 @@ export function isAuthEntryPath(pathname: string) {
 }
 
 export function isProtectedPath(pathname: string) {
+  if (isPublicAssessmentInvitationPath(pathname)) return false;
   return PROTECTED_ROUTE_PREFIXES.some(
     (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
   );
+}
+
+export function isPublicAssessmentInvitationPath(pathname: string) {
+  return /^\/assessment\/invitation\/[A-Za-z0-9_-]{1,128}(?:\/(?:results|report))?\/?$/.test(pathname);
 }
 
 export function getSafeReturnPath(value: string | null, fallback = AUTH_ROUTES.home) {

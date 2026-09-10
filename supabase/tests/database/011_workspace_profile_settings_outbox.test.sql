@@ -52,8 +52,8 @@ select set_config('request.jwt.claim.sub','b0000000-0000-0000-0000-000000000004'
 select throws_ok($$select public.save_consultant_profile('b1000000-0000-0000-0000-000000000001','Suspended','','','','','')$$,'42501',null,'suspended membership cannot save a profile');
 
 reset role;
-select is((select count(*) from private.domain_event_outbox),3::bigint,'each successful mutation emitted one transactional event');
-select results_eq($$select event_type from private.domain_event_outbox order by event_type$$,$$values ('consultant-profile.saved'::text),('membership-onboarding.state-changed'::text),('organization-settings.saved'::text)$$,'outbox records the intended event types');
+select is((select count(*) from private.domain_event_outbox where organization_id='b1000000-0000-0000-0000-000000000001'),3::bigint,'each successful mutation emitted one transactional event');
+select results_eq($$select event_type from private.domain_event_outbox where organization_id='b1000000-0000-0000-0000-000000000001' order by event_type$$,$$values ('consultant-profile.saved'::text),('membership-onboarding.state-changed'::text),('organization-settings.saved'::text)$$,'outbox records the intended event types');
 insert into private.domain_event_outbox(aggregate_type,event_type,occurred_at) values ('test','test.sentinel',now());
 select throws_ok($$update private.domain_event_outbox set payload='{}'$$,'55000','Domain events are append-only.','outbox rows cannot be updated');
 select throws_ok($$delete from private.domain_event_outbox$$,'55000','Domain events are append-only.','outbox rows cannot be deleted');

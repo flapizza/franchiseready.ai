@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { CandidateIntakeService } from "../services/CandidateIntakeService";
 import { resolveWorkspaceComposition } from "@/feature/platform/composition/resolveWorkspaceComposition";
-import { createAssessmentToken, hashAssessmentToken } from "@/feature/assessment-engine/production/token";
+import { assessmentInvitationUrl, createAssessmentToken, hashAssessmentToken } from "@/feature/assessment-engine/production/token";
 import { getPublicEnvironment } from "@/lib/env";
 
 export interface CandidateFormState {
@@ -37,13 +37,13 @@ export async function createCandidateAction(_previous: CandidateFormState, formD
   } catch {
     return "runtimes" in composition
       ? { status: "validation-error", message: "Candidate could not be created." }
-      : { status: "unavailable", message: "Production candidate identity resolution is not implemented. No demo matching was used." };
+      : { status: "unavailable", message: "Candidate could not be resolved or created. Please try again." };
   }
 }
 
-export interface InvitationActionState { status: "idle" | "sent" | "error"; message?: string; url?: string; candidateId?: string }
+export interface InvitationActionState { status: "idle" | "generated" | "error"; message?: string; url?: string; candidateId?: string }
 
-export async function sendAssessmentInvitationAction(_previous: InvitationActionState, formData: FormData): Promise<InvitationActionState> {
+export async function generateAssessmentInvitationAction(_previous: InvitationActionState, formData: FormData): Promise<InvitationActionState> {
   const candidateId = String(formData.get("candidateId") ?? "");
   try {
     const resolution=await resolveWorkspaceComposition();if(resolution.status!=="resolved")return {status:"error",message:"An active workspace is required."};const composition=resolution.composition;
@@ -51,13 +51,13 @@ export async function sendAssessmentInvitationAction(_previous: InvitationAction
       const token=createAssessmentToken();
       await composition.dependencies.assessments.createInvitation(candidateId,hashAssessmentToken(token),new Date(Date.now()+14*86400000).toISOString());
       revalidatePath(`/crm/candidates/${candidateId}`);
-      return {status:"sent",message:"Assessment invitation created",url:`${getPublicEnvironment().APP_URL}/assessment/invitation/${token}`,candidateId};
+      return {status:"generated",message:"Assessment invitation link ready",url:assessmentInvitationUrl(getPublicEnvironment().APP_URL,token),candidateId};
     }
     const invitation = await composition.runtimes.createAssessmentInvitations().send(candidateId);
     revalidatePath("/crm/candidates");
     revalidatePath(`/crm/candidates/${candidateId}`);
-    return { status: "sent", message: "Assessment Invitation Sent", url: invitation.assessmentUrl, candidateId };
-  } catch (error) {
-    return { status: "error", message: error instanceof Error ? error.message : "Could not send the invitation." };
+    return { status: "generated", message: "Assessment invitation link ready", url: invitation.assessmentUrl, candidateId };
+  } catch {
+    return { status: "error", message: "Could not generate the assessment link. Please try again." };
   }
 }

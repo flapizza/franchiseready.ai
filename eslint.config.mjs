@@ -9,6 +9,7 @@ const eslintConfig = defineConfig([
   globalIgnores([
     // Default ignores of eslint-config-next:
     ".next/**",
+    "supabase/.temp/**",
     "marketing/.next/**",
     "marketing/next-env.d.ts",
     ".next-dev/**",
@@ -16,6 +17,7 @@ const eslintConfig = defineConfig([
     "public-unsubscribe/node_modules/**",
     "out/**",
     "build/**",
+    "supabase/.temp/**",
     "next-env.d.ts",
   ]),
 ]);

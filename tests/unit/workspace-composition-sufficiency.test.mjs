@@ -7,12 +7,12 @@ import { fileURLToPath } from "node:url";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const source = (relativePath) => readFile(path.join(root, relativePath), "utf8");
 
-test("production candidate resolution is explicitly unavailable and never demo-backed", async () => {
+test("production candidate resolution uses its repository and is never demo-backed", async () => {
   const service = await source("feature/crm/services/ProductionCandidateResolutionService.ts");
   const composition = await source("feature/platform/composition/ProductionWorkspaceComposition.ts");
-  assert.match(service, /status: "unavailable", reason: "not-implemented"/);
+  assert.match(service, /findByNormalizedEmail/);
   assert.doesNotMatch(service, /Demo|Seed|Overlay/);
-  assert.match(composition, /new ProductionCandidateResolutionService\(\)/);
+  assert.match(composition, /new ProductionCandidateResolutionService\(candidates\)/);
   assert.doesNotMatch(composition, /DemoCandidateResolutionService/);
 });
 

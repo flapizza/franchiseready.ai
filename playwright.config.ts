@@ -34,7 +34,7 @@ export default defineConfig({
     env: {
       ...process.env,
       PLAYWRIGHT_TEST_MODE: "true",
-      CONFERENCE_DEMO_ACCESS: "true",
+      CONFERENCE_DEMO_ACCESS: process.env.CONFERENCE_DEMO_ACCESS ?? "true",
     },
   },
 });

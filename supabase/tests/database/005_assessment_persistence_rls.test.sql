@@ -17,7 +17,7 @@ select has_index('public','assessment_analyses','assessment_current_analysis_idx
 select has_function('public','create_assessment_invitation',array['text','text','timestamp with time zone'],'consultant invitation boundary exists');
 select has_function('public','load_assessment_by_token',array['text'],'token-scoped load boundary exists');
 select has_function('public','save_assessment_progress',array['text','jsonb'],'durable resume boundary exists');
-select has_function('public','submit_assessment',array['text','jsonb','jsonb','jsonb','integer'],'atomic immutable submission boundary exists');
+select has_function('public','finalize_assessment_trusted',array['text','jsonb','jsonb'],'atomic immutable submission boundary exists');
 select has_function('public','regenerate_assessment_analysis',array['text','jsonb','integer'],'analysis regeneration boundary exists');
 select has_function('public','revoke_assessment_invitation',array['text'],'revocation boundary exists');
 select policies_are('public','assessment_analyses',array['assessment_analyses_read'],'consultant-only analysis policy is narrow');
@@ -56,8 +56,8 @@ select is((select count(*) from public.get_candidate_assessment('cand_reportauth
 set local role authenticated;select set_config('request.jwt.claim.sub','50000000-0000-0000-0000-000000000004',true);
 select is((select count(*) from public.get_candidate_assessment('cand_reportauthaaaaaa')),0::bigint,'cross-organization consultant cannot resolve the report source');reset role;
 set local role anon;
-select is((select count(*) from public.load_assessment_by_token(repeat('d',64))),0::bigint,'invalid assessment token fails closed');
-select is((select status::text from public.load_assessment_by_token(repeat('a',64))),'analyzed','valid token holder can resolve completed candidate-safe source');
-select is((select status::text from public.load_assessment_by_token(repeat('b',64))),'expired','expired token follows invitation expiry policy');
-select is((select analysis_snapshot is null from public.load_assessment_by_token(repeat('c',64))),true,'revoked token exposes no analysis snapshot');reset role;
+select is(public.load_assessment_by_token(repeat('d',64)) is null,true,'invalid assessment token fails closed');
+select is(public.load_assessment_by_token(repeat('a',64))->>'status','analyzed','valid token holder can resolve completed candidate-safe source');
+select is(public.load_assessment_by_token(repeat('b',64)) is null,true,'expired token follows invitation expiry policy');
+select is(public.load_assessment_by_token(repeat('c',64)) is null,true,'revoked token exposes no analysis snapshot');reset role;
 select * from finish(); rollback;

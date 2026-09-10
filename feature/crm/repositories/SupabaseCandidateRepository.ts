@@ -33,11 +33,7 @@ export class SupabaseCandidateRepository implements CandidateRepository {
   }
 
   async findByNormalizedEmail(_membershipId: string, normalizedEmail: string): Promise<CandidateRecord[]> {
-    const { data, error } = await this.supabase.from("candidates").select("*")
-      .eq("organization_id", this.workspace.organization.id).ilike("email", normalizedEmail)
-      .is("archived_at", null);
-    if (error) throw new CandidateRepositoryError("Candidate identity could not be resolved.");
-    return data.map((row) => this.toRecord(row));
+    return (await this.getAll()).filter(candidate => candidate.email.trim().toLowerCase() === normalizedEmail);
   }
 
   async findByNormalizedPhone(_membershipId: string, normalizedPhone: string): Promise<CandidateRecord[]> {
@@ -66,19 +62,13 @@ export class SupabaseCandidateRepository implements CandidateRepository {
       return this.toRecord(data);
     }
 
-    const { data, error } = await this.supabase.from("candidates").insert({
-      organization_id: this.workspace.organization.id,
-      assigned_membership_id: this.workspace.membership.id,
-      created_by_membership_id: this.workspace.membership.id,
-      first_name: candidate.firstName,
-      last_name: candidate.lastName,
-      email: candidate.email,
-      phone: candidate.phone || null,
-      status: candidate.status,
-      pipeline_stage_id: candidate.pipelineStageId ?? candidate.pipelineStage,
-    }).select("*").single();
-    if (error) throw new CandidateRepositoryError("Candidate could not be created.");
-    return this.toRecord(data);
+    const { data, error } = await this.supabase.rpc("create_assessment_candidate", {
+      target_organization_id: this.workspace.organization.id,
+      proposed_first_name: candidate.firstName, proposed_last_name: candidate.lastName,
+      proposed_email: candidate.email, proposed_phone: candidate.phone || "",
+    });
+    if (error || !data?.[0]) throw new CandidateRepositoryError("Candidate could not be created.");
+    return this.toRecord(data[0]);
   }
 
   async deleteById(publicId: string): Promise<void> {

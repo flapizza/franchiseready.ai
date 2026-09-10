@@ -73,6 +73,6 @@ test("unknown canonical candidate IDs return the legitimate not-found response",
 test("manual candidate invitation opens the current full assessment, never the obsolete one-question engine",async({page})=>{
   await enterDemoAndReset(page);await page.goto("/crm/candidates/new");
   await page.getByLabel("First name").fill("Route");await page.getByLabel("Last name").fill("Regression");await page.getByLabel("Email").fill("route.regression@example.com");await page.getByRole("button",{name:/Create Candidate/i}).click();
-  await expect(page.getByText("Candidate created",{exact:true})).toBeVisible();await page.getByRole("button",{name:/Send Assessment/i}).click();await page.getByRole("link",{name:"Open Assessment"}).click();
+  await expect(page.getByText("Candidate created",{exact:true})).toBeVisible();await page.getByRole("button",{name:/Generate Assessment Link/i}).click();await page.getByRole("link",{name:"Open Assessment"}).click();
   await expect(page).toHaveURL(/\/assessment\/start\?invitation=/);await expect(page.getByRole("heading",{name:"Tell us a little about yourself"})).toBeVisible();await expect(page).not.toHaveURL(/\/assessment\/demo/);await expect(page.getByText(/How ready are you to take the next step/i)).toHaveCount(0);
 });

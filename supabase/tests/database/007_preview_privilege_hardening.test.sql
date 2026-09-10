@@ -14,7 +14,7 @@ select ok(not has_function_privilege('anon', 'public.discovery_session_payload(u
 
 select ok(has_function_privilege('anon', 'public.load_assessment_by_token(text)', 'EXECUTE'), 'anon retains token-scoped assessment load');
 select ok(has_function_privilege('anon', 'public.save_assessment_progress(text,jsonb)', 'EXECUTE'), 'anon retains token-scoped assessment progress save');
-select ok(has_function_privilege('anon', 'public.submit_assessment(text,jsonb,jsonb,jsonb,integer)', 'EXECUTE'), 'anon retains token-scoped assessment submission');
+select ok(not has_function_privilege('anon', 'public.finalize_assessment_trusted(text,jsonb,jsonb)', 'EXECUTE'), 'anon cannot supply authoritative analysis');
 
 select ok(not has_function_privilege('anon', 'public.prevent_assessment_submission_mutation()', 'EXECUTE'), 'anon cannot execute the assessment trigger helper');
 select ok(not has_function_privilege('authenticated', 'public.prevent_assessment_submission_mutation()', 'EXECUTE'), 'authenticated cannot execute the assessment trigger helper');

@@ -166,7 +166,7 @@ export async function createProductionWorkspaceComposition(
       emailMessages: new ProductionEmailRepository(context),
       emailDelivery: new ProductionEmailMessageService(context),
       communications: new ProductionCommunicationsWorkspaceRuntime(context),
-      candidateResolution: new ProductionCandidateResolutionService(),
+      candidateResolution: new ProductionCandidateResolutionService(candidates),
       candidateCRM: new ProductionCandidateCRMRuntime(candidates),
       consultantProfile,
       organizationSettings: new ProductionOrganizationSettingsRepository(client, context),

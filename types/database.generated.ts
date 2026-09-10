@@ -2681,6 +2681,39 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      create_assessment_candidate: {
+        Args: {
+          proposed_email: string
+          proposed_first_name: string
+          proposed_last_name: string
+          proposed_phone: string
+          target_organization_id: string
+        }
+        Returns: {
+          archived_at: string | null
+          assigned_membership_id: string
+          contact_id: string | null
+          created_at: string
+          created_by_membership_id: string
+          email: string
+          first_name: string
+          id: string
+          last_name: string
+          organization_id: string
+          phone: string | null
+          pipeline_stage_id: string
+          preferred_name: string | null
+          public_id: string
+          status: Database["public"]["Enums"]["candidate_status"]
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "candidates"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       create_assessment_invitation: {
         Args: {
           invitation_expires_at: string
@@ -2736,6 +2769,14 @@ export type Database = {
         Returns: string
       }
       discovery_session_payload: { Args: { sid: string }; Returns: Json }
+      finalize_assessment_trusted: {
+        Args: {
+          authoritative_analysis: Json
+          candidate_progress: Json
+          presented_token_hash: string
+        }
+        Returns: Json
+      }
       finish_campaign_send: {
         Args: { target_send_public_id: string }
         Returns: {
@@ -2830,21 +2871,7 @@ export type Database = {
       }
       load_assessment_by_token: {
         Args: { presented_token_hash: string }
-        Returns: {
-          analysis_snapshot: Json
-          candidate_public_id: string
-          completed_at: string
-          current_section: number
-          expires_at: string
-          id: string
-          last_saved_at: string
-          progress_snapshot: Json
-          public_id: string
-          revoked_at: string
-          started_at: string
-          status: Database["public"]["Enums"]["assessment_session_status"]
-          submitted_at: string
-        }[]
+        Returns: Json
       }
       promote_contact_to_candidate: {
         Args: { target_contact_public_id: string }
@@ -2939,33 +2966,7 @@ export type Database = {
       }
       save_assessment_progress: {
         Args: { presented_token_hash: string; progress_snapshot: Json }
-        Returns: {
-          candidate_id: string
-          completed_at: string | null
-          created_at: string
-          created_by_membership_id: string
-          current_section: number
-          expires_at: string
-          id: string
-          instrument_version: string
-          last_saved_at: string | null
-          organization_id: string
-          owning_membership_id: string
-          progress_snapshot: Json | null
-          public_id: string
-          revoked_at: string | null
-          started_at: string | null
-          status: Database["public"]["Enums"]["assessment_session_status"]
-          submitted_at: string | null
-          token_hash: string
-          updated_at: string
-        }[]
-        SetofOptions: {
-          from: "*"
-          to: "assessment_sessions"
-          isOneToOne: false
-          isSetofReturn: true
-        }
+        Returns: Json
       }
       save_consultant_profile: {
         Args: {
@@ -3063,42 +3064,6 @@ export type Database = {
           to: "membership_onboarding"
           isOneToOne: true
           isSetofReturn: false
-        }
-      }
-      submit_assessment: {
-        Args: {
-          presented_token_hash: string
-          submitted_analysis: Json
-          submitted_analysis_version: number
-          submitted_answers: Json
-          submitted_intake: Json
-        }
-        Returns: {
-          candidate_id: string
-          completed_at: string | null
-          created_at: string
-          created_by_membership_id: string
-          current_section: number
-          expires_at: string
-          id: string
-          instrument_version: string
-          last_saved_at: string | null
-          organization_id: string
-          owning_membership_id: string
-          progress_snapshot: Json | null
-          public_id: string
-          revoked_at: string | null
-          started_at: string | null
-          status: Database["public"]["Enums"]["assessment_session_status"]
-          submitted_at: string | null
-          token_hash: string
-          updated_at: string
-        }[]
-        SetofOptions: {
-          from: "*"
-          to: "assessment_sessions"
-          isOneToOne: false
-          isSetofReturn: true
         }
       }
       unsubscribe_marketing: {

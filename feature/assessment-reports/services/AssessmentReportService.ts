@@ -6,7 +6,7 @@ const values = (items: string[]) => items.length ? items : ["Explore during Disc
 const characteristicLabel=(value:string)=>value.split(/[- ]+/).map(word=>word.toUpperCase()==="B2B"?"B2B":word.charAt(0).toUpperCase()+word.slice(1)).join(" ");
 
 export class AssessmentReportService {
-  buildCandidateReport(source: Source): AssessmentReport {
+  buildCandidateReport(source: Omit<Source, "analysis"> & { analysis: Pick<ConferenceAnalysis, "ownershipProfile" | "financial" | "instrumentVersion" | "analysisVersion"> }): AssessmentReport {
     const { analysis } = source;
     const profile = analysis.ownershipProfile;
     return {

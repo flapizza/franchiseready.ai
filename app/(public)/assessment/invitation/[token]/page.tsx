@@ -5,7 +5,7 @@ import { hashAssessmentToken } from "@/feature/assessment-engine/production/toke
 export default async function ProductionAssessmentPage({params}:{params:Promise<{token:string}>}){
   const {token}=await params; let session;
   try{session=await(await createPublicAssessmentRepository()).loadByTokenHash(hashAssessmentToken(token));}catch{return <Unavailable/>;}
-  if(!session||session.revokedAt||session.status==="cancelled"||session.status==="expired")return <Unavailable expired/>;
+  if(!session)return <Unavailable expired/>;
   if(session.status==="analyzed")return <Completed token={token}/>;
   return <ConferenceAssessmentExperience productionToken={token} initialProgress={session.progress}/>;
 }
