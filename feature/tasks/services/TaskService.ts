@@ -16,7 +16,7 @@ export interface TaskInput {
 const priorities = new Set<TaskPriority>(["low", "normal", "high", "urgent"]);
 
 export class TaskService {
-  constructor(private readonly tasks: TaskRepository, private readonly candidates: CandidateRepository, private readonly activities: CandidateActivityRepository) {}
+  constructor(private readonly tasks: TaskRepository, private readonly candidates: CandidateRepository, private readonly activities?: CandidateActivityRepository) {}
 
   async create(consultantId: string, input: TaskInput, provenance: Pick<ConsultantTask, "source" | "sourceReferenceId" | "recommendedReason"> = { source: "consultant" }): Promise<ConsultantTask> {
     await this.validate(consultantId, input);
@@ -81,6 +81,6 @@ export class TaskService {
 
   private async activity(task: ConsultantTask, type: "task-created" | "task-completed" | "task-cancelled", title: string): Promise<void> {
     if (!task.candidateId) return;
-    await this.activities.add({ id: `${type}:${task.taskId}:${task.updatedAt}`, candidateId: task.candidateId, consultantId: task.consultantId, type, title, description: task.title, createdAt: task.updatedAt, metadata: { taskId: task.taskId } });
+    await this.activities?.add({ id: `${type}:${task.taskId}:${task.updatedAt}`, candidateId: task.candidateId, consultantId: task.consultantId, type, title, description: task.title, createdAt: task.updatedAt, metadata: { taskId: task.taskId } });
   }
 }

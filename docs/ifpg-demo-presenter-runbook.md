@@ -1,5 +1,7 @@
 # IFPG Demo Presenter Runbook
 
+For the hosted FranGroove Demo workspace, use the [Pack 002 presenter runbook](ifpg-demo-experience-pack-002.md), including its 5-, 10-, and 15-minute journeys. The guide below remains specific to the older temporary conference runtime.
+
 Use this guide for the approved `ifpg-conference-demo-v1` story. Keep the demonstration local and deterministic; do not imply that conference delivery actions contact an external recipient.
 
 ## Pre-demo startup and check

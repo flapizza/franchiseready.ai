@@ -1,3 +1,4 @@
+import { PersistedScheduleSummary } from "@/feature/tasks/components/PersistedScheduleSummary";
 import { MissionControlPage } from "@/feature/mission-control/components/MissionControlPage";
 import { notFound } from "next/navigation";
 import { resolveWorkspaceComposition } from "@/feature/platform/composition/resolveWorkspaceComposition";
@@ -9,7 +10,7 @@ export const dynamic = "force-dynamic";
 export default async function CRMPage() {
   const resolution = await resolveWorkspaceComposition();
   if (resolution.status !== "resolved") notFound();
-  if (!("runtimes" in resolution.composition)) return <PersistedMissionControlPage state={buildPersistedMissionControl(await resolution.composition.dependencies.candidateWorkspace.load())} />;
+  if (!("runtimes" in resolution.composition)) return <><PersistedMissionControlPage state={buildPersistedMissionControl(await resolution.composition.dependencies.candidateWorkspace.load())} schedule={<PersistedScheduleSummary />} /></>;
   const runtime = resolution.composition.runtimes.createMissionControl();
 
   const state =

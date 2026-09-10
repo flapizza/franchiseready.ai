@@ -1,3 +1,4 @@
+import { PersistedScheduleSummary } from "@/feature/tasks/components/PersistedScheduleSummary";
 import { Candidate360Runtime } from "../runtime/Candidate360Runtime";
 import { notFound } from "next/navigation";
 import Link from "next/link";
@@ -81,6 +82,7 @@ export async function Candidate360Page({
       {candidate.hasIntelligence && !candidate.rootOnly && <ReadinessScorecard
         candidate={candidate}
       />}
+      {isProduction && <a href={`/crm/candidates/${candidateId}/documents`} className="inline-flex rounded-xl bg-teal-700 px-5 py-3 font-bold text-white">Assessments &amp; Documents</a>}
       {resolvedAssessment?.analysis && <ProductionCandidateIntelligence analysis={resolvedAssessment.analysis} candidateId={candidateId} completedAt={resolvedAssessment.completedAt}/>}
       {resolvedAssessment?.analysis && <ProductionDiscoverySummary candidateId={candidate.id} session={productionDiscovery}/>}
 
@@ -90,6 +92,7 @@ export async function Candidate360Page({
 
       {!candidate.rootOnly && <CandidateMeetingPanel candidate={candidate} />}
 
+      {isProduction && <PersistedScheduleSummary candidateId={candidateId}/>}
       {taskState && <CandidateTaskPanel candidateId={candidate.id} candidateName={candidate.fullName} tasks={taskState.tasks} recommendations={taskState.recommendations} defaultDueAt={taskState.defaultDueAt} />}
 
       <CandidateActivityTimeline candidate={candidate} />

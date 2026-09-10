@@ -19,6 +19,9 @@ export function localDateTimeToIso(value: string, timezone = DEMO_CONSULTANT_TIM
     const [renderedHour, renderedMinute] = rendered.time.split(":").map(Number);
     instant += desired - Date.UTC(renderedYear, renderedMonth - 1, renderedDay, renderedHour, renderedMinute);
   }
-  return new Date(instant).toISOString();
+  const result=new Date(instant).toISOString();
+  const actual=localDateTimeParts(result,timezone);
+  if(`${actual.date}T${actual.time}`!==value)throw new Error("Choose a valid date and an existing local time.");
+  return result;
 }
 export function demoLocalIso(days: number, hour: number, minute = 0) { const value = new Date(); value.setHours(hour, minute, 0, 0); value.setDate(value.getDate() + days); return value.toISOString(); }

@@ -2,8 +2,9 @@ import { ReferralStudioPage } from "@/feature/referral-package/components/Referr
 import { resolveWorkspaceComposition } from "@/feature/platform/composition/resolveWorkspaceComposition";
 import { WorkspaceFeatureUnavailable } from "@/feature/platform/components/WorkspaceFeatureUnavailable";
 import { notFound } from "next/navigation";
-import { PersistedHandoffPreview } from "@/feature/referral-package/components/PersistedHandoffPreview";
-import { evaluateBrand } from "@/feature/brand-strategy/production/BrandReferralEngine";
+import { PersistedReferralWorkspace } from "@/feature/referral-package/components/PersistedReferralWorkspace";
+import {referralContext} from "@/feature/referral-package/services/PersistedReferral";
+
 
 export default async function CandidateReferralRoute({ params, searchParams }: PageProps<"/crm/candidates/[candidateId]/referral">) {
   const { candidateId } = await params;
@@ -11,11 +12,8 @@ export default async function CandidateReferralRoute({ params, searchParams }: P
   const referralId = query.referralId;
   const resolution=await resolveWorkspaceComposition();if(resolution.status!=="resolved")return <WorkspaceFeatureUnavailable title="Referral Studio"/>;
   if (!("runtimes" in resolution.composition)) {
-    const row = await resolution.composition.dependencies.candidateWorkspace.get(candidateId);
-    if (!row) notFound();
-    const brand = typeof query.brand === "string" ? await resolution.composition.dependencies.brandIntelligence.getById(query.brand) : null;
-    if (query.brand && !brand) notFound();
-    return <PersistedHandoffPreview row={row} brand={brand && row.assessment?.analysis ? evaluateBrand(row, brand) : null} />;
+    const context=await referralContext(candidateId,typeof query.brand==="string"?query.brand:undefined);if(!context)notFound();
+    return <PersistedReferralWorkspace context={context}/>;
   }
   return <ReferralStudioPage state={await resolution.composition.runtimes.createReferralStudio().load(candidateId, typeof referralId === "string" ? referralId : undefined)} />;
 }

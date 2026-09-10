@@ -28,7 +28,8 @@ test("production-unavailable domains render or return explicit unavailable state
 
 test("persisted Mission Control and handoff use authorized workspace dependencies",async()=>{
   assert.match(await source("app/(protected)/crm/page.tsx"),/dependencies\.candidateWorkspace\.load/);
-  assert.match(await source("app/(protected)/crm/candidates/[candidateId]/referral/page.tsx"),/dependencies\.candidateWorkspace\.get/);
+  assert.match(await source("app/(protected)/crm/candidates/[candidateId]/referral/page.tsx"),/referralContext/);
+  assert.match(await source("feature/referral-package/services/PersistedReferral.ts"),/dependencies\.candidateWorkspace\.get/);
 });
 
 test("candidate mutation actor and tenant context are derived from resolved composition",async()=>{

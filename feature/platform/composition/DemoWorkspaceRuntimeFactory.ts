@@ -51,7 +51,7 @@ export class DemoWorkspaceRuntimeFactory {
       candidateRepository: this.dependencies.candidates,
       playbooks: this.createEngagementPlaybook(),
       tasks: new TaskRuntime(this.dependencies.tasks, this.dependencies.candidates, conferenceDemoNow),
-      calendar: new CalendarRuntime(this.dependencies.calendar, this.dependencies.candidates, conferenceDemoNow),
+      calendar: new CalendarRuntime(this.dependencies.calendar, this.dependencies.candidates, conferenceDemoNow,{tasks:this.dependencies.tasks}),
       email: this.emailRuntime(),
       consultantId: demoConsultant.id,
       referrals: (candidateId) => demoCandidateOverlayStore.getCandidateReferrals(candidateId),
@@ -104,7 +104,7 @@ export class DemoWorkspaceRuntimeFactory {
 
   public createTasks() { return new TaskRuntime(this.dependencies.tasks, this.dependencies.candidates, conferenceDemoNow); }
   public createTaskService() { return new TaskService(this.dependencies.tasks, this.dependencies.candidates, this.dependencies.candidateActivities); }
-  public createCalendar() { return new CalendarRuntime(this.dependencies.calendar, this.dependencies.candidates, conferenceDemoNow); }
+  public createCalendar() { return new CalendarRuntime(this.dependencies.calendar, this.dependencies.candidates, conferenceDemoNow,{tasks:this.dependencies.tasks}); }
   public createCalendarService() { return new CalendarService(this.dependencies.calendar, this.dependencies.candidates, this.dependencies.candidateActivities); }
   public createPipeline() { return this.pipelineService(); }
   public createCandidatePipelineStageService() { return new CandidatePipelineStageService(this.dependencies.pipeline, this.dependencies.candidates, this.dependencies.candidateActivities); }

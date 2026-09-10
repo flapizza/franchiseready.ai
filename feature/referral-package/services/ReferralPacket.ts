@@ -1,0 +1,22 @@
+import type { referralContext } from "./PersistedReferral";
+import type { AssessmentReport } from "@/feature/assessment-reports/models/AssessmentReport";
+type Context=NonNullable<Awaited<ReturnType<typeof referralContext>>>;
+/** An explicit allowlist. Private notes, consultantBrief and internal tensions never enter the packet. */
+export function buildReferralPacket(c:Context,now=new Date()):AssessmentReport{
+ const a=c.row.assessment?.analysis,r=c.record,b=c.brand;if(!a||!r||!b||c.consideration?.state!=="selected")throw Error("Select a brand and complete the assessment first.");
+ const intake=r.intake,answers=r.answers,reported=(id:string)=>answers[id]?.join("; ")||"Unknown / not established";
+ return{reportType:"CANDIDATE_ASSESSMENT_REPORT",audience:"candidate",privacyClassification:"CANDIDATE SAFE",templateVersion:"candidate-report-v1",candidateName:`${c.row.candidate.firstName} ${c.row.candidate.lastName}`,instrumentLabel:"Franchise Ownership Assessment v1.0",instrumentVersion:r.instrumentVersion,analysisVersion:a.analysisVersion,assessmentCompletedAt:r.completedAt,generatedAt:now.toISOString(),title:"Candidate Referral Profile",subtitle:b.name,source:a,sections:[
+ {heading:"Candidate Overview",paragraphs:[`${c.row.candidate.firstName} ${c.row.candidate.lastName} · ${c.row.candidate.email} · ${c.row.candidate.phone||"Phone not recorded"}`,`Candidate-reported location: ${intake.city}, ${intake.stateProvince}, ${intake.country}. Target territory: not verified.`,`Candidate-reported background: ${intake.occupationTitle||"Unknown"}${intake.currentEmployer?` at ${intake.currentEmployer}`:""}. ${intake.ownershipExperience||"Prior ownership details not established."}`]},
+ {heading:"Financial Snapshot",paragraphs:[`Candidate-reported net worth: ${a.financial.netWorth}`,`Candidate-reported liquid capital: ${a.financial.liquidCapital}`,`Candidate-reported investment preference: ${a.financial.investmentRange}`,"Funding method and approval: unknown. Financial statements have not been independently verified."]},
+ {heading:"Ownership Goals",paragraphs:["Candidate-reported motivations and preferences:"],bullets:[...a.ownershipProfile.motivations,...a.ownershipProfile.operatingPreferences,"Timeline and target territory require consultant confirmation.",`Household runway: ${reported("q35")}`]},
+ {heading:"Professional / Leadership Profile",paragraphs:["FranGroove-derived strengths; validate with concrete examples."],bullets:a.ownershipProfile.strengths},
+ {heading:"Candidate Intelligence Summary",paragraphs:[`FranGroove-derived ownership profile: ${a.ownershipProfile.primary}`,a.ownershipProfile.interpretation]},
+ {heading:"Why This Brand",paragraphs:[`FranGroove-derived comparison: ${b.band}. ${b.evidenceLabel}`,b.concept?"Concept profile. This is not a verified live franchise opportunity.":"Confirm the current franchise offer directly with the brand."]},
+ {heading:"Compatibility Highlights",bullets:b.strengths.map(f=>f.explanation)},
+ {heading:"Considerations / Items to Validate",bullets:[...b.factors.filter(f=>f.category!=="Timing and readiness"&&f.state!=="aligned").map(f=>f.explanation),"Territory availability, candidate consent and funding approval are not verified."]},
+ {heading:"Discovery Summary",paragraphs:[c.row.discovery?`Consultant-recorded status: ${c.row.discovery.status}. ${c.row.discovery.observations.filter(o=>o.followUpNeeded||o.status==="unclear"||o.status==="contradicted").length} items require follow-up.`:"Discovery has not been recorded.","Private Discovery notes and internal assessment commentary are excluded. The consultant recommendation below contains information explicitly prepared for this packet."]},
+ {heading:"Referral Readiness",paragraphs:[c.readiness.band],bullets:c.readiness.items.map(i=>`${i.label}: ${i.state}. ${i.label==="Discovery"||i.label==="Concerns"?"Consultant review required before an introduction.":i.detail}`)},
+ {heading:"Consultant Recommendation",paragraphs:[c.consideration.consultant_note||"No consultant recommendation has been prepared."]},
+ {heading:"Consultant Contact",paragraphs:[c.consultant.name,c.consultant.email||"Contact email not recorded",`Prepared ${now.toISOString().slice(0,10)}. Preparation template: referral-packet-v1.`,`Assessment submission ${r.submissionId}; analysis ${r.id}; brand publication ${b.versionId}.`]},
+ ],disclaimer:"Prepared for consultant review and deliberate sharing. This packet is not franchise approval, financial verification or territory confirmation. No referral has been transmitted by FranGroove."};
+}

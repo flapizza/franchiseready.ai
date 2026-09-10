@@ -658,6 +658,71 @@ export type Database = {
           },
         ]
       }
+      candidate_brand_considerations: {
+        Row: {
+          brand_public_id: string
+          candidate_public_id: string
+          consultant_membership_id: string
+          consultant_note: string
+          created_at: string
+          id: string
+          organization_id: string
+          state: string
+          updated_at: string
+        }
+        Insert: {
+          brand_public_id: string
+          candidate_public_id: string
+          consultant_membership_id: string
+          consultant_note?: string
+          created_at?: string
+          id: string
+          organization_id: string
+          state: string
+          updated_at?: string
+        }
+        Update: {
+          brand_public_id?: string
+          candidate_public_id?: string
+          consultant_membership_id?: string
+          consultant_note?: string
+          created_at?: string
+          id?: string
+          organization_id?: string
+          state?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidate_brand_consideration_candidate_public_id_organiza_fkey"
+            columns: ["candidate_public_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "candidates"
+            referencedColumns: ["public_id", "organization_id"]
+          },
+          {
+            foreignKeyName: "candidate_brand_consideration_consultant_membership_id_org_fkey"
+            columns: ["consultant_membership_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization_memberships"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "candidate_brand_considerations_brand_public_id_fkey"
+            columns: ["brand_public_id"]
+            isOneToOne: false
+            referencedRelation: "brand_identities"
+            referencedColumns: ["public_id"]
+          },
+          {
+            foreignKeyName: "candidate_brand_considerations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       candidates: {
         Row: {
           archived_at: string | null
@@ -851,6 +916,88 @@ export type Database = {
           },
         ]
       }
+      consultant_calendar_events: {
+        Row: {
+          candidate_public_id: string | null
+          consultant_membership_id: string
+          created_at: string
+          description: string
+          end_at: string
+          event_type: string
+          id: string
+          location: string | null
+          meeting_url: string | null
+          notes: string | null
+          organization_id: string
+          source: string
+          start_at: string
+          status: string
+          timezone: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          candidate_public_id?: string | null
+          consultant_membership_id: string
+          created_at?: string
+          description?: string
+          end_at: string
+          event_type?: string
+          id: string
+          location?: string | null
+          meeting_url?: string | null
+          notes?: string | null
+          organization_id: string
+          source?: string
+          start_at: string
+          status: string
+          timezone: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          candidate_public_id?: string | null
+          consultant_membership_id?: string
+          created_at?: string
+          description?: string
+          end_at?: string
+          event_type?: string
+          id?: string
+          location?: string | null
+          meeting_url?: string | null
+          notes?: string | null
+          organization_id?: string
+          source?: string
+          start_at?: string
+          status?: string
+          timezone?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consultant_calendar_events_candidate_public_id_organizatio_fkey"
+            columns: ["candidate_public_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "candidates"
+            referencedColumns: ["public_id", "organization_id"]
+          },
+          {
+            foreignKeyName: "consultant_calendar_events_consultant_membership_id_organi_fkey"
+            columns: ["consultant_membership_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization_memberships"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "consultant_calendar_events_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       consultant_profiles: {
         Row: {
           created_at: string
@@ -895,6 +1042,192 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "organization_memberships"
             referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      consultant_reminders: {
+        Row: {
+          candidate_public_id: string | null
+          consultant_membership_id: string
+          created_at: string
+          id: string
+          organization_id: string
+          reference_id: string
+          reference_type: string
+          remind_at: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          candidate_public_id?: string | null
+          consultant_membership_id: string
+          created_at?: string
+          id: string
+          organization_id: string
+          reference_id: string
+          reference_type: string
+          remind_at: string
+          status: string
+          updated_at?: string
+        }
+        Update: {
+          candidate_public_id?: string | null
+          consultant_membership_id?: string
+          created_at?: string
+          id?: string
+          organization_id?: string
+          reference_id?: string
+          reference_type?: string
+          remind_at?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consultant_reminders_candidate_public_id_organization_id_fkey"
+            columns: ["candidate_public_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "candidates"
+            referencedColumns: ["public_id", "organization_id"]
+          },
+          {
+            foreignKeyName: "consultant_reminders_consultant_membership_id_organization_fkey"
+            columns: ["consultant_membership_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization_memberships"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "consultant_reminders_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      consultant_task_dismissals: {
+        Row: {
+          candidate_public_id: string | null
+          consultant_membership_id: string
+          created_at: string
+          id: string
+          organization_id: string
+          updated_at: string
+        }
+        Insert: {
+          candidate_public_id?: string | null
+          consultant_membership_id: string
+          created_at?: string
+          id: string
+          organization_id: string
+          updated_at?: string
+        }
+        Update: {
+          candidate_public_id?: string | null
+          consultant_membership_id?: string
+          created_at?: string
+          id?: string
+          organization_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consultant_task_dismissals_candidate_public_id_organizatio_fkey"
+            columns: ["candidate_public_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "candidates"
+            referencedColumns: ["public_id", "organization_id"]
+          },
+          {
+            foreignKeyName: "consultant_task_dismissals_consultant_membership_id_organi_fkey"
+            columns: ["consultant_membership_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization_memberships"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "consultant_task_dismissals_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      consultant_tasks: {
+        Row: {
+          candidate_public_id: string | null
+          completed_at: string | null
+          consultant_membership_id: string
+          created_at: string
+          description: string
+          due_at: string
+          id: string
+          organization_id: string
+          priority: string
+          recommended_reason: string | null
+          source: string
+          source_reference_id: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          candidate_public_id?: string | null
+          completed_at?: string | null
+          consultant_membership_id: string
+          created_at?: string
+          description?: string
+          due_at: string
+          id: string
+          organization_id: string
+          priority: string
+          recommended_reason?: string | null
+          source?: string
+          source_reference_id?: string | null
+          status: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          candidate_public_id?: string | null
+          completed_at?: string | null
+          consultant_membership_id?: string
+          created_at?: string
+          description?: string
+          due_at?: string
+          id?: string
+          organization_id?: string
+          priority?: string
+          recommended_reason?: string | null
+          source?: string
+          source_reference_id?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consultant_tasks_candidate_public_id_organization_id_fkey"
+            columns: ["candidate_public_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "candidates"
+            referencedColumns: ["public_id", "organization_id"]
+          },
+          {
+            foreignKeyName: "consultant_tasks_consultant_membership_id_organization_id_fkey"
+            columns: ["consultant_membership_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "organization_memberships"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "consultant_tasks_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -3039,6 +3372,14 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      set_candidate_brand_consideration: {
+        Args: {
+          next_state: string
+          target_brand: string
+          target_candidate: string
+        }
+        Returns: undefined
       }
       set_membership_onboarding_state: {
         Args: {

@@ -1,6 +1,16 @@
-import type { CandidateRepository } from "@/feature/crm/repositories/CandidateRepository";
-import { DemoTaskRepository } from "@/feature/tasks/repositories/DemoTaskRepository";
-import { EmailCommunicationRuntime } from "@/feature/communications/runtime/EmailCommunicationRuntime";
-import type { ConsultantCalendarEvent } from "../models/ConsultantCalendarEvent";
-export interface MeetingBrief { snapshot: string[]; changes: string[]; openQuestions: string[]; objectives: string[]; suggestedQuestions: string[]; }
-export class MeetingBriefService { constructor(private readonly candidates: CandidateRepository) {} async build(event: ConsultantCalendarEvent): Promise<MeetingBrief | null> { if (!event.candidateId) return null; const candidate = await this.candidates.getById(event.candidateId); if (!candidate) return null; const tasks = (await new DemoTaskRepository().getAll(candidate.consultantId)).filter((item) => item.candidateId === candidate.id); const emails = new EmailCommunicationRuntime().load(candidate.id); const intelligence = candidate.intelligence; const familyConcern = `${event.description ?? ""} ${intelligence?.executiveSummary ?? ""}`.toLowerCase().includes("family"); return { snapshot: [`Pipeline: ${candidate.pipelineStage.replaceAll("-", " ")}`, `Readiness: ${intelligence?.overallReadiness ?? "Pending"}`, `Buying confidence: ${intelligence?.timing.confidence ?? "Pending"}`], changes: [emails[0]?.mostRecentEngagement ? `Email: ${emails[0].mostRecentEngagement}` : "No new email engagement recorded.", tasks.some((item) => item.status === "completed") ? "A related follow-up task was completed." : "No related task completion since the last review."], openQuestions: [familyConcern ? "Family alignment remains unresolved." : "Confirm remaining qualification concerns.", "Confirm decision timing and next commitment."], objectives: [familyConcern ? "Confirm family alignment" : "Validate ownership goals", "Clarify investment comfort", "Agree on the next concrete step"], suggestedQuestions: [familyConcern ? "What does your family need to feel aligned with the next step?" : "What has changed since our last conversation?", "What investment range feels comfortable after your recent research?", "What would make the next decision feel clear?"] }; } }
+﻿import type {CandidateRepository} from "@/feature/crm/repositories/CandidateRepository";
+import type {PersistedCandidateWorkspace} from "@/feature/crm/models/PersistedCandidateWorkspace";
+import type {TaskRepository} from "@/feature/tasks/repositories/TaskRepository";
+import type {ConsultantCalendarEvent} from "../models/ConsultantCalendarEvent";
+export interface MeetingBrief {snapshot:string[];changes:string[];openQuestions:string[];objectives:string[];suggestedQuestions:string[]}
+export interface MeetingBriefSources {tasks?:TaskRepository;workspace?:{get(id:string):Promise<PersistedCandidateWorkspace|null>}}
+export class MeetingBriefService{
+ constructor(private readonly candidates:CandidateRepository,private readonly sources:MeetingBriefSources={}){}
+ async build(event:ConsultantCalendarEvent):Promise<MeetingBrief|null>{
+  if(!event.candidateId)return null;const candidate=await this.candidates.getById(event.candidateId);if(!candidate)return null;
+  const tasks=(await this.sources.tasks?.getAll(event.consultantId)??[]).filter(t=>t.candidateId===candidate.id);
+  const row=await this.sources.workspace?.get(candidate.id),a=row?.assessment?.analysis;
+  const unresolved=row?.discovery?.observations.filter(o=>o.followUpNeeded||o.status==="unclear"||o.status==="contradicted")??[];
+  return{snapshot:[`Stage: ${candidate.pipelineStage.replaceAll('-',' ')}`,a?`Ownership profile: ${a.ownershipProfile.primary}`:candidate.intelligence?.executiveSummary||"Review the candidate's assessment and current evidence."],changes:[`${tasks.filter(t=>t.status==='open').length} open candidate tasks; ${tasks.filter(t=>t.status==='completed').length} completed.`,row?.discovery?`Discovery: ${row.discovery.status}`:"No persisted Discovery context loaded."],openQuestions:unresolved.length?unresolved.map(o=>`${o.topic}: ${o.finding}`):a?.discoveryPriorities.map(p=>p.title)??["Confirm priorities and the next commitment."],objectives:[row?.discovery?.nextSteps||"Agree on the next concrete step.","Clarify remaining fit and financial questions."],suggestedQuestions:a?.discoveryPriorities.slice(0,3).map(p=>p.suggestedQuestion)??["What has changed since our last conversation?","What would make the next decision clearer?"]};
+ }
+}

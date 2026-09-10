@@ -1,5 +1,7 @@
 # IFPG Demo Experience Pack 001
 
+The current hosted presentation is documented in the [Pack 002 runbook](ifpg-demo-experience-pack-002.md). This document records the Pack 001 foundation.
+
 This is the persisted FranGroove Demo Preview experience for Alex Morgan. The older `ifpg-demo-presenter-runbook.md` describes the separate temporary conference runtime and its simulated actions; it is not the runbook for this workspace.
 
 ## Product behavior and architecture

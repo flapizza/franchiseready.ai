@@ -1,22 +1,23 @@
 import type { CandidateRepository } from "@/feature/crm/repositories/CandidateRepository";
 import type { CalendarWorkspaceState } from "../models/CalendarWorkspaceState";
 import type { CalendarRepository } from "../repositories/CalendarRepository";
+import type {MeetingBriefSources} from "../services/MeetingBriefService";
 import { MeetingBriefService } from "../services/MeetingBriefService";
 import { DEMO_CONSULTANT_TIMEZONE, formatEventDate, formatEventTime, localDateKey } from "../time/ConsultantTime";
 
 export class CalendarRuntime {
-  constructor(private readonly repository: CalendarRepository, private readonly candidates: CandidateRepository, private readonly now: () => Date = () => new Date()) {}
+  constructor(private readonly repository: CalendarRepository, private readonly candidates: CandidateRepository, private readonly now: () => Date = () => new Date(), private readonly sources:MeetingBriefSources={}) {}
   async build(consultantId: string): Promise<CalendarWorkspaceState> {
     const [events, candidates, reminders] = await Promise.all([this.repository.getEvents(consultantId), this.candidates.getAll(), this.repository.getReminders(consultantId)]);
     const owned = candidates.filter((item) => item.consultantId === consultantId);
     const names = new Map(owned.map((item) => [item.id, `${item.firstName} ${item.lastName}`]));
-    const briefService = new MeetingBriefService(this.candidates);
+    const briefService = new MeetingBriefService(this.candidates,this.sources);
     return {
       timezone: DEMO_CONSULTANT_TIMEZONE,
       todayKey: localDateKey(this.now()),
       candidates: owned.map((item) => ({ id: item.id, name: names.get(item.id)! })).sort((a, b) => a.name.localeCompare(b.name)),
       events: await Promise.all(events.sort((a, b) => Date.parse(a.startAt) - Date.parse(b.startAt)).map(async (event) => ({
-        id: event.id, title: event.title, candidateId: event.candidateId, startAt: event.startAt, endAt: event.endAt,
+        id: event.id, title: event.title, eventType:event.eventType, candidateId: event.candidateId, startAt: event.startAt, endAt: event.endAt,
         candidateName: event.candidateId ? names.get(event.candidateId) : undefined,
         candidateHref: event.candidateId ? `/crm/candidates/${event.candidateId}` : undefined,
         dateKey: localDateKey(event.startAt, event.timezone), dateLabel: formatEventDate(event.startAt, event.timezone),

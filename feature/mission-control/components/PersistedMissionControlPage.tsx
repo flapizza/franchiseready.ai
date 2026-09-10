@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ArrowUpRight, CircleCheck, Compass } from "lucide-react";
 import { buildPersistedMissionControl } from "../runtime/PersistedMissionControl";
 
-export function PersistedMissionControlPage({ state }: { state: ReturnType<typeof buildPersistedMissionControl> }) {
+export function PersistedMissionControlPage({ state, schedule }: { state: ReturnType<typeof buildPersistedMissionControl>; schedule?: React.ReactNode }) {
   return <div className="min-w-0 space-y-8" data-persisted-mission-control>
     <section className="rounded-3xl bg-slate-950 p-6 text-white sm:p-8">
       <p className="text-xs font-bold uppercase tracking-[.2em] text-teal-300">Your practice today</p>
@@ -13,6 +13,7 @@ export function PersistedMissionControlPage({ state }: { state: ReturnType<typeo
     <section aria-label="Practice summary" className="grid grid-cols-2 gap-3 lg:grid-cols-4">
       {[["Active candidates", state.active], ["Assessments in progress", state.inProgress], ["Completed assessments", state.completed], ["In brand matching", state.matching]].map(([label, value]) => <div key={label} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><p className="text-sm font-semibold text-slate-500">{label}</p><p className="mt-2 text-3xl font-black text-slate-950">{value}</p></div>)}
     </section>
+    {schedule}
     <section aria-labelledby="attention-heading" className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6">
       <div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-xs font-bold uppercase tracking-widest text-teal-700">Who needs a conversation?</p><h2 id="attention-heading" className="mt-1 text-xl font-black">Your next actions</h2></div><span className="rounded-full bg-slate-100 px-3 py-1 text-sm">{state.attention.length} candidates to review</span></div>
       <p className="mt-2 text-sm text-slate-500">Based on incomplete assessments, recorded progress, Discovery findings and next-step context.</p>

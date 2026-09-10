@@ -1,0 +1,11 @@
+import Link from "next/link";
+import { resolveConsultantSchedule } from "../runtime/resolveConsultantSchedule";
+const requestTime=()=>Date.now();
+export async function PersistedScheduleSummary({candidateId}:{candidateId?:string}) {
+  const s=await resolveConsultantSchedule();if(!s?.persisted)return null;
+  const [tasks,calendar]=await Promise.all([s.taskRuntime.build(s.consultantId),s.calendarRuntime.build(s.consultantId)]);
+  const visible=tasks.tasks.filter(t=>(!candidateId||t.candidateId===candidateId)&&t.status==="open");
+  const now=requestTime();
+  const meetings=calendar.events.filter(e=>(!candidateId||e.candidateId===candidateId)&&e.status==="scheduled"&&Date.parse(e.endAt)>now);
+  return <section aria-label="Tasks and meetings" className="grid gap-5 lg:grid-cols-2"><div className="rounded-2xl border bg-white p-5"><div className="flex justify-between gap-4"><h2 className="text-xl font-black">Tasks &amp; next actions</h2><Link href="/crm/tasks" className="text-sm font-bold text-blue-700">Open Tasks</Link></div><p className="mt-2 text-sm text-slate-500">{visible.filter(t=>t.overdue).length} overdue · {visible.filter(t=>t.dueToday).length} due today · {visible.filter(t=>!t.overdue&&!t.dueToday).length} upcoming</p>{visible.slice(0,6).map(t=><div key={t.taskId} className="mt-3 rounded-xl bg-slate-50 p-3"><Link href={t.candidateHref??"/crm/tasks"} className="font-bold text-blue-700">{t.title}</Link><p className="mt-1 text-sm">{t.candidateName} · {t.overdue?"Overdue · ":""}{t.dueLabel}</p></div>)}{!visible.length&&<p className="mt-4 text-sm">No open tasks.</p>}</div><div className="rounded-2xl border bg-white p-5"><div className="flex justify-between gap-4"><h2 className="text-xl font-black">Upcoming meetings</h2><Link href={candidateId?`/crm/calendar?candidate=${candidateId}`:"/crm/calendar"} className="text-sm font-bold text-blue-700">Open Calendar</Link></div>{meetings.slice(0,5).map(e=><Link key={e.id} href={`/crm/calendar?event=${e.id}`} className="mt-3 block rounded-xl bg-slate-50 p-3"><p className="font-bold text-blue-700">{e.title}</p><p className="mt-1 text-sm">{e.dateLabel} · {e.timeLabel} · {e.candidateName}</p></Link>)}{!meetings.length&&<p className="mt-4 text-sm">No upcoming meetings.</p>}</div></section>;
+}

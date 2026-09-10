@@ -97,7 +97,7 @@ export function Sidebar({ presentation }: { presentation: WorkspacePresentation 
 
         <NavigationItem
           href={APP_ROUTES.referralStudio}
-          label={presentation.kind === "production" ? "Handoff Preview" : "Referral Studio"}
+          label={presentation.kind === "production" ? "Referral Preparation" : "Referral Studio"}
           icon={<FileText size={20} />}
           activeSuffixes={["/referral"]}
         />

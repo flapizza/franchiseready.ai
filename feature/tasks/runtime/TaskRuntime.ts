@@ -21,14 +21,14 @@ function sort(left: TaskView, right: TaskView): number {
 }
 
 export class TaskRuntime {
-  constructor(private readonly tasks: TaskRepository, private readonly candidates: CandidateRepository, private readonly now: () => Date = () => new Date()) {}
+  constructor(private readonly tasks: TaskRepository, private readonly candidates: CandidateRepository, private readonly now: () => Date = () => new Date(), private readonly recommendations:Pick<FollowUpRecommendationService,"build">|null=new FollowUpRecommendationService(tasks,now)) {}
   async build(consultantId: string, now = this.now()): Promise<TaskWorkspaceState> {
     const candidates = (await this.candidates.getAll()).filter((candidate) => candidate.consultantId === consultantId);
     const names = new Map(candidates.map((candidate) => [candidate.id, `${candidate.firstName} ${candidate.lastName}`]));
     const taskViews = (await this.tasks.getAll(consultantId)).map((task) => view(task, names, now)).sort(sort);
     const count = (filter: TaskFilter) => taskViews.filter((task) => filter === "all" || filter === "completed" ? (filter === "all" ? true : task.status === "completed") : filter === "overdue" ? task.overdue : filter === "today" ? task.dueToday : task.status === "open" && !task.overdue && !task.dueToday).length;
     const tomorrow = new Date(now); tomorrow.setDate(tomorrow.getDate() + 1); tomorrow.setHours(9, 0, 0, 0);
-    return { tasks: taskViews, recommendations: await new FollowUpRecommendationService(this.tasks, this.now).build(consultantId, candidates), candidates: [...names].map(([candidateId, name]) => ({ candidateId, name })).sort((a, b) => a.name.localeCompare(b.name)), counts: { today: count("today"), upcoming: count("upcoming"), overdue: count("overdue"), completed: count("completed"), all: count("all") }, defaultDueAt: tomorrow.toISOString() };
+    return { tasks: taskViews, recommendations: await this.recommendations?.build(consultantId, candidates) ?? [], candidates: [...names].map(([candidateId, name]) => ({ candidateId, name })).sort((a, b) => a.name.localeCompare(b.name)), counts: { today: count("today"), upcoming: count("upcoming"), overdue: count("overdue"), completed: count("completed"), all: count("all") }, defaultDueAt: tomorrow.toISOString() };
   }
   async forCandidate(consultantId: string, candidateId: string, now = this.now()) {
     const state = await this.build(consultantId, now);
