@@ -11,7 +11,7 @@ export function CandidateHeader({
   return (
     <section data-candidate-hero className="overflow-hidden rounded-3xl bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 shadow-xl">
 
-      <div className={candidate.rootOnly ? "p-10" : "p-6 lg:p-8"}>
+      <div className={candidate.rootOnly ? "p-6 lg:p-10" : "p-6 lg:p-8"}>
 
         <div className={`flex flex-wrap justify-between ${candidate.rootOnly ? "items-start gap-10" : "items-end gap-6"}`}>
 
@@ -28,7 +28,7 @@ export function CandidateHeader({
               </span>
 
             </div>
-            <h1 className={`${candidate.rootOnly ? "mt-7 text-5xl" : "mt-5 text-4xl"} font-black tracking-tight text-white`}>
+            <h1 className={`${candidate.rootOnly ? "mt-7 text-4xl lg:text-5xl" : "mt-5 text-4xl"} break-words font-black tracking-tight text-white`}>
               {candidate.fullName}
             </h1>
 

@@ -6,6 +6,39 @@ async function enterDemo(page: Page) {
   await expect(page).toHaveURL(/\/crm$/);
 }
 
+test("Candidate 360 uses the full mobile workspace and keeps navigation reachable", async ({ page }) => {
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  page.on("console", (message) => { if (message.type() === "error") errors.push(message.text()); });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await enterDemo(page);
+  for (const width of [390, 1023]) {
+    await page.setViewportSize({ width, height: 844 });
+    await page.goto("/crm/candidates/candidate-demo");
+    await expect(page.getByRole("heading", { name: "John Smith", exact: true })).toBeVisible();
+    const geometry = await page.evaluate(() => {
+      const main = document.querySelector("[data-workspace-scroll]")!;
+      const workspace = document.querySelector("[data-candidate-360-workspace]")!.getBoundingClientRect();
+      return { left: main.getBoundingClientRect().left, width: main.clientWidth, leftEdge: workspace.left, rightEdge: workspace.right };
+    });
+    expect(geometry.left).toBe(0);
+    expect(geometry.width).toBe(width);
+    expect(geometry.leftEdge).toBeGreaterThanOrEqual(0);
+    expect(geometry.rightEdge).toBeLessThanOrEqual(width);
+    await expect(page.locator("[data-app-sidebar]")).toBeHidden();
+    const menu = page.locator("summary").filter({ hasText: "Menu" });
+    await menu.click();
+    await page.getByRole("navigation").getByRole("link", { name: "Contacts", exact: true }).click();
+    await expect(page).toHaveURL(/\/crm\/contacts$/);
+    await expect(page.locator("details[open]")).toHaveCount(0);
+    await menu.click();
+    await menu.press("Escape");
+    await expect(page.locator("details[open]")).toHaveCount(0);
+    await expect(menu).toBeFocused();
+  }
+  expect(errors, errors.join("\n")).toEqual([]);
+});
+
 async function expectViewportFill(page: Page) {
   const geometry = await page.evaluate(() => {
     const rect = (selector: string) => document.querySelector(selector)!.getBoundingClientRect();

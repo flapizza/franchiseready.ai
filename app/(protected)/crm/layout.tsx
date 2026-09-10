@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import { AppShell } from "@/feature/layout/components/AppShell";
+import { MobileWorkspaceHeader } from "@/feature/layout/components/MobileWorkspaceHeader";
 import { PageContainer } from "@/feature/layout/components/PageContainer";
 import { resolveWorkspaceComposition } from "@/feature/platform/composition/resolveWorkspaceComposition";
 import { notFound, redirect } from "next/navigation";
@@ -18,7 +19,7 @@ export default async function CRMLayout({
   if (resolution.status === "needs-workspace-bootstrap") redirect("/onboarding");
   if (resolution.status !== "resolved") notFound();
   return (
-    <AppShell presentation={resolution.composition.presentation}>
+    <AppShell presentation={resolution.composition.presentation} mobileHeader={<MobileWorkspaceHeader presentation={resolution.composition.presentation} />}>
       <PageContainer>
         {children}
       </PageContainer>

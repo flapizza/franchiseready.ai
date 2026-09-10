@@ -40,7 +40,7 @@ export function PageContainer({
 
       )}
 
-      <div className="p-10">
+      <div className="min-w-0 p-4 lg:p-10">
 
         {children}
 
