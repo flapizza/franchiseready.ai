@@ -18,6 +18,7 @@ import { ProductionCandidateIntelligence } from "./ProductionCandidateIntelligen
 import { ProductionDiscoverySummary } from "./ProductionDiscoverySummary";
 import { DeleteCandidateControl } from "@/feature/crm/components/DeleteCandidateControl";
 import { DemoCandidateJourney } from "./DemoCandidateJourney";
+import { assessmentSharingState } from "@/feature/crm/services/AssessmentSharingState";
 
 type Props = {
   candidateId: string;
@@ -72,6 +73,10 @@ export async function Candidate360Page({
       {candidate.rootOnly && <nav aria-label="Candidate journey" className="flex flex-wrap gap-3"><Link href="/crm" className="inline-flex min-h-11 items-center rounded-xl border bg-white px-4 text-sm font-bold text-blue-700">Mission Control</Link><Link href="/crm/candidates" className="inline-flex min-h-11 items-center rounded-xl border bg-white px-4 text-sm font-bold text-blue-700">Pipeline</Link>{resolvedAssessment?.analysis && <><Link href={`/crm/candidates/${candidate.id}/strategy`} className="inline-flex min-h-11 items-center rounded-xl bg-teal-700 px-4 text-sm font-bold text-white">Brand Referral Engine</Link><Link href={`/crm/candidates/${candidate.id}/referral`} className="inline-flex min-h-11 items-center rounded-xl border bg-white px-4 text-sm font-bold text-blue-700">Handoff Preview</Link></>}</nav>}
 
       {!candidate.rootOnly && candidate.id === "candidate-demo" && <DemoCandidateJourney candidateId={candidate.id} />}
+
+      {candidate.rootOnly && <nav aria-label="Assessment actions" className="flex flex-wrap gap-3">
+        {candidate.assessmentSession?.status !== "analyzed" ? <Link href="#assessment-invitation" className="inline-flex min-h-11 items-center rounded-xl bg-blue-600 px-5 py-3 font-bold text-white">{assessmentSharingState(candidate.assessmentSession).canGenerate ? "Share Assessment" : "Assessment Status"}</Link> : <><Link href="#assessment-intelligence" className="inline-flex min-h-11 items-center rounded-xl bg-blue-600 px-5 py-3 font-bold text-white">View Intelligence</Link><Link href={`/crm/candidates/${candidate.id}/documents`} className="inline-flex min-h-11 items-center rounded-xl border bg-white px-5 py-3 font-bold text-blue-700">Assessments &amp; Documents</Link></>}
+      </nav>}
 
       <CandidateRelationshipOverview candidate={candidate} />
 

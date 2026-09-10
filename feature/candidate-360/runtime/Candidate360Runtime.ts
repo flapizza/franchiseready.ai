@@ -15,6 +15,7 @@ import { formatEventDate, formatEventTime } from "@/feature/calendar/time/Consul
 
 import type { Candidate360State, CandidateActivityState } from "../models/Candidate360State";
 import type { ProductionAssessmentSession } from "@/feature/assessment-engine/production/types";
+import { assessmentSharingState } from "@/feature/crm/services/AssessmentSharingState";
 
 const activityPresentation: Record<ActivityType, Pick<CandidateActivityState, "icon" | "tone">> = {
   "candidate-created": { icon: "candidate", tone: "blue" },
@@ -178,18 +179,20 @@ export class Candidate360Runtime {
     const session=this.dependencies.productionAssessment ?? null;
     const complete=session?.status==="analyzed"&&Boolean(session.analysis);
     const pending=session?.status==="in-progress";
+    const sharing=assessmentSharingState(session);
     return {
       rootOnly: true, id: candidate.id, fullName: `${candidate.firstName} ${candidate.lastName}`, email: candidate.email,
       consultantSender: { name: "FranGroove", email: null }, emails: [], currentStage: stage.replaceAll("-", " "),
       currentStageId: stage, canonicalLifecycleStage: candidate.pipelineStage === "lead" ? "lead" : "other",
       pipelineStages: [{ stageId: stage, label: stage.replaceAll("-", " ") }], hasIntelligence: complete,
+      assessmentSession: session ? {id:session.id,status:session.status,expiresAt:session.expiresAt,revokedAt:session.revokedAt} : undefined,
       assessmentStatus: complete?"completed":pending?"pending":"not-completed", readinessScore: session?.analysis?Math.round(session.analysis.ownershipProfile.confidence*100):null, buyingConfidence: session?.analysis?Math.round(session.analysis.ownershipProfile.confidence*100):null, recommendationConfidence: session?.analysis?Math.round(session.analysis.ownershipProfile.confidence*100):null,
       executiveSummary: session?.analysis?.executiveSummary??"Candidate root information is available. Assessment intelligence will appear after completion.",
       financialReadiness: null, leadershipReadiness: null, lifestyleAlignment: null, coachability: null,
       nextBestAction: "Continue candidate qualification", knownInformation: [
         { label: "Email", value: candidate.email, icon: "email" },
         { label: "Phone", value: candidate.phone || "Not provided", icon: "phone" },
-      ], assessment: complete?{label:"Assessment Complete",detail:"Candidate Intelligence is available.",invitationSent:true,actionLabel:"Open Candidate Intelligence"}:pending?{label:"Assessment In Progress",detail:"Progress was saved durably.",invitationSent:true,actionLabel:"Await completion"}:{label:session?"Assessment Not Started":"Assessment Not Started",detail:session?"A secure invitation is active.":"Create an assessment invitation when the candidate is ready.",invitationSent:Boolean(session),actionLabel:session?"Invitation active":"Create Assessment"},
+      ], assessment: {label:sharing.label,detail:sharing.detail,invitationSent:Boolean(session),actionLabel:complete?"View Intelligence":"Share Assessment"},
       activities: complete&&session?.completedAt?[{id:`${session.id}:completed`,title:"Intelligence Generated",description:"Assessment Complete",timestamp:session.completedAt,dateLabel:formatActivityDate(session.completedAt),icon:"assessment",tone:"emerald"}]:[], lifecycleAction: null,
     };
   }

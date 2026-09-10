@@ -3,8 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { CandidateIntakeService } from "../services/CandidateIntakeService";
 import { resolveWorkspaceComposition } from "@/feature/platform/composition/resolveWorkspaceComposition";
-import { assessmentInvitationUrl, createAssessmentToken, hashAssessmentToken } from "@/feature/assessment-engine/production/token";
-import { getPublicEnvironment } from "@/lib/env";
+import { assessmentInvitationPath, createAssessmentToken, hashAssessmentToken } from "@/feature/assessment-engine/production/token";
+import { assessmentSharingState } from "../services/AssessmentSharingState";
 
 export interface CandidateFormState {
   status: "idle" | "validation-error" | "unavailable" | "created" | "exact-match" | "possible-match";
@@ -41,17 +41,22 @@ export async function createCandidateAction(_previous: CandidateFormState, formD
   }
 }
 
-export interface InvitationActionState { status: "idle" | "generated" | "error"; message?: string; url?: string; candidateId?: string }
+export interface InvitationActionState { status: "idle" | "generated" | "error"; message?: string; url?: string; candidateId?: string; sessionId?: string }
 
 export async function generateAssessmentInvitationAction(_previous: InvitationActionState, formData: FormData): Promise<InvitationActionState> {
   const candidateId = String(formData.get("candidateId") ?? "");
   try {
     const resolution=await resolveWorkspaceComposition();if(resolution.status!=="resolved")return {status:"error",message:"An active workspace is required."};const composition=resolution.composition;
     if (!("runtimes" in composition)) {
+      const existing = await composition.dependencies.assessments.getForCandidate(candidateId);
+      const sharing = assessmentSharingState(existing);
+      if (!sharing.canGenerate) return {status:"error",message:"This assessment cannot be replaced. Review the candidate's existing results."};
+      if (sharing.replace && formData.get("confirmReplacement") !== existing?.id) return {status:"error",message:"Review the current invitation and explicitly confirm replacement before continuing."};
       const token=createAssessmentToken();
-      await composition.dependencies.assessments.createInvitation(candidateId,hashAssessmentToken(token),new Date(Date.now()+14*86400000).toISOString());
+      const invitation=await composition.dependencies.assessments.createInvitation(candidateId,hashAssessmentToken(token),new Date(Date.now()+14*86400000).toISOString());
       revalidatePath(`/crm/candidates/${candidateId}`);
-      return {status:"generated",message:"Assessment invitation link ready",url:assessmentInvitationUrl(getPublicEnvironment().APP_URL,token),candidateId};
+      revalidatePath("/crm/candidates");
+      return {status:"generated",message:"Assessment invitation link ready",url:assessmentInvitationPath(token),candidateId,sessionId:invitation.id};
     }
     const invitation = await composition.runtimes.createAssessmentInvitations().send(candidateId);
     revalidatePath("/crm/candidates");

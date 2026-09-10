@@ -23,8 +23,9 @@ test('local Production invitation, anonymous resume, trusted atomic completion a
  await expect(page.getByRole('heading',{name:'Candidate created'})).toBeVisible();
  const candidatePath=(await page.getByRole('link',{name:'Open candidate record'}).getAttribute('href'))!;
  await expect(page.getByText(/This action does not send email/)).toBeVisible();
- await page.getByRole('button',{name:'Generate Assessment Link'}).click();
- const invitation=(await page.getByRole('link',{name:'Open Assessment'}).getAttribute('href'))!;
+ const generationRequest=page.waitForRequest(r=>r.method()==='POST'&&!!r.headers()['next-action']);
+ await page.getByRole('button',{name:'Generate Assessment Link'}).click();const generation=await generationRequest;
+ const invitation=new URL((await page.getByRole('link',{name:'Open Assessment'}).getAttribute('href'))!,page.url()).toString();
  expect(invitation).toMatch(/^http:\/\/127\.0\.0\.1:3100\/assessment\/invitation\/[A-Za-z0-9_-]{43}$/);
  const token=invitation.split('/').at(-1)!;const hash=createHash('sha256').update(token).digest('hex');
  // Repeated consultant intake resolves the persisted candidate rather than creating a duplicate.
@@ -75,7 +76,12 @@ test('local Production invitation, anonymous resume, trusted atomic completion a
  const pdf=await candidate.request.get(`${invitation}/report`);expect(pdf.ok()).toBe(true);expect(pdf.headers()['content-type']).toContain('application/pdf');expect((await pdf.body()).toString('latin1')).not.toContain('INTERNAL CONSULTANT USE');
  await candidate.goto(invitation);await expect(candidate.getByRole('heading',{name:'Assessment complete'})).toBeVisible();
  await page.goto(candidatePath);await expect(page.getByRole('heading',{name:'Consultant Brief'})).toBeVisible();await page.screenshot({path:testInfo.outputPath('consultant-desktop.png'),fullPage:true});
+ await expect(page.getByRole('link',{name:'Share Assessment',exact:true})).toHaveCount(0);await expect(page.getByRole('link',{name:'View Intelligence',exact:true})).toBeVisible();
+ const repeatedGeneration=await page.request.post(generation.url(),{headers:{'next-action':generation.headers()['next-action'],'content-type':generation.headers()['content-type'],origin:new URL(page.url()).origin},data:generation.postData()!});expect(await repeatedGeneration.text()).toContain('This assessment cannot be replaced');expect((await read()).id).toBe(persisted.id);
+ await page.getByRole('link',{name:'Assessments & Documents',exact:true}).first().click();
+ for(const label of ['Completed Assessment','Candidate Profile','Consultant Intelligence Report']){await page.getByRole('link',{name:label,exact:true}).click();const path=(await page.getByRole('link',{name:'Download PDF',exact:true}).getAttribute('href'))!;const report=await page.request.get(path);expect(report.headers()['content-type']).toContain('application/pdf');const denied=await candidate.request.get(path);expect(denied.headers()['content-type']).not.toContain('application/pdf');}
  const other=client();expect((await other.auth.signInWithPassword({email:'assessment-other@example.test',password})).error).toBeNull();
+ expect((await other.rpc('create_assessment_invitation',{target_candidate_public_id:candidatePath.split('/').at(-1)!,presented_token_hash:'f'.repeat(64),invitation_expires_at:'2030-01-01T00:00:00Z'})).error?.code).toBe('42501');
  const isolated=await other.rpc('get_candidate_assessment',{target_candidate_public_id:candidatePath.split('/').at(-1)!});expect(isolated.error).toBeNull();expect(isolated.data).toEqual([]);
  expect((await other.rpc('create_assessment_candidate',createArgs)).error?.code).toBe('42501');
  // Local-only fixture mutations exercise public expired/revoked handling.

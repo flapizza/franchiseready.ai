@@ -31,7 +31,7 @@ export class ProductionCandidateCRMRuntime {
           readinessLabel: signals?.assessmentLabel ?? (candidate.intelligence ? `${candidate.intelligence.overallReadiness}%` : "Not Yet Evaluated"),
           bestBrand: null, lastActivityLabel: new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" }).format(new Date(candidate.lastActivityAt)),
           nextAction: signals?.nextAction ?? "Continue candidate qualification", attention: needsAttention ? "needs-attention" as const : "on-track" as const, attentionLabel: needsAttention ? "Review next step" : "On Track", momentum: "steady" as const,
-          referralReady: false, href: `/crm/candidates/${candidate.id}`, actionLabel: "Open Candidate", actionHref: `/crm/candidates/${candidate.id}`,
+          referralReady: false, href: `/crm/candidates/${candidate.id}`, actionLabel: row?.assessment?.status === "analyzed" ? "View Assessment Results" : "Share Assessment", actionHref: `/crm/candidates/${candidate.id}#${row?.assessment?.status === "analyzed" ? "assessment-intelligence" : "assessment-invitation"}`,
           momentumLabel: "Steady", actionKind: "navigate" as const, openTaskCount: 0 };
       }),
     };

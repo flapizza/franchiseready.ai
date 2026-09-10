@@ -17,6 +17,7 @@ export interface Candidate360State {
   assessmentStatus: "not-completed" | "pending" | "completed";
 
   assessmentUrl?: string;
+  assessmentSession?: import("@/feature/crm/services/AssessmentSharingState").AssessmentSharingSession;
 
   readinessScore: number | null;
 
