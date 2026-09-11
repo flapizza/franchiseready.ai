@@ -1,0 +1,194 @@
+{
+  "project": "dleaiihhthhdxghycdls",
+  "commit": "dded86d7bc2652d4fb7ad0bd5af98f740f199eaf",
+  "tables": [
+    {
+      "table_name": "assessment_analyses",
+      "fingerprint": "<row xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n  <records>11</records>\n  <fingerprint>7193e658acfcbd0e610482b9474d81c8</fingerprint>\n</row>\n\n"
+    },
+    {
+      "table_name": "assessment_sessions",
+      "fingerprint": "<row xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n  <records>16</records>\n  <fingerprint>39678de9984136d252a64be7d57bc419</fingerprint>\n</row>\n\n"
+    },
+    {
+      "table_name": "assessment_submissions",
+      "fingerprint": "<row xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n  <records>11</records>\n  <fingerprint>a62671cc088672b3f3f60a2700f0f3b7</fingerprint>\n</row>\n\n"
+    },
+    {
+      "table_name": "brand_consultant_items",
+      "fingerprint": "<row xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n  <records>0</records>\n  <fingerprint>d41d8cd98f00b204e9800998ecf8427e</fingerprint>\n</row>\n\n"
+    },
+    {
+      "table_name": "brand_evidence",
+      "fingerprint": "<row xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n  <records>204</records>\n  <fingerprint>50671270e2fc0f9fb1fb3328352a54b7</fingerprint>\n</row>\n\n"
+    },
+    {
+      "table_name": "brand_fact_definitions",
+      "fingerprint": "<row xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n  <records>50</records>\n  <fingerprint>08ca0f40572d62d4693a09c2e2317b80</fingerprint>\n</row>\n\n"
+    },
+    {
+      "table_name": "brand_fact_evidence",
+      "fingerprint": "<row xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n  <records>204</records>\n  <fingerprint>5552fbf11bfdd8e3956748052b873803</fingerprint>\n</row>\n\n"
+    },
+    {
+      "table_name": "brand_identities",
+      "fingerprint": "<row xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n  <records>6</records>\n  <fingerprint>13da860d4d1057c146fa10b127a360ee</fingerprint>\n</row>\n\n"
+    },
+    {
+      "table_name": "brand_profile_facts",
+      "fingerprint": "<row xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n  <records>300</records>\n  <fingerprint>7626d7290152aa9494baee5e515c6d64</fingerprint>\n</row>\n\n"
+    },
+    {
+      "table_name": "brand_profile_versions",
+      "fingerprint": "<row xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n  <records>6</records>\n  <fingerprint>918fc8d0fc7a933682453a2b59fc8be4</fingerprint>\n</row>\n\n"
+    },
+    {
+      "table_name": "candidate_assignment_history",
+      "fingerprint": "<row xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n  <records>0</records>\n  <fingerprint>d41d8cd98f00b204e9800998ecf8427e</fingerprint>\n</row>\n\n"
+    },
+    {
+      "table_name": "candidate_brand_considerations",
+      "fingerprint": "<row xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n  <records>5</records>\n  <fingerprint>728e216b88eca8607b7b19f17cf97a03</fingerprint>\n</row>\n\n"
+    },
+    {
+      "table_name": "candidates",
+      "fingerprint": "<row xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n  <records>15</records>\n  <fingerprint>136dd9a2cc3b4f776116a72a31e2510e</fingerprint>\n</row>\n\n"
+    },
+    {
+      "table_name": "connected_email_accounts",
+      "fingerprint": "<row xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n  <records>0</records>\n  <fingerprint>d41d8cd98f00b204e9800998ecf8427e</fingerprint>\n</row>\n\n"
+    },
+    {
+      "table_name": "connected_email_credentials",
+      "fingerprint": "<row xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n  <records>0</records>\n  <fingerprint>d41d8cd98f00b204e9800998ecf8427e</fingerprint>\n</row>\n\n"
+    },
+    {
+      "table_name": "consultant_calendar_events",
+      "fingerprint": "<row xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n  <records>12</records>\n  <fingerprint>7de0b6b67cdf27b5708b745d3a8aed7d</fingerprint>\n</row>\n\n"
+    },
+    {
+      "table_name": "consultant_profiles",
+      "fingerprint": "<row xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n  <records>4</records>\n  <fingerprint>7e0b018a6957881c6c68f858b69bdc59</fingerprint>\n</row>\n\n"
+    },
+    {
+      "table_name": "consultant_reminders",
+      "fingerprint": "<row xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n  <records>0</records>\n  <fingerprint>d41d8cd98f00b204e9800998ecf8427e</fingerprint>\n</row>\n\n"
+    },
+    {
+      "table_name": "consultant_task_dismissals",
+      "fingerprint": "<row xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n  <records>0</records>\n  <fingerprint>d41d8cd98f00b204e9800998ecf8427e</fingerprint>\n</row>\n\n"
+    },
+    {
+      "table_name": "consultant_tasks",
+      "fingerprint": "<row xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n  <records>16</records>\n  <fingerprint>d43dccf4ef332ee19f63bbcc158d94e6</fingerprint>\n</row>\n\n"
+    },
+    {
+      "table_name": "contact_list_memberships",
+      "fingerprint": "<row xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n  <records>17</records>\n  <fingerprint>8b1947a9976b2947c465a69736ab0987</fingerprint>\n</row>\n\n"
+    },
+    {
+      "table_name": "contact_lists",
+      "fingerprint": "<row xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n  <records>2</records>\n  <fingerprint>a6e3024ef10cc2baf7bf41f3b4f48010</fingerprint>\n</row>\n\n"
+    },
+    {
+      "table_name": "contact_segments",
+      "fingerprint": "<row xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n  <records>2</records>\n  <fingerprint>1d049177f3186c1fa9aebc45a9a430f3</fingerprint>\n</row>\n\n"
+    },
+    {
+      "table_name": "contact_tag_memberships",
+      "fingerprint": "<row xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n  <records>16</records>\n  <fingerprint>a2cb30091cd6e1494ecb236c60a5741a</fingerprint>\n</row>\n\n"
+    },
+    {
+      "table_name": "contact_tags",
+      "fingerprint": "<row xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n  <records>4</records>\n  <fingerprint>f5078a9acd8fd7e25f75bb3f216ef6aa</fingerprint>\n</row>\n\n"
+    },
+    {
+      "table_name": "contacts",
+      "fingerprint": "<row xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n  <records>17</records>\n  <fingerprint>591ad1866333346c5d9587b71b8111d2</fingerprint>\n</row>\n\n"
+    },
+    {
+      "table_name": "discovery_intelligence",
+      "fingerprint": "<row xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n  <records>3</records>\n  <fingerprint>a838325d8ec4b7d25a7bc2f891967885</fingerprint>\n</row>\n\n"
+    },
+    {
+      "table_name": "discovery_observations",
+      "fingerprint": "<row xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n  <records>13</records>\n  <fingerprint>9c2d719054af8dbe1220325367e6fa39</fingerprint>\n</row>\n\n"
+    },
+    {
+      "table_name": "discovery_sessions",
+      "fingerprint": "<row xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n  <records>6</records>\n  <fingerprint>00539ee31be2f2e84e525be9cb7b3c9a</fingerprint>\n</row>\n\n"
+    },
+    {
+      "table_name": "email_delivery_attempts",
+      "fingerprint": "<row xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n  <records>0</records>\n  <fingerprint>d41d8cd98f00b204e9800998ecf8427e</fingerprint>\n</row>\n\n"
+    },
+    {
+      "table_name": "email_messages",
+      "fingerprint": "<row xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n  <records>0</records>\n  <fingerprint>d41d8cd98f00b204e9800998ecf8427e</fingerprint>\n</row>\n\n"
+    },
+    {
+      "table_name": "email_oauth_transactions",
+      "fingerprint": "<row xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n  <records>0</records>\n  <fingerprint>d41d8cd98f00b204e9800998ecf8427e</fingerprint>\n</row>\n\n"
+    },
+    {
+      "table_name": "email_recipients",
+      "fingerprint": "<row xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n  <records>0</records>\n  <fingerprint>d41d8cd98f00b204e9800998ecf8427e</fingerprint>\n</row>\n\n"
+    },
+    {
+      "table_name": "marketing_campaigns",
+      "fingerprint": "<row xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n  <records>3</records>\n  <fingerprint>146e70fc39241e1c4fa447800db8fb18</fingerprint>\n</row>\n\n"
+    },
+    {
+      "table_name": "marketing_delivery_events",
+      "fingerprint": "<row xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n  <records>3</records>\n  <fingerprint>4b7c824e1800c05db65b263428338818</fingerprint>\n</row>\n\n"
+    },
+    {
+      "table_name": "marketing_send_recipients",
+      "fingerprint": "<row xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n  <records>1</records>\n  <fingerprint>af785f26a2fb4f8c2d57118fc49b8656</fingerprint>\n</row>\n\n"
+    },
+    {
+      "table_name": "marketing_send_runs",
+      "fingerprint": "<row xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n  <records>1</records>\n  <fingerprint>53232f2c1176fcec77bc2f403b568a29</fingerprint>\n</row>\n\n"
+    },
+    {
+      "table_name": "marketing_unsubscribe_tokens",
+      "fingerprint": "<row xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n  <records>2</records>\n  <fingerprint>bbc323b7e60cb68d7cc5a675c8a60d6f</fingerprint>\n</row>\n\n"
+    },
+    {
+      "table_name": "membership_invitations",
+      "fingerprint": "<row xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n  <records>0</records>\n  <fingerprint>d41d8cd98f00b204e9800998ecf8427e</fingerprint>\n</row>\n\n"
+    },
+    {
+      "table_name": "membership_onboarding",
+      "fingerprint": "<row xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n  <records>3</records>\n  <fingerprint>9ca9e2ae5f9edf3f0690ed3076f54629</fingerprint>\n</row>\n\n"
+    },
+    {
+      "table_name": "membership_reporting_history",
+      "fingerprint": "<row xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n  <records>0</records>\n  <fingerprint>d41d8cd98f00b204e9800998ecf8427e</fingerprint>\n</row>\n\n"
+    },
+    {
+      "table_name": "organization_brands",
+      "fingerprint": "<row xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n  <records>0</records>\n  <fingerprint>d41d8cd98f00b204e9800998ecf8427e</fingerprint>\n</row>\n\n"
+    },
+    {
+      "table_name": "organization_memberships",
+      "fingerprint": "<row xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n  <records>5</records>\n  <fingerprint>e08c4cae670bccda3e580e60ae94c78d</fingerprint>\n</row>\n\n"
+    },
+    {
+      "table_name": "organization_settings",
+      "fingerprint": "<row xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n  <records>3</records>\n  <fingerprint>cceae36f8f54c957bb4fd879ad57b876</fingerprint>\n</row>\n\n"
+    },
+    {
+      "table_name": "organizations",
+      "fingerprint": "<row xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n  <records>4</records>\n  <fingerprint>1dedca407a51dd0900ba3cafb82f93e6</fingerprint>\n</row>\n\n"
+    },
+    {
+      "table_name": "user_profiles",
+      "fingerprint": "<row xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n  <records>0</records>\n  <fingerprint>d41d8cd98f00b204e9800998ecf8427e</fingerprint>\n</row>\n\n"
+    }
+  ],
+  "privateDomainEventOutbox": {
+    "records": 8,
+    "fingerprint": "4b98e2ad1f63a989bde887305fbd6bf9"
+  }
+}

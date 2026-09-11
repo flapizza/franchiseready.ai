@@ -9,6 +9,10 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+studio_media_assets: { Row: {public_id: string;organization_id: string;creator_membership_id: string;version: number;source_mime: string;output_mime: string;width: number;height: number;byte_size: number;source_byte_size: number;checksum: string;source_checksum: string;source_path: string;delivery_path: string;thumbnail_path: string;default_alt: string;status: string;created_at: string;updated_at: string}; Insert: {public_id?: string;organization_id?: string;creator_membership_id?: string;version?: number;source_mime?: string;output_mime?: string;width?: number;height?: number;byte_size?: number;source_byte_size?: number;checksum?: string;source_checksum?: string;source_path?: string;delivery_path?: string;thumbnail_path?: string;default_alt?: string;status?: string;created_at?: string;updated_at?: string}; Update: {public_id?: string;organization_id?: string;creator_membership_id?: string;version?: number;source_mime?: string;output_mime?: string;width?: number;height?: number;byte_size?: number;source_byte_size?: number;checksum?: string;source_checksum?: string;source_path?: string;delivery_path?: string;thumbnail_path?: string;default_alt?: string;status?: string;created_at?: string;updated_at?: string}; Relationships: [] }
+studio_organization_branding: { Row: {organization_id: string;logo_asset_id: string | null;postal_address: string;primary_color: string;accent_color: string;default_font: string;updated_at: string}; Insert: {organization_id?: string;logo_asset_id?: string | null;postal_address?: string;primary_color?: string;accent_color?: string;default_font?: string;updated_at?: string}; Update: {organization_id?: string;logo_asset_id?: string | null;postal_address?: string;primary_color?: string;accent_color?: string;default_font?: string;updated_at?: string}; Relationships: [] }
+studio_consultant_branding: { Row: {membership_id: string;organization_id: string;headshot_asset_id: string | null;updated_at: string}; Insert: {membership_id?: string;organization_id?: string;headshot_asset_id?: string | null;updated_at?: string}; Update: {membership_id?: string;organization_id?: string;headshot_asset_id?: string | null;updated_at?: string}; Relationships: [] }
+
       assessment_analyses: {
         Row: {
           analysis_snapshot: Json
@@ -2082,6 +2086,7 @@ export type Database = {
       }
       marketing_campaigns: {
         Row: {
+ branding_snapshot: Json | null
           audience_public_id: string | null
           audience_type:
             | Database["public"]["Enums"]["marketing_audience_source"]
@@ -2103,6 +2108,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+ branding_snapshot?: Json | null
           audience_public_id?: string | null
           audience_type?:
             | Database["public"]["Enums"]["marketing_audience_source"]
@@ -2124,6 +2130,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+ branding_snapshot?: Json | null
           audience_public_id?: string | null
           audience_type?:
             | Database["public"]["Enums"]["marketing_audience_source"]
@@ -2807,6 +2814,8 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+save_studio_branding: {Args:{target_organization_id:string; proposed:Json; organization_changes:boolean};Returns:undefined}
+
       save_marketing_campaign_draft: {
         Args: { target_organization_id: string; target_public_id: string; expected_updated_at: string | null; payload: Json };
         Returns: Database["public"]["Tables"]["marketing_campaigns"]["Row"];

@@ -1,14 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { EditorContent, useEditor } from "@tiptap/react";
 import { NodeSelection } from "@tiptap/pm/state";
 import type { JSONContent } from "@tiptap/core";
 import { colors, fontIds, fontNames, fontSizes, fontStacks, httpsUrl, mergeFields, parseEmailDocument, type EmailDocument } from "./document";
 import { imagePlaceholder, studioExtensions } from "./extensions";
 import "./studio.css";
+import MediaLibrary from '../media/MediaLibrary';
+import type { BrandingSnapshot } from '../media/model';
 
-export default function VisualEditor({ value, onChange, disabled = false }: { value: EmailDocument; onChange: (value: EmailDocument) => void; disabled?: boolean }) {
+export default function VisualEditor({ value, onChange, disabled = false, branding }: { value: EmailDocument; onChange: (value: EmailDocument) => void; disabled?: boolean; branding?:BrandingSnapshot|null }) {
+  const [library,setLibrary]=useState<{from:number;to:number}|null|false>(false);
   const [notice, setNotice] = useState("");
   const [linkUrl, setLinkUrl] = useState("https://");
   const [, refresh] = useState(0);
@@ -69,22 +72,25 @@ export default function VisualEditor({ value, onChange, disabled = false }: { va
       <select aria-label="Insert merge field" value="" onChange={e => { if (e.target.value) insert("mergeField", { field: e.target.value }); }}><option value="">Personalize…</option>{mergeFields.map(field => <option key={field}>{field}</option>)}</select>
       {control("Add button", () => insert("button", { label: "Explore opportunities", href: "https://example.com", alignment: "left" }))}
       {control("Add divider", () => insert("divider"))}{control("Add spacer", () => insert("spacer", { height: 24 }))}
-      {control("Add signature", () => insert("signature"))}
+      {control("Add signature", () => insert("signature",branding?{name:branding.name,title:branding.title,company:branding.company,email:branding.email,phone:branding.phone}:undefined))}
+      {branding?.logo&&control("Insert company logo",()=>insert("emailImage",{assetId:branding.logo,alt:`${branding.company} logo`,alignment:'left',width:140,href:null}))}
+      {branding?.headshot&&control("Insert headshot",()=>insert("emailImage",{assetId:branding.headshot,alt:branding.name,alignment:'left',width:120,href:null}))}
       {control("Image placeholder", () => insertNode(imagePlaceholder()))}
       {control("Image + text", () => insertNode({ type: "imageText", content: [imagePlaceholder(), { type: "emailColumn", content: [{ type: "paragraph", attrs: { textAlign: "left" }, content: [{ type: "text", text: "Tell the story behind this image." }] }] }] }))}
-      <button type="button" disabled className="studio-tool opacity-50">Media library — forthcoming</button>
+      {control("Media library",()=>setLibrary(null))}
     </div>
     <div className="studio-links"><label className="min-w-0 flex-1 text-xs font-bold">HTTPS link<input aria-label="HTTPS link" value={linkUrl} onChange={e => setLinkUrl(e.target.value)} placeholder="https://" className="mt-1 w-full rounded-lg border p-2 font-normal" /></label>{control("Apply link", () => { if (!httpsUrl.safeParse(linkUrl).success) { setNotice("Enter a valid HTTPS link."); return; } editor.chain().focus().setMark("link", { href: linkUrl }).run(); setNotice(""); })}{control("Remove link", () => editor.chain().focus().unsetMark("link").run())}</div>
     {selected && ["button", "signature", "emailImage", "spacer"].includes(selected.type.name) && <div className="studio-properties" aria-label="Selected block properties">
       <p className="w-full text-xs font-black uppercase text-teal-700">Selected {selected.type.name === "emailImage" ? "image placeholder" : selected.type.name}</p>
       {selected.type.name === "button" && <>{property("Button label", "label")}{property("Button destination", "href")}</>}
       {selected.type.name === "signature" && <>{property("Signature name", "name")}{property("Signature title", "title")}{property("Signature company", "company")}{property("Signature email", "email")}{property("Signature phone", "phone")}</>}
-      {selected.type.name === "emailImage" && <>{property("Alt text", "alt")}<label className="studio-property">Image width<input aria-label="Image width" type="number" min="80" max="600" value={selected.attrs.width} onChange={e => editor.commands.updateAttributes("emailImage", { width: Number(e.target.value) })} /></label>{property("Image destination", "href")}<p className="text-xs text-slate-500">Asset: {selected.attrs.assetId ?? "Not connected"}</p><button type="button" disabled className="studio-tool">Replace image — media library forthcoming</button></>}
+      {selected.type.name === "emailImage" && <>{property("Alt text", "alt")}<label className="studio-property">Image width<input aria-label="Image width" type="number" min="80" max="600" value={selected.attrs.width} onChange={e => editor.commands.updateAttributes("emailImage", { width: Number(e.target.value) })} /></label>{property("Image destination", "href")}<p className="text-xs text-slate-500">Asset: {selected.attrs.assetId ?? "Not connected"}</p>{control("Replace image",()=>setLibrary({from:editor.state.selection.from,to:editor.state.selection.to}))}</>}
       {["button", "emailImage"].includes(selected.type.name) && <label className="studio-property">Block alignment<select aria-label="Block alignment" value={selected.attrs.alignment} onChange={e => editor.commands.updateAttributes(selected.type.name, { alignment: e.target.value })}>{["left", "center", "right"].map(a => <option key={a}>{a}</option>)}</select></label>}
       {selected.type.name === "spacer" && <label className="studio-property">Spacer height<select aria-label="Spacer height" value={selected.attrs.height} onChange={e => editor.commands.updateAttributes("spacer", { height: Number(e.target.value) })}>{[8, 16, 24, 32, 48].map(n => <option key={n} value={n}>{n}px</option>)}</select></label>}
       {control("Remove block", () => editor.chain().focus().deleteSelection().run())}
     </div>}
+    {library!==false&&<MediaLibrary onClose={()=>setLibrary(false)} onSelect={asset=>{const node={type:'emailImage',attrs:{assetId:asset.public_id,alt:asset.default_alt,alignment:'center',width:Math.min(536,Math.max(80,asset.width)),href:null}};if(library)editor.chain().focus().insertContentAt(library,node).run();else insertNode(node);setLibrary(false);}}/>}
     {notice && <p role="status" className="border-b bg-amber-50 p-3 text-sm text-amber-900">{notice}</p>}
-    <div className="studio-canvas-surround"><div className="studio-canvas" style={{ fontFamily: fontStacks[value.theme.fontFamily] }}><EditorContent editor={editor} /><div className="studio-compliance">Sender identity · Postal address · Unsubscribe<br /><span>Protected footer added in email preview</span></div></div></div>
+    <div className="studio-canvas-surround"><div className="studio-canvas" style={{ fontFamily: fontStacks[value.theme.fontFamily],color:value.theme.textColor,"--studio-accent":value.theme.accentColor } as CSSProperties}><EditorContent editor={editor} /><div className="studio-compliance">Sender identity · Postal address · Unsubscribe<br /><span>Protected footer added in email preview</span></div></div></div>
   </fieldset>;
 }

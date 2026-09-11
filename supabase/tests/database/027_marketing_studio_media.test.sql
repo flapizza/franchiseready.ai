@@ -1,0 +1,25 @@
+begin;create extension if not exists pgtap with schema extensions;select no_plan();
+insert into auth.users(instance_id,id,aud,role,email,encrypted_password,email_confirmed_at,raw_app_meta_data,raw_user_meta_data,created_at,updated_at)values('00000000-0000-0000-0000-000000000000','f0000000-0000-0000-0000-000000000001','authenticated','authenticated','send-a@example.test','',now(),'{}','{}',now(),now()),('00000000-0000-0000-0000-000000000000','f0000000-0000-0000-0000-000000000002','authenticated','authenticated','send-b@example.test','',now(),'{}','{}',now(),now());
+insert into public.organizations(id,public_id,name)values('f1000000-0000-0000-0000-000000000001','org_deliveryaaaaaaaa','Delivery A'),('f1000000-0000-0000-0000-000000000002','org_deliverybbbbbbbb','Delivery B');
+insert into public.organization_memberships(id,organization_id,user_id,role,status)values('f2000000-0000-0000-0000-000000000001','f1000000-0000-0000-0000-000000000001','f0000000-0000-0000-0000-000000000001','owner','active'),('f2000000-0000-0000-0000-000000000002','f1000000-0000-0000-0000-000000000002','f0000000-0000-0000-0000-000000000002','owner','active');
+
+insert into public.studio_media_assets(public_id,organization_id,creator_membership_id,source_mime,output_mime,width,height,byte_size,source_byte_size,checksum,source_checksum,source_path,delivery_path,thumbnail_path) select 'asset_'||repeat('a',32),'f1000000-0000-0000-0000-000000000001','f2000000-0000-0000-0000-000000000001','image/png','image/png',100,100,100,100,repeat('a',64),repeat('b',64),'f1000000-0000-0000-0000-000000000001/asset_'||repeat('a',32)||'/1/original','f1000000-0000-0000-0000-000000000001/asset_'||repeat('a',32)||'/1/email.png','f1000000-0000-0000-0000-000000000001/asset_'||repeat('a',32)||'/1/thumb.png';
+select throws_ok($$update public.studio_media_assets set width=200$$,'P0001',null,'asset versions are immutable');
+select throws_ok($$delete from public.studio_media_assets$$,'P0001',null,'referenced URLs cannot be destructively deleted');
+set local role authenticated;select set_config('request.jwt.claim.sub','f0000000-0000-0000-0000-000000000002',true);
+select is((select count(*) from public.studio_media_assets),0::bigint,'other tenant cannot enumerate assets');
+select throws_ok($$insert into public.studio_media_assets(public_id)values('asset_fake')$$,'42501',null,'client cannot forge uploads');
+select throws_ok($$select public.save_studio_branding('f1000000-0000-0000-0000-000000000001','{}',true)$$,'42501',null,'other tenant cannot mutate branding');
+select throws_ok($$select public.save_studio_branding('f1000000-0000-0000-0000-000000000002',jsonb_build_object('headshot','asset_'||repeat('a',32)),false)$$,'23503',null,'wrong tenant headshot blocked');
+select throws_ok($$insert into public.marketing_campaigns(organization_id,created_by_membership_id,name,content_version,content) values('f1000000-0000-0000-0000-000000000002','f2000000-0000-0000-0000-000000000002','Bad image',2,jsonb_build_object('version',2,'type','email','theme',jsonb_build_object('fontFamily','arial','fontSize',16,'textColor','#172033','accentColor','#2563EB'),'document',jsonb_build_object('type','doc','content',jsonb_build_array(jsonb_build_object('type','emailImage','attrs',jsonb_build_object('assetId','asset_'||repeat('a',32),'alt','','alignment','left','width',100,'href',null))))))$$,'42501',null,'wrong organization campaign placement rejected');
+select set_config('request.jwt.claim.sub','f0000000-0000-0000-0000-000000000001',true);
+select is((select count(*) from public.studio_media_assets),1::bigint,'own tenant can reuse media');
+select lives_ok($$select public.save_studio_branding('f1000000-0000-0000-0000-000000000001',jsonb_build_object('headshot','asset_'||repeat('a',32)),false)$$,'own headshot accepted');
+select lives_ok($$select public.save_studio_branding('f1000000-0000-0000-0000-000000000001','{"postalAddress":"100 Synthetic Lane","primaryColor":"#172033","accentColor":"#2563EB","font":"arial","logo":null}',true)$$,'owner branding accepted');
+reset role;update public.organization_memberships set role='consultant' where id='f2000000-0000-0000-0000-000000000001';set local role authenticated;
+select throws_ok($$select public.save_studio_branding('f1000000-0000-0000-0000-000000000001','{}',true)$$,'42501',null,'consultant cannot change organization branding');
+reset role;update public.organization_memberships set status='suspended' where id='f2000000-0000-0000-0000-000000000001';set local role authenticated;
+select is((select count(*) from public.studio_media_assets),0::bigint,'inactive membership cannot enumerate');
+select throws_ok($$select public.save_studio_branding('f1000000-0000-0000-0000-000000000001','{}',false)$$,'42501',null,'inactive member cannot update branding');
+select throws_ok($$insert into storage.objects(bucket_id,name)values('studio-delivery','../../evil.png')$$,'42501',null,'direct storage upload and traversal denied');
+select * from finish();rollback;

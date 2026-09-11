@@ -18,7 +18,13 @@ export function studioExtensions() {
     Node.create({ name: "divider", group: "block", atom: true, renderHTML: () => ["hr", { class: "studio-divider" }] }),
     Node.create({ name: "spacer", group: "block", atom: true, addAttributes: () => attrs({ height: 24 }), renderHTML: ({ node }) => ["div", { class: "studio-spacer", style: `height:${node.attrs.height}px` }, "Spacing"] }),
     Node.create({ name: "signature", group: "block", atom: true, addAttributes: () => attrs({ name: "Your name", title: "Franchise Consultant", company: "Your company", email: "", phone: "" }), renderHTML: ({ node }) => ["div", { class: "studio-signature" }, ...Object.values(node.attrs).filter(Boolean).map(value => ["div", {}, String(value)])] }),
-    Node.create({ name: "emailImage", group: "block", atom: true, addAttributes: () => attrs({ assetId: null, alt: "Image description", alignment: "center", width: 536, href: null }), renderHTML: ({ node }) => ["div", { class: "studio-image", style: `max-width:${node.attrs.width}px;text-align:${node.attrs.alignment}` }, ["strong", {}, node.attrs.alt || "Image placeholder"], ["div", {}, "Media library forthcoming"]] }),
+    Node.create({ name: "emailImage", addNodeView: () => ({node}) => {
+ const dom=document.createElement('div');dom.className='studio-image';
+ dom.style.maxWidth=String(node.attrs.width)+'px';dom.style.textAlign=node.attrs.alignment;
+ dom.style.marginLeft=node.attrs.alignment==='left'?'0':'auto';dom.style.marginRight=node.attrs.alignment==='right'?'0':'auto';
+ if(node.attrs.assetId){const img=document.createElement('img');img.src='/api/marketing/media/'+encodeURIComponent(node.attrs.assetId);img.alt=node.attrs.alt;img.style.cssText='display:block;width:100%;height:auto';dom.append(img);}else{dom.textContent=(node.attrs.alt||'Image placeholder')+' - Choose an image from the media library';}
+ return {dom};
+ }, group: "block", atom: true, addAttributes: () => attrs({ assetId: null, alt: "Image description", alignment: "center", width: 536, href: null }), renderHTML: ({ node }) => ["div", { class: "studio-image", style: `max-width:${node.attrs.width}px;text-align:${node.attrs.alignment}` }, ["strong", {}, node.attrs.alt || "Image placeholder"], ["div", {}, "Choose an image from the media library"]] }),
     Node.create({ name: "imageText", group: "block", content: "emailImage emailColumn", isolating: true, renderHTML: () => ["div", { class: "studio-columns" }, 0] }),
     Node.create({ name: "emailColumn", content: "(paragraph | heading | bulletList | orderedList)+", isolating: true, renderHTML: () => ["div", { class: "studio-column" }, 0] }),
   ];
