@@ -4,7 +4,7 @@ test("Contacts to Segment to ready Campaign without delivery", async ({ page }) 
   await enterDemo(page); await page.goto("/crm/segments/new"); await page.getByLabel("Segment name").fill("Carolina Semi-Absentee");
   await page.getByRole("button", { name: "Preview audience" }).click(); await expect(page.getByText("Current audience preview")).toBeVisible();
   await page.getByRole("button", { name: "Save Segment" }).click(); await expect(page).toHaveURL(/\/crm\/segments\/seg_/);
-  await page.getByRole("link", { name: "Create Campaign from Segment" }).click(); await page.getByLabel("Campaign name").fill("Carolina Opportunity Update");
+  await page.getByRole("link", { name: "Create Campaign from Segment" }).click(); page.once("dialog",dialog=>dialog.accept());await page.getByRole("button",{name:"Classic text campaign",exact:true}).click();await page.getByLabel("Campaign name").fill("Carolina Opportunity Update");
   await page.getByLabel("Subject line").fill("Ideas for {{first_name}}"); await page.getByLabel("Sender display name").fill("Alex Morgan"); await page.getByLabel("Reply-to address").fill("alex@example.test");
   await page.getByLabel("Email heading").fill("A focused shortlist"); await page.getByLabel("Body content").fill("Hi {{preferred_name}},\nHere are franchise opportunities selected for you."); await page.getByLabel("Footer content").fill("FranGroove - opted-in audience.");
   await page.getByRole("button", { name: "Refresh counts" }).click(); await expect(page.getByText("Sendable").locator("..")).toContainText("3");

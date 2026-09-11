@@ -2807,6 +2807,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      save_marketing_campaign_draft: {
+        Args: { target_organization_id: string; target_public_id: string; expected_updated_at: string | null; payload: Json };
+        Returns: Database["public"]["Tables"]["marketing_campaigns"]["Row"];
+      };
       accept_membership_invitation: {
         Args: { presented_token: string }
         Returns: {
