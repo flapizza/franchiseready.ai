@@ -14,6 +14,8 @@ pinned dependency at 0.35.4. MIME must match decoded JPEG/PNG/WebP, animated inp
 is rejected, edges are capped at 6000px and decoded pixels at 24 million. Sharp
 applies orientation, strips metadata, resizes inside 1200px, re-encodes PNG and
 generates a 240px thumbnail. No input URLs, SVG, data URLs or browser HTML are used.
+The media route explicitly includes Sharp's platform binary and libvips packages
+in its Next.js output trace so the hosted function retains native dependencies.
 
 The server generates `organization/asset_id/1/variant` paths. Private originals
 use `studio-originals` (3 MiB; JPEG/PNG/WebP); public normalized email/thumbnail
