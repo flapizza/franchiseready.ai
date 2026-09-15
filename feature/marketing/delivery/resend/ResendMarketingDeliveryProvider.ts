@@ -39,6 +39,7 @@ export class ResendMarketingDeliveryProvider implements MarketingDeliveryProvide
           html: input.html,
           text: input.text,
           tags: safeTags(input.metadata),
+          ...(input.headers ? {headers: safeUnsubscribeHeaders(input.headers)} : {}),
         }),
         signal: controller.signal,
       });
@@ -64,3 +65,9 @@ function safeDisplayName(value: string) { return value.replace(/[\r\n<>]/g, " ")
 function safeTags(metadata: Record<string, string>) { return Object.entries(metadata).filter(([name,value])=>/^[A-Za-z0-9_-]{1,50}$/.test(name)&&/^[A-Za-z0-9_-]{1,256}$/.test(value)).slice(0,10).map(([name,value])=>({name,value})); }
 function retryableStatus(status: number) { return status===408||status===409||status===425||status===429||status>=500; }
 function isProviderAcceptance(value: unknown): value is {id:string} { return typeof value==='object'&&value!==null&&typeof (value as {id?:unknown}).id==='string'&&(value as {id:string}).id.length>0&&(value as {id:string}).id.length<=255; }
+
+function safeUnsubscribeHeaders(headers:Record<string,string>) {
+ const url=headers['List-Unsubscribe'];
+ if(!url||!/^<https:\/\/[^<>\s]+>$/.test(url)||headers['List-Unsubscribe-Post']!=='List-Unsubscribe=One-Click')throw Error('Invalid unsubscribe headers');
+ return {'List-Unsubscribe':url,'List-Unsubscribe-Post':'List-Unsubscribe=One-Click'};
+}

@@ -1,0 +1,2 @@
+import {defineConfig,devices} from '@playwright/test';
+export default defineConfig({testDir:'./e2e',testMatch:'marketing-studio-delivery.spec.ts',workers:1,timeout:180000,reporter:'list',use:{...devices['Desktop Chrome'],baseURL:'http://127.0.0.1:3117',screenshot:'only-on-failure',trace:'retain-on-failure'},webServer:{cwd:process.cwd(),command:'node node_modules/next/dist/bin/next start -H 127.0.0.1 -p 3117',url:'http://127.0.0.1:3117/login',reuseExistingServer:false,timeout:120000}});

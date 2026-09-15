@@ -15,11 +15,11 @@ export function renderStudioEmail(value: unknown, context: RenderContext) {
   const email = parseEmailDocument(value), ctx = contextSchema.parse(context);
   const vars = { ...ctx.personalization, preferred_name: ctx.personalization.preferred_name || ctx.personalization.first_name };
   const personalize = (s: string) => s.replace(/{{\s*(first_name|preferred_name|consultant_name)\s*}}/g, (_, key: keyof typeof vars) => vars[key]);
-  const inlineText = (nodes: Inline[] = []) => nodes.map(n => n.type === "hardBreak" ? "\n" : n.type === "mergeField" ? vars[n.attrs.field] : n.text).join("");
+  const inlineText = (nodes: Inline[] = []) => nodes.map(n => n.type === "hardBreak" ? "\n" : n.type === "mergeField" ? vars[n.attrs.field] : personalize(n.text)).join("");
   const link = (url: string, content: string, style = "") => ctx.preview ? `<span style="${style};text-decoration:underline">${content}</span>` : `<a href="${escape(url)}" style="${style}">${content}</a>`;
   const inlineHtml = (nodes: Inline[] = []): string => nodes.map(n => {
     if (n.type === "hardBreak") return "<br>";
-    let html = escape(n.type === "mergeField" ? vars[n.attrs.field] : n.text);
+    let html = escape(n.type === "mergeField" ? vars[n.attrs.field] : personalize(n.text));
     for (const m of n.marks ?? []) {
       if (m.type === "bold") html = `<strong>${html}</strong>`;
       else if (m.type === "italic") html = `<em>${html}</em>`;

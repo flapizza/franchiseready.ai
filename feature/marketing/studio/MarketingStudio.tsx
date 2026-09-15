@@ -1,4 +1,5 @@
 "use client";
+import StudioDeliveryPanel from '../delivery/StudioDeliveryPanel';
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { AudiencePreview, Campaign, MarketingOptions } from "../models/Marketing";
@@ -36,7 +37,7 @@ export default function MarketingStudio({ campaign, options, initialAudience }: 
     {error && <p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">{error}</p>}
     <BrandingPanel snapshot={branding} onInitial={b=>{if(!branding)setBranding(b);}} onRefresh={b=>{setBranding(b);setRefreshBranding(true);setDocument(old=>({...old,theme:{...old.theme,fontFamily:b.font,textColor:b.primaryColor,accentColor:b.accentColor}}));changed();}} />
     <VisualEditor branding={branding} disabled={pending} value={document} onChange={value => { setDocument(value); changed(); }} />
-    <p className="rounded-xl bg-amber-50 p-4 text-sm text-amber-900">Visual campaign delivery will be enabled after final delivery certification.</p>
+    {campaign?<StudioDeliveryPanel campaignId={campaign.id} revision={campaign.updatedAt} dirty={dirty||pending}/>:<p className="rounded-xl bg-sky-50 p-4 text-sm">Save Draft to enable test email and audience review.</p>}
     {preview && <section className="min-w-0 rounded-2xl border bg-slate-100 p-3 sm:p-5" aria-label="Rendered email preview"><div className="mb-4 flex flex-wrap items-center justify-between gap-3"><div><h3 className="font-black">Email preview</h3><p className="text-xs text-slate-600">Sample recipient: Jordan · Links disabled · Email clients may vary</p></div><div className="flex gap-2"><button aria-pressed={!mobile} onClick={() => setMobile(false)} className="rounded-lg border bg-white px-3 py-2 text-sm font-bold">Desktop preview</button><button aria-pressed={mobile} onClick={() => setMobile(true)} className="rounded-lg border bg-white px-3 py-2 text-sm font-bold">Mobile preview</button></div></div>{previewStale && <p role="status" className="mb-3 text-sm font-bold text-amber-800">Content changed. Select Preview email to refresh.</p>}<p className="mb-3 text-sm font-bold">Subject: {preview.subject || "Not set"}</p><iframe title="Email preview" sandbox="" referrerPolicy="no-referrer" srcDoc={preview.html} className="mx-auto block h-[700px] w-full rounded-xl border bg-white" style={{ maxWidth: mobile ? 390 : 680 }} /><details className="mt-4"><summary className="cursor-pointer text-sm font-bold">Plain-text alternative</summary><pre className="mt-3 whitespace-pre-wrap break-words rounded-xl bg-white p-4 text-sm">{preview.text}</pre></details></section>}
   </section>;
 }
