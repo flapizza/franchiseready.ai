@@ -94,11 +94,56 @@ test("public surface contains no protected application capability or forbidden c
     "../lib/env.ts",
     "../lib/unsubscribe.ts",
     "../lib/response.ts",
+    "../lib/one-click.ts",
+    "../app/api/marketing/unsubscribe/[token]/route.ts",
+    "../app/api/marketing/test-unsubscribe/[token]/route.ts",
     "../next.config.ts",
     "../proxy.ts",
   ];
   const source = (await Promise.all(files.map((file) => readFile(new URL(file, import.meta.url), "utf8")))).join("\n");
   for (const forbidden of ["service_role", "RESEND_", "CAMPAIGN_DELIVERY", "VERCEL_AUTOMATION", "NEXT_PUBLIC_", "/crm", "/login", "createAdmin", "cookies("]) {
     assert.equal(source.includes(forbidden), false, `unexpected capability: ${forbidden}`);
+  }
+});
+import { GET as testGet, POST as testPost } from '../app/api/marketing/test-unsubscribe/[token]/route.ts';
+import { POST as normalPost } from '../app/api/marketing/unsubscribe/[token]/route.ts';
+import { oneClick } from '../lib/one-click.ts';
+
+const oneClickRequest = (body='List-Unsubscribe=One-Click') => new Request('https://public.example.test/unsubscribe', {method:'POST',headers:{'content-type':'application/x-www-form-urlencoded'},body});
+
+test('public test GET/POST repeat safely through only the isolated RPC; normal POST uses normal consent RPC', async (context) => {
+  const previous={fetch:globalThis.fetch,url:process.env.SUPABASE_URL,key:process.env.SUPABASE_PUBLISHABLE_KEY};
+  process.env.SUPABASE_URL=ENVIRONMENT.supabaseUrl;
+  process.env.SUPABASE_PUBLISHABLE_KEY=ENVIRONMENT.supabasePublishableKey;
+  const calls=[];
+  globalThis.fetch=async(url,init)=>{calls.push({url,init});return Response.json(true);};
+  context.after(()=>{globalThis.fetch=previous.fetch;for(const [key,value]of [['SUPABASE_URL',previous.url],['SUPABASE_PUBLISHABLE_KEY',previous.key]]){if(value===undefined)delete process.env[key];else process.env[key]=value;}});
+  for(const handler of [testGet,testGet,testPost,testPost,normalPost,normalPost]){
+    const response=await handler(oneClickRequest(),{params:Promise.resolve({token:VALID_TOKEN})});
+    assert.equal(response.status,200);
+    const body=await response.text();
+    assert.match(body,handler===normalPost?/You have been unsubscribed/:/Test email acknowledged/);
+    assert.ok(!body.includes(VALID_TOKEN));
+    assert.equal(response.headers.get('set-cookie'),null);
+    assert.match(response.headers.get('cache-control'),/no-store/);
+  }
+  assert.deepEqual(calls.map(c=>c.url.split('/').pop()),['unsubscribe_studio_test','unsubscribe_studio_test','unsubscribe_studio_test','unsubscribe_studio_test','unsubscribe_marketing','unsubscribe_marketing']);
+  for(const call of calls){assert.deepEqual(JSON.parse(call.init.body),{token_digest:hashToken(VALID_TOKEN)});assert.equal(call.init.credentials,'omit');assert.equal(call.init.headers.authorization,undefined);}
+});
+
+test('one-click rejects invalid tokens, duplicate fields, wrong media types and oversized streams before RPC',async()=>{
+  let calls=0;const apply=async()=>{calls++;return 'success';};
+  for(const [raw,body,status]of [['bad','List-Unsubscribe=One-Click',400],[VALID_TOKEN,'List-Unsubscribe=No',400],[VALID_TOKEN,'List-Unsubscribe=One-Click&List-Unsubscribe=One-Click',400],[VALID_TOKEN,'List-Unsubscribe=One-Click&tenant=other',400],[VALID_TOKEN,'x'.repeat(1025),413]]){
+    assert.equal((await oneClick(oneClickRequest(body),raw,apply)).status,status);
+  }
+  assert.equal((await oneClick(new Request('https://example.test',{method:'POST',body:'List-Unsubscribe=One-Click'}),VALID_TOKEN,apply)).status,400);
+  assert.equal(calls,0);
+});
+
+test('one-click failures remain generic without reflecting tokens or backend details',async()=>{
+  for(const apply of [async()=> 'unavailable',async()=>{throw Error('private tenant details');}]){
+    const response=await oneClick(oneClickRequest(),VALID_TOKEN,apply,true);
+    assert.equal(response.status,400);
+    const body=await response.text();assert.doesNotMatch(body,/private tenant details/);assert.ok(!body.includes(VALID_TOKEN));
   }
 });

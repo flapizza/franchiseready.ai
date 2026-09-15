@@ -5,6 +5,7 @@ export type UnsubscribeOutcome = "success" | "unavailable";
 export type RpcTransport = (
   environment: UnsubscribeEnvironment,
   input: Readonly<{ token_digest: string }>,
+  rpc: "unsubscribe_marketing" | "unsubscribe_studio_test",
 ) => Promise<boolean>;
 
 const TOKEN_PATTERN = /^[A-Za-z0-9-]{32,128}$/;
@@ -20,9 +21,10 @@ export function hashToken(token: string): string {
 async function callUnsubscribeRpc(
   environment: UnsubscribeEnvironment,
   input: Readonly<{ token_digest: string }>,
+  rpc: "unsubscribe_marketing" | "unsubscribe_studio_test",
 ): Promise<boolean> {
   const response = await fetch(
-    `${environment.supabaseUrl}/rest/v1/rpc/unsubscribe_marketing`,
+    `${environment.supabaseUrl}/rest/v1/rpc/${rpc}`,
     {
       method: "POST",
       cache: "no-store",
@@ -46,12 +48,27 @@ export async function unsubscribe(
     transport?: RpcTransport;
   }> = {},
 ): Promise<UnsubscribeOutcome> {
+  return apply(token, dependencies, "unsubscribe_marketing");
+}
+
+export async function unsubscribeTest(
+  token: string,
+  dependencies: Parameters<typeof unsubscribe>[1] = {},
+): Promise<UnsubscribeOutcome> {
+  return apply(token, dependencies, "unsubscribe_studio_test");
+}
+
+async function apply(
+  token: string,
+  dependencies: NonNullable<Parameters<typeof unsubscribe>[1]>,
+  rpc: "unsubscribe_marketing" | "unsubscribe_studio_test",
+): Promise<UnsubscribeOutcome> {
   if (!isValidToken(token)) return "unavailable";
 
   try {
     const environment = dependencies.environment ?? readEnvironment();
     const transport = dependencies.transport ?? callUnsubscribeRpc;
-    const result = await transport(environment, { token_digest: hashToken(token) });
+    const result = await transport(environment, { token_digest: hashToken(token) }, rpc);
     return result ? "success" : "unavailable";
   } catch {
     return "unavailable";

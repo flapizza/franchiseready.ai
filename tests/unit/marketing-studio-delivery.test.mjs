@@ -24,3 +24,21 @@ test('explicit test recipient validation rejects reserved synthetic destinations
 test('one-click accepts standards-compatible POST and hashes the token',async()=>{let digest;const r=await oneClickUnsubscribe(new Request('https://demo.example.test/u',{method:'POST',headers:{'content-type':'application/x-www-form-urlencoded'},body:'List-Unsubscribe=One-Click'}),token,async d=>{digest=d;return true;});assert.equal(r.status,200);assert.match(digest,/^[a-f0-9]{64}$/);assert.notEqual(digest,token);});
 test('one-click rejects malformed tokens, oversized bodies and incorrect form fields',async()=>{let calls=0;for(const [raw,body,status]of [['bad','List-Unsubscribe=One-Click',400],[token,'x'.repeat(1025),413],[token,'List-Unsubscribe=No',400],[token,'List-Unsubscribe=One-Click&extra=bad',400]]){const r=await oneClickUnsubscribe(new Request('https://demo.example.test/u',{method:'POST',headers:{'content-type':'application/x-www-form-urlencoded'},body}),raw,async()=>{calls++;return true;});assert.equal(r.status,status);}assert.equal(calls,0);});
 test('Resend receives only supported unsubscribe headers and frozen HTML/text',async()=>{let body;const provider=new ResendMarketingDeliveryProvider({apiKey:'mock',fromEmail:'sender@real-domain.org'},async(_url,request)=>{body=JSON.parse(request.body);return Response.json({id:'mock-message'});});const rendered=renderStudioDelivery(source(),{},token);const result=await provider.submit({deliveryKey:'rcpt_test',senderName:'Alex',to:'approved@real-domain.org',replyTo:'alex@real-domain.org',...rendered,headers:{...rendered.headers,'X-Untrusted':'bad'},metadata:{}});assert.equal(result.kind,'accepted');assert.deepEqual(body.headers,rendered.headers);assert.equal(body.html,rendered.html);assert.equal(body.text,rendered.text);});
+
+import {marketingPublicOrigin} from '../../feature/marketing/delivery/public-origin.ts';
+test('public origin override drives both V2 body alternatives and supported one-click paths',()=>{
+ const origin='https://frangroove-public-unsubscribe.vercel.app';
+ for(const testSend of [false,true]){
+  const s=source();s.studio_snapshot.publicOrigin=marketingPublicOrigin('https://protected.vercel.app',{MARKETING_PUBLIC_URL:origin});
+  const output=renderStudioDelivery(s,{firstName:'James',preferredName:'Jim'},token,testSend);
+  const bodyPath=testSend?'/api/marketing/test-unsubscribe/':'/unsubscribe/';
+  const postPath=testSend?'/api/marketing/test-unsubscribe/':'/api/marketing/unsubscribe/';
+  assert.ok(output.html.includes(origin+bodyPath+token));assert.ok(output.text.includes(origin+bodyPath+token));
+  assert.equal(output.headers['List-Unsubscribe'],`<${origin}${postPath}${token}>`);
+  assert.equal(output.headers['List-Unsubscribe-Post'],'List-Unsubscribe=One-Click');
+ }
+});
+test('public origin fails closed for invalid overrides and preserves an unconfigured fallback',()=>{
+ assert.equal(marketingPublicOrigin('http://localhost:3000',{}),'http://localhost:3000');
+ for(const value of ['', 'http://example.test','https://example.test/path','https://user:secret@example.test','https://example.test/','https://example.test?x=1'])assert.throws(()=>marketingPublicOrigin('https://fallback.test',{MARKETING_PUBLIC_URL:value}));
+});

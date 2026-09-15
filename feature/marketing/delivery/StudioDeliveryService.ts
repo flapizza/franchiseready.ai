@@ -9,6 +9,7 @@ import type {MarketingRepository} from '../repositories/MarketingRepository';
 import type {FinalAudienceReview,MarketingDeliveryProvider,ProviderSubmission} from './MarketingDelivery';
 import {deliveryAddress,renderStudioDelivery,validateStudioSend,type StudioSendSource} from './studio-snapshot';
 import {z} from 'zod';
+import {marketingPublicOrigin} from './public-origin';
 
 // The privileged client is used only for private, audited artifact operations,
 // after the ordinary repository has authorized the campaign in the workspace.
@@ -19,7 +20,7 @@ export class StudioDeliveryService {
     if(!campaign||campaign.content.version!==2)throw Error('A V2 campaign in this workspace is required.');
     if(campaign.updatedAt!==revision)throw Error('Campaign changed. Reload and review again.');
     const environment=getPublicEnvironment(),admin=createAdminSupabaseClient();
-    const data=await studioRpc(admin,'stage_studio_campaign',{target_campaign:id,actor_membership:this.ctx.membership.id,expected_revision:revision,audience_fingerprint:fingerprint,public_origin:process.env.MARKETING_PUBLIC_URL??new URL(environment.APP_URL).origin,media_origin:new URL(environment.NEXT_PUBLIC_SUPABASE_URL).origin});
+    const data=await studioRpc(admin,'stage_studio_campaign',{target_campaign:id,actor_membership:this.ctx.membership.id,expected_revision:revision,audience_fingerprint:fingerprint,public_origin:marketingPublicOrigin(new URL(environment.APP_URL).origin),media_origin:new URL(environment.NEXT_PUBLIC_SUPABASE_URL).origin});
     const staged=data as {stageId:string;source:StudioSendSource};
     validateStudioSend(staged.source);
     // Rendering is itself a prerequisite: oversized output and unresolved images fail before confirmation.

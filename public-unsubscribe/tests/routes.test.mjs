@@ -61,6 +61,21 @@ test("production route surface is isolated, hardened, and fail-closed", { timeou
   assert.match(response.headers.get("x-robots-tag") ?? "", /noindex/);
   assert.equal(response.headers.get("x-powered-by"), null);
 
+  for (const path of ['/api/marketing/test-unsubscribe/', '/api/marketing/unsubscribe/']) {
+    for (const token of ['short-token-value', rawToken]) {
+      const reply = await fetch(application.origin + path + token, {method:'POST', headers:{'content-type':'application/x-www-form-urlencoded'},body:'List-Unsubscribe=One-Click',redirect:'manual'});
+      assert.equal(reply.status,400);
+      assert.equal(reply.headers.get('set-cookie'),null);
+      assert.match(reply.headers.get('cache-control'),/no-store/);
+      assert.ok(!(await reply.text()).includes(token));
+    }
+  }
+  const testGet = await fetch(application.origin+'/api/marketing/test-unsubscribe/'+rawToken,{redirect:'manual'});
+  assert.equal(testGet.status,400);
+  assert.equal(testGet.headers.get('location'),null);
+  assert.equal(application.output().includes(rawToken),false);
+  assert.equal((await fetch(application.origin+'/unsubscribe/'+rawToken,{method:'POST'})).status,405);
+
   for (const path of ["/", "/crm", "/login", "/api/internal/campaign-delivery", "/api/arbitrary", "/arbitrary/path"]) {
     const isolated = await fetch(`${application.origin}${path}`, { redirect: "manual" });
     assert.equal(isolated.status, 404, `${path} must be unavailable`);
