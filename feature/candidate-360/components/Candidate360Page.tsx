@@ -75,7 +75,7 @@ export async function Candidate360Page({
       {!candidate.rootOnly && candidate.id === "candidate-demo" && <DemoCandidateJourney candidateId={candidate.id} />}
 
       {candidate.rootOnly && <nav aria-label="Assessment actions" className="flex flex-wrap gap-3">
-        {candidate.assessmentSession?.status !== "analyzed" ? <Link href="#assessment-invitation" className="inline-flex min-h-11 items-center rounded-xl bg-blue-600 px-5 py-3 font-bold text-white">{assessmentSharingState(candidate.assessmentSession).canGenerate ? "Share Assessment" : "Assessment Status"}</Link> : <><Link href="#assessment-intelligence" className="inline-flex min-h-11 items-center rounded-xl bg-blue-600 px-5 py-3 font-bold text-white">View Intelligence</Link><Link href={`/crm/candidates/${candidate.id}/documents`} className="inline-flex min-h-11 items-center rounded-xl border bg-white px-5 py-3 font-bold text-blue-700">Assessments &amp; Documents</Link></>}
+        {candidate.assessmentSession?.status !== "analyzed" ? <Link href="#assessment-invitation" className="inline-flex min-h-11 items-center rounded-xl bg-blue-600 px-5 py-3 font-bold text-white">{assessmentSharingState(candidate.assessmentSession).canGenerate ? "Share Assessment" : "Assessment Status"}</Link> : <><Link href="#assessment-intelligence" className="inline-flex min-h-11 items-center rounded-xl bg-blue-600 px-5 py-3 font-bold text-white">View Candidate Intelligence</Link><Link href={`/crm/candidates/${candidate.id}/documents`} className="inline-flex min-h-11 items-center rounded-xl border bg-white px-5 py-3 font-bold text-blue-700">Assessments &amp; Documents</Link></>}
       </nav>}
 
       <CandidateRelationshipOverview candidate={candidate} />

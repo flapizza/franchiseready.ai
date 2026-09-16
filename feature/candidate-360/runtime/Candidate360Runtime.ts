@@ -192,7 +192,7 @@ export class Candidate360Runtime {
       nextBestAction: "Continue candidate qualification", knownInformation: [
         { label: "Email", value: candidate.email, icon: "email" },
         { label: "Phone", value: candidate.phone || "Not provided", icon: "phone" },
-      ], assessment: {label:sharing.label,detail:sharing.detail,invitationSent:Boolean(session),actionLabel:complete?"View Intelligence":"Share Assessment"},
+      ], assessment: {label:sharing.label,detail:sharing.detail,invitationSent:Boolean(session),actionLabel:complete?"View Candidate Intelligence":"Share Assessment"},
       activities: complete&&session?.completedAt?[{id:`${session.id}:completed`,title:"Intelligence Generated",description:"Assessment Complete",timestamp:session.completedAt,dateLabel:formatActivityDate(session.completedAt),icon:"assessment",tone:"emerald"}]:[], lifecycleAction: null,
     };
   }

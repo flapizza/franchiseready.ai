@@ -5,6 +5,7 @@ import { CandidateIntakeService } from "../services/CandidateIntakeService";
 import { resolveWorkspaceComposition } from "@/feature/platform/composition/resolveWorkspaceComposition";
 import { assessmentInvitationPath, createAssessmentToken, hashAssessmentToken } from "@/feature/assessment-engine/production/token";
 import { assessmentSharingState } from "../services/AssessmentSharingState";
+import { AssessmentRepositoryError } from "@/feature/assessment-engine/production/SupabaseAssessmentRepository";
 
 export interface CandidateFormState {
   status: "idle" | "validation-error" | "unavailable" | "created" | "exact-match" | "possible-match";
@@ -41,28 +42,37 @@ export async function createCandidateAction(_previous: CandidateFormState, formD
   }
 }
 
-export interface InvitationActionState { status: "idle" | "generated" | "error"; message?: string; url?: string; candidateId?: string; sessionId?: string }
+export interface InvitationActionState { status: "idle" | "generated" | "error"; message?: string; url?: string; candidateId?: string; contactId?: string; sessionId?: string; expiresAt?: string }
 
 export async function generateAssessmentInvitationAction(_previous: InvitationActionState, formData: FormData): Promise<InvitationActionState> {
   const candidateId = String(formData.get("candidateId") ?? "");
+  const contactId = String(formData.get("contactId") ?? "");
+  const expected = String(formData.get("confirmReplacement") ?? "") || null;
   try {
     const resolution=await resolveWorkspaceComposition();if(resolution.status!=="resolved")return {status:"error",message:"An active workspace is required."};const composition=resolution.composition;
     if (!("runtimes" in composition)) {
-      const existing = await composition.dependencies.assessments.getForCandidate(candidateId);
+      if (Boolean(candidateId) === Boolean(contactId)) return {status:"error",message:"Choose one person before sharing an assessment."};
+      const existing = contactId ? await composition.dependencies.assessments.getForContact(contactId) : await composition.dependencies.assessments.getForCandidate(candidateId);
       const sharing = assessmentSharingState(existing);
       if (!sharing.canGenerate) return {status:"error",message:"This assessment cannot be replaced. Review the candidate's existing results."};
-      if (sharing.replace && formData.get("confirmReplacement") !== existing?.id) return {status:"error",message:"Review the current invitation and explicitly confirm replacement before continuing."};
+      if ((existing?.id ?? null) !== expected) return {status:"error",message:"The invitation changed. Refresh status and review the current invitation before replacing it."};
       const token=createAssessmentToken();
-      const invitation=await composition.dependencies.assessments.createInvitation(candidateId,hashAssessmentToken(token),new Date(Date.now()+14*86400000).toISOString());
-      revalidatePath(`/crm/candidates/${candidateId}`);
+      const invitation = contactId
+        ? await composition.dependencies.assessments.createContactInvitation(contactId,hashAssessmentToken(token),new Date(Date.now()+14*86400000).toISOString(),expected)
+        : await composition.dependencies.assessments.createInvitation(candidateId,hashAssessmentToken(token),new Date(Date.now()+14*86400000).toISOString(),expected);
+      if (contactId) revalidatePath(`/crm/contacts/${contactId}`);
+      if (candidateId) revalidatePath(`/crm/candidates/${candidateId}`);
       revalidatePath("/crm/candidates");
-      return {status:"generated",message:"Assessment invitation link ready",url:assessmentInvitationPath(token),candidateId,sessionId:invitation.id};
+      if ('identityConflict' in invitation && invitation.identityConflict) return {status:"error",message:"These details may match an existing candidate. Review the existing records before continuing. No candidate was created or linked."};
+      return {status:"generated",message:"Assessment invitation link ready",url:assessmentInvitationPath(token),candidateId,contactId,sessionId:invitation.id,expiresAt:invitation.expiresAt};
     }
     const invitation = await composition.runtimes.createAssessmentInvitations().send(candidateId);
     revalidatePath("/crm/candidates");
     revalidatePath(`/crm/candidates/${candidateId}`);
     return { status: "generated", message: "Assessment invitation link ready", url: invitation.assessmentUrl, candidateId };
-  } catch {
+  } catch (error) {
+    if (error instanceof AssessmentRepositoryError && error.code === "40001") return {status:"error",message:"The invitation changed. Refresh status and review the current invitation before replacing it."};
+    if (error instanceof AssessmentRepositoryError && error.code === "P0001") return {status:"error",message:"These details may match an existing candidate. Review the existing records before continuing. No person was merged."};
     return { status: "error", message: "Could not generate the assessment link. Please try again." };
   }
 }

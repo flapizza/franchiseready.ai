@@ -87,7 +87,8 @@ studio_consultant_branding: { Row: {membership_id: string;organization_id: strin
       }
       assessment_sessions: {
         Row: {
-          candidate_id: string
+          candidate_id: string | null
+          contact_id: string | null
           completed_at: string | null
           created_at: string
           created_by_membership_id: string
@@ -108,7 +109,8 @@ studio_consultant_branding: { Row: {membership_id: string;organization_id: strin
           updated_at: string
         }
         Insert: {
-          candidate_id: string
+          candidate_id?: string | null
+          contact_id?: string | null
           completed_at?: string | null
           created_at?: string
           created_by_membership_id: string
@@ -129,7 +131,8 @@ studio_consultant_branding: { Row: {membership_id: string;organization_id: strin
           updated_at?: string
         }
         Update: {
-          candidate_id?: string
+          candidate_id?: string | null
+          contact_id?: string | null
           completed_at?: string | null
           created_at?: string
           created_by_membership_id?: string
@@ -150,6 +153,13 @@ studio_consultant_branding: { Row: {membership_id: string;organization_id: strin
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "assessment_sessions_contact_org_fk"
+            columns: ["contact_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id", "organization_id"]
+          },
           {
             foreignKeyName: "assessment_sessions_candidate_id_fkey"
             columns: ["candidate_id"]
@@ -3062,12 +3072,14 @@ save_studio_branding: {Args:{target_organization_id:string; proposed:Json; organ
       }
       create_assessment_invitation: {
         Args: {
+          expected_replacement_id?: string
           invitation_expires_at: string
           presented_token_hash: string
           target_candidate_public_id: string
         }
         Returns: {
-          candidate_id: string
+          candidate_id: string | null
+          contact_id: string | null
           completed_at: string | null
           created_at: string
           created_by_membership_id: string
@@ -3105,6 +3117,27 @@ save_studio_branding: {Args:{target_organization_id:string; proposed:Json; organ
           created: boolean
           invitation_id: string
         }[]
+      }
+      create_contact_assessment_invitation: {
+        Args: {
+          target_contact_public_id: string
+          presented_token_hash: string
+          invitation_expires_at: string
+          expected_replacement_id?: string
+        }
+        Returns: Json
+      }
+      create_assessment_contact: {
+        Args: {target_organization_id:string; proposed_first_name:string; proposed_last_name:string; proposed_email:string; proposed_phone:string}
+        Returns: string
+      }
+      get_contact_assessment: {
+        Args: { target_contact_public_id: string }
+        Returns: Json
+      }
+      revoke_contact_assessment_invitation: {
+        Args: { target_contact_public_id: string }
+        Returns: undefined
       }
       current_active_membership_id: {
         Args: { target_organization_id: string }

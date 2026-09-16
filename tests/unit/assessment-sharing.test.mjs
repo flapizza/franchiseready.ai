@@ -5,7 +5,7 @@ const {assessmentInvitationPath,createAssessmentToken}=await import('../../featu
 const session={id:'session',status:'invited',expiresAt:'2030-01-01T00:00:00Z',revokedAt:null};
 test('sharing uses real session lifecycle and preserves completed evidence',()=>{
  const state=(extra={})=>assessmentSharingState({...session,...extra},Date.parse('2026-09-10'));
- assert.equal(assessmentSharingState(null).label,'Not started');assert.equal(state().label,'Invitation active');assert.equal(state().replace,true);
+ assert.equal(assessmentSharingState(null).label,'Not invited');assert.equal(state().label,'Invitation ready');assert.equal(state().replace,true);
  assert.equal(state({status:'in-progress'}).label,'In progress');
  for(const extra of [{expiresAt:'2026-01-01'}, {status:'cancelled'}, {status:'expired'}, {revokedAt:'2026-09-09'}]){assert.equal(state(extra).label,'Expired or replaced');assert.equal(state(extra).replace,true);}
  assert.equal(state({status:'analyzed',expiresAt:'2020-01-01'}).label,'Completed');assert.equal(state({status:'analyzed'}).canGenerate,false);assert.equal(state({status:'submitted'}).canGenerate,false);

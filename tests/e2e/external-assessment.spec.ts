@@ -24,7 +24,7 @@ test('local Production invitation, anonymous resume, trusted atomic completion a
  const candidatePath=(await page.getByRole('link',{name:'Open candidate record'}).getAttribute('href'))!;
  await expect(page.getByText(/This action does not send email/)).toBeVisible();
  const generationRequest=page.waitForRequest(r=>r.method()==='POST'&&!!r.headers()['next-action']);
- await page.getByRole('button',{name:'Generate Assessment Link'}).click();const generation=await generationRequest;
+ await page.getByRole('button',{name:'Share Assessment'}).click();const generation=await generationRequest;
  const invitation=new URL((await page.getByRole('link',{name:'Open Assessment'}).getAttribute('href'))!,page.url()).toString();
  expect(invitation).toMatch(/^http:\/\/127\.0\.0\.1:3100\/assessment\/invitation\/[A-Za-z0-9_-]{43}$/);
  const token=invitation.split('/').at(-1)!;const hash=createHash('sha256').update(token).digest('hex');
@@ -76,7 +76,7 @@ test('local Production invitation, anonymous resume, trusted atomic completion a
  const pdf=await candidate.request.get(`${invitation}/report`);expect(pdf.ok()).toBe(true);expect(pdf.headers()['content-type']).toContain('application/pdf');expect((await pdf.body()).toString('latin1')).not.toContain('INTERNAL CONSULTANT USE');
  await candidate.goto(invitation);await expect(candidate.getByRole('heading',{name:'Assessment complete'})).toBeVisible();
  await page.goto(candidatePath);await expect(page.getByRole('heading',{name:'Consultant Brief'})).toBeVisible();await page.screenshot({path:testInfo.outputPath('consultant-desktop.png'),fullPage:true});
- await expect(page.getByRole('link',{name:'Share Assessment',exact:true})).toHaveCount(0);await expect(page.getByRole('link',{name:'View Intelligence',exact:true})).toBeVisible();
+ await expect(page.getByRole('link',{name:'Share Assessment',exact:true})).toHaveCount(0);await expect(page.getByRole('link',{name:'View Candidate Intelligence',exact:true})).toBeVisible();
  const repeatedGeneration=await page.request.post(generation.url(),{headers:{'next-action':generation.headers()['next-action'],'content-type':generation.headers()['content-type'],origin:new URL(page.url()).origin},data:generation.postData()!});expect(await repeatedGeneration.text()).toContain('This assessment cannot be replaced');expect((await read()).id).toBe(persisted.id);
  await page.getByRole('link',{name:'Assessments & Documents',exact:true}).first().click();
  for(const label of ['Completed Assessment','Candidate Profile','Consultant Intelligence Report']){await page.getByRole('link',{name:label,exact:true}).click();const path=(await page.getByRole('link',{name:'Download PDF',exact:true}).getAttribute('href'))!;const report=await page.request.get(path);expect(report.headers()['content-type']).toContain('application/pdf');const denied=await candidate.request.get(path);expect(denied.headers()['content-type']).not.toContain('application/pdf');}

@@ -16,3 +16,10 @@ export type ProductionAssessmentSession = {
   completedAt: string | null; expiresAt: string; revokedAt: string | null;
   progress: AssessmentProgress | null; analysis: ConferenceAnalysis | null;
 };
+
+/** A permanent contact may not have a candidate until trusted completion. */
+export type ContactAssessmentSession = Omit<ProductionAssessmentSession, "candidateId"> & {
+  contactId: string;
+  candidateId: string | null;
+  identityConflict: boolean;
+};
