@@ -2,15 +2,17 @@ import { z } from 'zod';
 import { assetIdSchema, type MediaAsset } from '../marketing/media/model';
 import { colors, fontIds } from '../marketing/studio/document';
 
-export const slideTitles = ['Brand Overview','Business Model','Investment & Economics','Why Candidates Consider This Brand','Discussion / Next Steps'] as const;
-export const mediaSlots = ['brandLogo','hero','image2','image3','companyLogo'] as const;
+export const slideTitles = ['Brand Overview','The Business & Ownership Model','Investment & Financial Structure','Training, Support & Brand Advantages','The Franchise Opportunity'] as const;
+// Presentation-local purpose slots; future governed profile assets can populate these directly.
+export const mediaSlots = ['brandLogo','hero','image2','image3','location','productService','operations','customerExperience','team','marketing','companyLogo'] as const;
 export type MediaSlot = typeof mediaSlots[number];
 const text = (max:number) => z.string().trim().max(max).refine(s=>!/[\u0000-\u001f]/.test(s),'Use a single line of text.');
 export const optionsSchema = z.object({
   expectedVersion:text(200).min(1), title:text(70), subtitle:text(140),
   showSupport:z.boolean(), showFees:z.boolean(), showConsiderations:z.boolean(),
   imageFit:z.enum(['cover','contain']),
-  assets:z.object({brandLogo:assetIdSchema.nullable(),hero:assetIdSchema.nullable(),image2:assetIdSchema.nullable(),image3:assetIdSchema.nullable(),companyLogo:assetIdSchema.nullable()}).strict(),
+  assets:z.object({brandLogo:assetIdSchema.nullable(),hero:assetIdSchema.nullable(),image2:assetIdSchema.nullable(),image3:assetIdSchema.nullable(),location:assetIdSchema.nullable(),productService:assetIdSchema.nullable(),operations:assetIdSchema.nullable(),customerExperience:assetIdSchema.nullable(),team:assetIdSchema.nullable(),marketing:assetIdSchema.nullable(),companyLogo:assetIdSchema.nullable()}).strict(),
+  visualIdentity:z.object({primaryColor:z.enum(colors),secondaryColor:z.enum(colors),accentColor:z.enum(colors)}).strict(),
   branding:z.object({name:text(70),company:text(80),title:text(90),email:text(100),phone:text(40),website:text(140),primaryColor:z.enum(colors),accentColor:z.enum(colors),font:z.enum(fontIds)}).strict(),
 }).strict();
 export type PresentationOptions = z.infer<typeof optionsSchema>;

@@ -22,10 +22,10 @@ test('demo media imports and loads with Sharp unavailable',()=>{
   for(const asset of assets){const png=Buffer.from(asset.deliveryUrl.split(',')[1],'base64');if(png.toString('hex',0,8)!=='89504e470d0a1a0a'||png.readUInt32BE(16)!==asset.width||png.readUInt32BE(20)!==asset.height)throw Error('Invalid static PNG');}
   console.log(assets.length);
  `],{encoding:'utf8',windowsHide:true});
- assert.equal(output.trim(),'4');
+ assert.equal(output.trim(),'10');
 });
 test('demo media is deterministic, export allowlisted and does not call workspace media',async()=>{
- const demoAssets=await demoPresentationMedia(),again=await demoPresentationMedia();assert.deepEqual(demoAssets,again);assert.equal(Object.keys(demoAssets).length,4);
+ const demoAssets=await demoPresentationMedia(),again=await demoPresentationMedia();assert.deepEqual(demoAssets,again);assert.equal(Object.keys(demoAssets).length,10);
  const o=options();[o.assets.brandLogo,o.assets.hero,o.assets.image2,o.assets.image3]=Object.keys(demoAssets);
  const dependencies={load:async()=>({profile,mediaAvailable:true,demoAssets}),media:async()=>{throw Error('Real library must not be called')}};
  const result=await preparePresentationExport(profile.id,o,dependencies);assert.equal(Object.keys(result.assets).length,4);
@@ -74,4 +74,24 @@ test('editable PPTX contains five slides, embedded image and source notes',async
  const cover=await zip.file('ppt/slides/slide1.xml').async('string');assert.match(cover,/<a:t>/);assert.match(cover,/Synthetic Consultant/);assert.match(cover,/<p:pic>/);
  assert.match(await zip.file('ppt/notesSlides/notesSlide1.xml').async('string'),/Internal demo material/);
  for(let i=0;i<5;i++)for(const e of presentationScene(p,i).elements){assert.ok(e.x>=0&&e.y>=0&&e.x+e.w<=13.334&&e.y+e.h<=7.5);if(e.kind==='image'&&[o.assets.brandLogo,o.assets.companyLogo].includes(e.assetId))assert.ok(['contain','cover'].includes(e.fit));}
+});
+
+test('brand-only narrative, purpose imagery and varied shared compositions',async()=>{
+ const edited=structuredClone(profile);edited.discoveryQuestions.value=['DISCOVERY MUST NOT APPEAR'];
+ const o=defaultOptions(edited,branding),assets=await demoPresentationMedia();
+ const slots=['brandLogo','hero','image2','image3','location','productService','operations','customerExperience','team','marketing'];
+ slots.forEach((slot,i)=>o.assets[slot]=Object.keys(assets)[i]);
+ const p=buildPresentation(edited,o);
+ assert.deepEqual(p.slides.map(s=>s.title),['Brand Overview','The Business & Ownership Model','Investment & Financial Structure','Training, Support & Brand Advantages','The Franchise Opportunity']);
+ assert.ok(!JSON.stringify(p).includes('DISCOVERY MUST NOT APPEAR'));
+ assert.ok(p.slides[4].facts.some(f=>f.provenance.startsWith('website')));
+ edited.website.approval='internal-only';edited.characteristics.territoryModel.verification='unknown';
+ assert.ok(!buildPresentation(edited,o).slides[4].facts.some(f=>['Website','Territory model'].includes(f.label)));
+ const scenes=p.slides.map((_,i)=>presentationScene(p,i));
+ assert.deepEqual(scenes.map(s=>s.elements.filter(e=>e.kind==='image').length),[4,3,0,3,3]);
+ assert.equal(new Set(scenes.map(s=>s.background)).size,3);
+ for(const scene of scenes)for(const e of scene.elements)assert.ok(e.x>=0&&e.y>=0&&e.x+e.w<=13.334&&e.y+e.h<=7.5);
+ const zip=await JSZip.loadAsync(await renderPptx(p,assets));
+ for(let i=0;i<5;i++){const xml=await zip.file('ppt/slides/slide'+(i+1)+'.xml').async('string');assert.equal((xml.match(/<p:pic>/g)||[]).length,scenes[i].elements.filter(e=>e.kind==='image').length);assert.match(xml,/<a:t>/);}
+ assert.throws(()=>buildPresentation(profile,{...o,visualIdentity:{...o.visualIdentity,secondaryColor:'red'}}));
 });

@@ -9,12 +9,13 @@ test('Brand Presentation Studio: entry, five slides, local edits, preview and ed
   await expect(page.locator('[data-studio-ready]'),JSON.stringify(errors)).toHaveAttribute('data-studio-ready','true',{timeout:30000});
   await page.getByLabel('Cover title',{exact:true}).fill('Explore ActionCOACH');
   await expect(page.locator('[data-slide-preview]')).toContainText('Explore ActionCOACH');
+  await page.getByLabel('Secondary color',{exact:true}).selectOption('#7C3AED');
   await page.getByLabel('Include fees',{exact:true}).uncheck();
-  for(const [slot,asset] of [['Brand logo','DEMO LOGO'],['Hero image','DEMO HERO'],['Business model image','DEMO IMAGE TWO'],['Additional brand image','DEMO IMAGE THREE']]){
+  for(const [slot,asset] of [['Brand logo','DEMO LOGO'],['Hero image','DEMO HERO'],['Business model image','DEMO IMAGE TWO'],['Additional brand image','DEMO IMAGE THREE'],['Location image','DEMO LOCATION'],['Product/service image','DEMO PRODUCT / SERVICE'],['Operations image','DEMO OPERATIONS'],['Customer experience image','DEMO CUSTOMER EXPERIENCE'],['Team image','DEMO TEAM'],['Marketing/general image','DEMO MARKETING / GENERAL']]){
     await page.getByRole('button',{name:'Choose '+slot,exact:true}).click();
     await page.getByRole('dialog',{name:'Demo presentation imagery'}).getByRole('button',{name:new RegExp('^'+asset+' .*synthetic, not actual brand imagery$')}).click();
   }
-  await expect(page.locator('[data-slide-preview] img')).toHaveCount(2);
+  await expect(page.locator('[data-slide-preview] img')).toHaveCount(4);
   for(let i=0;i<5;i++){
     await expect(page.getByText(`Slide ${i+1} of 5`,{exact:true})).toBeVisible();
     expect(await page.locator('[data-slide-preview]').evaluate(el=>{const r=el.getBoundingClientRect();return Math.abs(r.width/r.height-16/9)<.02})).toBe(true);
@@ -23,6 +24,8 @@ test('Brand Presentation Studio: entry, five slides, local edits, preview and ed
     if(i<4)await page.getByRole('button',{name:'Next',exact:true}).click();
   }
   await expect(page.locator('[data-slide-preview]')).toContainText('not an offer to sell a franchise');
+  await expect(page.locator('[data-slide-preview]')).toContainText('The Franchise Opportunity');
+  await expect(page.locator('[data-slide-preview]')).not.toContainText('Questions to explore');
   await page.getByRole('button',{name:'Previous',exact:true}).click();
   const downloading=page.waitForEvent('download');await page.getByRole('button',{name:'Download PowerPoint',exact:true}).click();const download=await downloading;
   expect(await download.failure()).toBeNull();expect(download.suggestedFilename()).toMatch(/\.pptx$/);await download.saveAs(info.outputPath('studio.pptx'));
