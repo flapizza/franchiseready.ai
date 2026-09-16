@@ -1,0 +1,67 @@
+/* The mounted V2 composer owns this presentation; other CRM screens never opt in. */
+[data-app-shell]:has([data-campaign-composer]) [data-app-sidebar],
+[data-app-shell]:has([data-campaign-composer]) [data-app-topbar],
+[data-app-shell]:has([data-campaign-composer]) [data-app-mobile-header],
+[data-campaign-page]:has([data-campaign-composer]) > [data-campaign-heading] { display:none; }
+[data-app-shell]:has([data-campaign-composer]) [data-workspace-frame],
+[data-app-shell]:has([data-campaign-composer]) [data-workspace-content] { padding:0; max-width:none; }
+[data-campaign-page]:has([data-campaign-composer]) { margin:0; }
+[data-campaign-page]:has([data-campaign-composer]) > * { margin-block:0; }
+.composer-workspace { font-family:Arial,Helvetica,sans-serif; min-width:0; min-height:100dvh; background:#edf2f7; color:#172033; }
+.composer-topbar { display:flex; flex-wrap:wrap; align-items:center; gap:16px; padding:12px 20px; background:white; border-bottom:1px solid #dce3ec; }
+.composer-back { font-size:12px; font-weight:700; color:#475569; }
+.composer-identity { min-width:0; flex:1 1 180px; }
+.composer-identity p { font-size:10px; letter-spacing:.18em; color:#0f766e; font-weight:800; }
+.composer-identity h1 { font-size:16px; font-weight:800; overflow-wrap:anywhere; }
+.composer-identity span { font-size:11px; color:#64748b; }
+.composer-actions { display:flex; flex-wrap:wrap; align-items:center; gap:8px; min-width:0; }
+.composer-save { padding:9px 16px; border-radius:8px; background:#0f766e; color:white; font-size:12px; font-weight:800; }
+.composer-save:disabled { opacity:.5; }
+.composer-save-hint { max-width:190px; font-size:11px; color:#64748b; }
+.composer-workspace :is(button,a,summary,input,select,textarea):focus-visible { outline:2px solid #2563eb; outline-offset:3px; }
+.composer-delivery { position:relative; }
+.composer-delivery > section { padding:0; border:0; border-radius:0; }
+.composer-delivery > section > h3,.composer-delivery > section > p:first-of-type { display:none; }
+.composer-delivery > section > div:first-of-type { margin:0; gap:8px; }
+.composer-delivery > section > div:first-of-type > button { padding:9px 12px; border-radius:8px; font-size:12px; }
+.composer-delivery [data-delivery-panel] { position:absolute; right:0; top:calc(100% + 8px); z-index:30; width:min(440px,calc(100vw - 32px)); max-height:70dvh; overflow:auto; box-shadow:0 12px 40px #0f172a30; border:1px solid #cbd5e1; }
+.composer-delivery > section > p { font-size:11px; margin-top:4px; max-width:340px; }
+.studio-editor.composer-editor { display:grid; grid-template-columns:280px minmax(0,1fr); grid-template-rows:auto auto 1fr; border:0; border-radius:0; min-height:calc(100dvh - 90px); align-items:start; }
+.composer-viewbar { grid-column:1/-1; display:flex; align-items:center; gap:12px; padding:8px 16px; background:white; border-bottom:1px solid #e2e8f0; font-size:12px; color:#64748b; }
+.composer-editor > aside { grid-column:1; grid-row:2/5; align-self:stretch; background:white; border-right:1px solid #dce3ec; padding:12px; min-width:0; }
+.composer-editor > .studio-toolbar { grid-column:2; grid-row:2; position:sticky; top:0; z-index:10; padding:8px 12px; }
+.composer-editor > .studio-canvas-surround,.composer-preview { grid-column:2; grid-row:3; min-width:0; width:100%; }
+.composer-editor > .studio-canvas-surround { padding:32px 24px 80px; min-height:calc(100dvh - 210px); }
+.composer-editor .studio-canvas .tiptap { min-height:560px; }
+.composer-editor > p[role=status] { grid-column:2; grid-row:4; }
+.studio-editor.composer-editor[data-controls-open=false] { grid-template-columns:minmax(0,1fr); }
+.studio-editor.composer-editor[data-controls-open=false] > :is(.studio-toolbar,.studio-canvas-surround,.composer-preview,p[role=status]) { grid-column:1; }
+.composer-editor [hidden] { display:none !important; }
+.composer-disclosure { border-bottom:1px solid #e2e8f0; padding:12px 0; }
+.composer-disclosure > summary { font-size:12px; font-weight:800; cursor:pointer; padding:4px; }
+.composer-disclosure > div { padding:12px 0; border:0; border-radius:0; }
+.composer-editor aside > details:not(.composer-disclosure) { padding:12px 0; border:0; border-bottom:1px solid #e2e8f0; border-radius:0; font-size:12px; }
+.composer-editor aside :is(input,select,textarea) { max-width:100%; min-width:0; }
+.composer-editor aside .sm\:grid-cols-2 { grid-template-columns:1fr; }
+.composer-editor aside [role=dialog] { padding:8px; }
+.composer-editor aside [role=dialog] > .grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.composer-preview { padding:16px 24px 48px; }
+.composer-preview > section { padding:0; border:0; }
+@media(max-width:1100px) { .composer-topbar { gap:10px; } .composer-actions { flex:1 1 100%; } .studio-editor.composer-editor { grid-template-columns:260px minmax(0,1fr); } .composer-editor > .studio-canvas-surround { padding:24px 12px 60px; } }
+@media(max-width:760px) { .composer-topbar { padding:12px; } .studio-editor.composer-editor { display:flex; flex-direction:column; } .composer-editor > * { width:100%; } .composer-editor > aside { order:1; border-right:0; } .composer-viewbar { order:0; } .composer-editor > .studio-toolbar { order:2; position:static; } .composer-editor > .studio-canvas-surround,.composer-preview { order:3; } .composer-editor > p[role=status] { order:4; } .composer-editor > .studio-canvas-surround { padding:16px 10px 40px; } .composer-preview { padding:12px; } .composer-delivery [data-delivery-panel] { position:static; width:100%; max-height:65dvh; margin-top:12px; } }
+
+@media(min-width:761px) {
+ .composer-workspace { height:100dvh; min-height:0; display:flex; flex-direction:column; }
+ .composer-topbar { flex-shrink:0; }
+ .studio-editor.composer-editor { flex:1; min-height:0; grid-template-rows:auto auto minmax(0,1fr) auto; }
+ .composer-editor > aside { overflow:auto; min-height:0; }
+ .composer-editor > .studio-canvas-surround,.composer-preview { overflow:auto; height:100%; min-height:0; }
+}
+@media(max-width:760px) { .composer-editor > aside { max-height:45dvh; overflow:auto; } }
+
+@media(max-width:760px) { .composer-editor > .studio-toolbar { flex-wrap:nowrap; overflow-x:auto; } .composer-editor > .studio-toolbar > * { flex-shrink:0; } }
+
+.composer-delivery [data-delivery-panel][hidden] { display:none; }
+.composer-delivery .delivery-panel-heading { position:sticky; top:-16px; z-index:1; display:flex; align-items:center; justify-content:space-between; gap:12px; padding-block:8px; background:#f0f9ff; }
+.composer-delivery #studio-review-panel > .delivery-panel-heading { background:#fffbeb; }
+@media(max-width:760px) { .composer-delivery { width:100%; } }

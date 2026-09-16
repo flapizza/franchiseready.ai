@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type CSSProperties } from "react";
+import { useEffect, useState, type ReactNode, type CSSProperties } from "react";
 import { EditorContent, useEditor } from "@tiptap/react";
 import { NodeSelection } from "@tiptap/pm/state";
 import type { JSONContent } from "@tiptap/core";
@@ -10,8 +10,9 @@ import "./studio.css";
 import MediaLibrary from '../media/MediaLibrary';
 import type { BrandingSnapshot } from '../media/model';
 
-export default function VisualEditor({ value, onChange, disabled = false, branding }: { value: EmailDocument; onChange: (value: EmailDocument) => void; disabled?: boolean; branding?:BrandingSnapshot|null }) {
+export default function VisualEditor({ value, onChange, disabled = false, branding, controls, preview, previewing = false, onEdit }: { value: EmailDocument; onChange: (value: EmailDocument) => void; disabled?: boolean; branding?:BrandingSnapshot|null; controls?: ReactNode; preview?: ReactNode; previewing?: boolean; onEdit?: () => void }) {
   const [library,setLibrary]=useState<{from:number;to:number}|null|false>(false);
+  const [controlsOpen, setControlsOpen] = useState(true);
   const [notice, setNotice] = useState("");
   const [linkUrl, setLinkUrl] = useState("https://");
   const [, refresh] = useState(0);
@@ -54,8 +55,9 @@ export default function VisualEditor({ value, onChange, disabled = false, brandi
   };
   const insert = (type: string, attrs?: Record<string, unknown>) => insertNode({ type, ...(attrs ? { attrs } : {}) });
   const property = (label: string, key: string, type = "text") => <label className="studio-property">{label}<input type={type} value={selected?.attrs[key] ?? ""} onChange={event => editor.commands.updateAttributes(selected!.type.name, { [key]: event.target.value || (key === "href" ? null : "") })} /></label>;
-  return <fieldset disabled={disabled} className="studio-editor">
-    <div className="studio-toolbar" role="group" aria-label="Email formatting">
+  return <fieldset disabled={disabled} className="studio-editor composer-editor" data-controls-open={controlsOpen}>
+    <div className="composer-viewbar"><button type="button" className="studio-tool" aria-expanded={controlsOpen} aria-controls="composer-controls" onClick={() => setControlsOpen(!controlsOpen)}>{controlsOpen ? "Hide controls" : "Show controls"}</button><span>{previewing ? "Email preview" : "Design your email"}</span>{previewing && <button type="button" className="studio-tool" onClick={() => { onEdit?.(); requestAnimationFrame(() => editor.commands.focus()); }}>Back to editing</button>}</div>
+    <div hidden={previewing} className="studio-toolbar" role="group" aria-label="Email formatting">
       <label className="sr-only" htmlFor="studio-font">Font family</label><select id="studio-font" aria-label="Font family" value={editor.getAttributes("emailStyle").font ?? "arial"} onChange={e => applyStyle("font", e.target.value)}>{fontIds.map(id => <option key={id} value={id}>{fontNames[id]}</option>)}</select>
       <select aria-label="Font size" value={editor.getAttributes("emailStyle").size ?? 16} onChange={e => applyStyle("size", Number(e.target.value))}>{fontSizes.map(size => <option key={size} value={size}>{size}px</option>)}</select>
       <select aria-label="Text color" value={editor.getAttributes("emailStyle").color ?? "#172033"} onChange={e => applyStyle("color", e.target.value)}>{colors.map((color, i) => <option key={color} value={color}>{["Ink", "Slate", "Blue", "Green", "Rose", "Purple"][i]}</option>)}</select>
@@ -68,6 +70,7 @@ export default function VisualEditor({ value, onChange, disabled = false, brandi
       {control("Numbered list", () => editor.chain().focus().toggleOrderedList().run(), editor.isActive("orderedList"))}
       {control("Undo", () => editor.chain().focus().undo().run())}{control("Redo", () => editor.chain().focus().redo().run())}
     </div>
+    <aside id="composer-controls" aria-label="Composer controls" hidden={!controlsOpen}>{controls}<details open className="composer-disclosure"><summary>Content blocks &amp; media</summary>
     <div className="studio-insert" role="group" aria-label="Insert email content">
       <select aria-label="Insert merge field" value="" onChange={e => { if (e.target.value) insert("mergeField", { field: e.target.value }); }}><option value="">Personalize…</option>{mergeFields.map(field => <option key={field}>{field}</option>)}</select>
       {control("Add button", () => insert("button", { label: "Explore opportunities", href: "https://example.com", alignment: "left" }))}
@@ -79,6 +82,7 @@ export default function VisualEditor({ value, onChange, disabled = false, brandi
       {control("Image + text", () => insertNode({ type: "imageText", content: [imagePlaceholder(), { type: "emailColumn", content: [{ type: "paragraph", attrs: { textAlign: "left" }, content: [{ type: "text", text: "Tell the story behind this image." }] }] }] }))}
       {control("Media library",()=>setLibrary(null))}
     </div>
+    </details><details className="composer-disclosure" open><summary>Links &amp; block properties</summary>
     <div className="studio-links"><label className="min-w-0 flex-1 text-xs font-bold">HTTPS link<input aria-label="HTTPS link" value={linkUrl} onChange={e => setLinkUrl(e.target.value)} placeholder="https://" className="mt-1 w-full rounded-lg border p-2 font-normal" /></label>{control("Apply link", () => { if (!httpsUrl.safeParse(linkUrl).success) { setNotice("Enter a valid HTTPS link."); return; } editor.chain().focus().setMark("link", { href: linkUrl }).run(); setNotice(""); })}{control("Remove link", () => editor.chain().focus().unsetMark("link").run())}</div>
     {selected && ["button", "signature", "emailImage", "spacer"].includes(selected.type.name) && <div className="studio-properties" aria-label="Selected block properties">
       <p className="w-full text-xs font-black uppercase text-teal-700">Selected {selected.type.name === "emailImage" ? "image placeholder" : selected.type.name}</p>
@@ -89,8 +93,11 @@ export default function VisualEditor({ value, onChange, disabled = false, brandi
       {selected.type.name === "spacer" && <label className="studio-property">Spacer height<select aria-label="Spacer height" value={selected.attrs.height} onChange={e => editor.commands.updateAttributes("spacer", { height: Number(e.target.value) })}>{[8, 16, 24, 32, 48].map(n => <option key={n} value={n}>{n}px</option>)}</select></label>}
       {control("Remove block", () => editor.chain().focus().deleteSelection().run())}
     </div>}
+    </details>
     {library!==false&&<MediaLibrary onClose={()=>setLibrary(false)} onSelect={asset=>{const node={type:'emailImage',attrs:{assetId:asset.public_id,alt:asset.default_alt,alignment:'center',width:Math.min(536,Math.max(80,asset.width)),href:null}};if(library)editor.chain().focus().insertContentAt(library,node).run();else insertNode(node);setLibrary(false);}}/>}
+    </aside>
     {notice && <p role="status" className="border-b bg-amber-50 p-3 text-sm text-amber-900">{notice}</p>}
-    <div className="studio-canvas-surround"><div className="studio-canvas" style={{ fontFamily: fontStacks[value.theme.fontFamily],color:value.theme.textColor,"--studio-accent":value.theme.accentColor } as CSSProperties}><EditorContent editor={editor} /><div className="studio-compliance">Sender identity · Postal address · Unsubscribe<br /><span>Protected footer added in email preview</span></div></div></div>
+    <div hidden={previewing} className="studio-canvas-surround"><div className="studio-canvas" style={{ fontFamily: fontStacks[value.theme.fontFamily],color:value.theme.textColor,"--studio-accent":value.theme.accentColor } as CSSProperties}><EditorContent editor={editor} /><div className="studio-compliance">Sender identity · Postal address · Unsubscribe<br /><span>Protected footer added in email preview</span></div></div></div>
+    <div className="composer-preview" hidden={!previewing}>{preview}</div>
   </fieldset>;
 }

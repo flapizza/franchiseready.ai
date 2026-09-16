@@ -25,7 +25,7 @@ export function AppShell({
 
         {presentation.temporaryDataIndicator && <DemoWorkspaceIndicator indicator={presentation.temporaryDataIndicator} />}
 
-        {mobileHeader ? <><header className="flex shrink-0 items-center justify-between gap-3 border-b border-border bg-white px-4 py-3 lg:hidden">{mobileHeader}</header><div className="hidden lg:block"><TopBar presentation={presentation} /></div></> : <TopBar presentation={presentation} />}
+        {mobileHeader ? <><header data-app-mobile-header className="flex shrink-0 items-center justify-between gap-3 border-b border-border bg-white px-4 py-3 lg:hidden">{mobileHeader}</header><div className="hidden lg:block"><TopBar presentation={presentation} /></div></> : <TopBar presentation={presentation} />}
 
         <main data-workspace-scroll className="min-h-0 flex-1 overflow-auto bg-slate-100">
 

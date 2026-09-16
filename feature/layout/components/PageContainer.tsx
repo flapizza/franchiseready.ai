@@ -40,7 +40,7 @@ export function PageContainer({
 
       )}
 
-      <div className="min-w-0 p-4 lg:p-10">
+      <div data-workspace-content className="min-w-0 p-4 lg:p-10">
 
         {children}
 
