@@ -24,6 +24,7 @@ export function BrandProfileWorkspace({ profile }: { profile: BrandIntelligenceP
         <div className="max-w-3xl">
           <div className="flex flex-wrap gap-2"><Pill>{profile.category.value ?? "Category unknown"}</Pill><Pill>{profile.version.origin === "local-test-fixture" ? "Local demo profile" : profile.demoClassification === "curated-demo-concept" ? "Curated demo concept" : profile.demoClassification === "existing-demo-profile" ? "Existing demo profile" : "Brand profile"}</Pill></div>
           <h1 className="mt-5 text-4xl font-black tracking-tight">{profile.name}</h1>
+          <Link href={`/crm/brands/${profile.id}/presentation`} className="mt-5 inline-flex min-h-11 items-center rounded-xl bg-white px-5 py-3 text-sm font-bold text-slate-950 hover:bg-teal-50">Create Presentation</Link>
           <p className="mt-4 text-base leading-7 text-slate-300">{profile.description.value ?? "No reviewed description is available."}</p>
         </div>
         <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
