@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {execFileSync} from 'node:child_process';
 import JSZip from 'jszip';
 import sharp from 'sharp';
 import {BrandIntelligenceRuntime} from '../../feature/brand-library/runtime/BrandIntelligenceRuntime.ts';
@@ -12,6 +13,17 @@ const branding={version:1,name:'Synthetic Consultant',company:'Example Advisory'
 const profiles=await new BrandIntelligenceRuntime().getAll();
 const profile=profiles.sort((a,b)=>b.completeness.knownFields-a.completeness.knownFields)[0];
 const options=()=>defaultOptions(profile,branding);
+test('demo media imports and loads with Sharp unavailable',()=>{
+ const output=execFileSync(process.execPath,['--import','./tests/fixtures/register-typescript.mjs','--input-type=module','-e',`
+  import {registerHooks} from 'node:module';
+  registerHooks({resolve(specifier,context,next){if(specifier==='sharp'||specifier.startsWith('@img/'))throw Error('Native image processing forbidden');return next(specifier,context);}});
+  const {demoPresentationMedia}=await import('./feature/brand-presentation/demoMedia.ts');
+  const assets=Object.values(await demoPresentationMedia());
+  for(const asset of assets){const png=Buffer.from(asset.deliveryUrl.split(',')[1],'base64');if(png.toString('hex',0,8)!=='89504e470d0a1a0a'||png.readUInt32BE(16)!==asset.width||png.readUInt32BE(20)!==asset.height)throw Error('Invalid static PNG');}
+  console.log(assets.length);
+ `],{encoding:'utf8',windowsHide:true});
+ assert.equal(output.trim(),'4');
+});
 test('demo media is deterministic, export allowlisted and does not call workspace media',async()=>{
  const demoAssets=await demoPresentationMedia(),again=await demoPresentationMedia();assert.deepEqual(demoAssets,again);assert.equal(Object.keys(demoAssets).length,4);
  const o=options();[o.assets.brandLogo,o.assets.hero,o.assets.image2,o.assets.image3]=Object.keys(demoAssets);
