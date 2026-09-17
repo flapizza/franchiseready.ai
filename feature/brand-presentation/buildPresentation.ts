@@ -1,3 +1,4 @@
+import { demoPhotographyNotice, demoPhotographySources } from './eraDemoPhotography';
 import type { BrandFact, BrandIntelligenceProfile } from '../brand-library/models/BrandIntelligenceProfile';
 import type { BrandingSnapshot } from '../marketing/media/model';
 import { defaultDisclaimer, disclaimerText, optionsSchema, selectedAssetIds, slideTitles, type AssetMap, type Presentation, type PresentationOptions, type SlideFact, type Scene, type Element, PresentationError } from './model';
@@ -46,7 +47,7 @@ export function buildPresentation(profile:BrandIntelligenceProfile,input:unknown
   const label=profile.version.origin==='local-test-fixture'?'LOCAL DEMO · NOT VERIFIED':profile.demoClassification!=='not-demo'?'DEMO MATERIAL · NOT VERIFIED':'BRAND INTELLIGENCE';
   const slides=content.map((items,i)=>{
     const facts=pick(items);
-    return {title:slideTitles[i],facts,notes:[profile.name,`Profile version: ${profile.version.id}`,`Published/effective: ${profile.version.publishedAt??profile.version.effectiveAt??'Unknown'}`,label,'Consultant discussion material; not a purchase recommendation, performance claim or candidate-fit guarantee. Unknown or non-approved facts are omitted. Any abbreviated text is reproduced in full below. Images are explicit consultant selections, not independently verified brand imagery.',...facts.map(f=>`${f.label}: ${f.value}\n${f.provenance}`)].join('\n\n')};
+    return {title:slideTitles[i],facts,notes:[profile.name,`Profile version: ${profile.version.id}`,`Published/effective: ${profile.version.publishedAt??profile.version.effectiveAt??'Unknown'}`,label,'Consultant discussion material; not a purchase recommendation, performance claim or candidate-fit guarantee. Unknown or non-approved facts are omitted. Any abbreviated text is reproduced in full below. Images are explicit consultant selections, not independently verified brand imagery.',...demoPhotographySources(o),...facts.map(f=>`${f.label}: ${f.value}\n${f.provenance}`)].join('\n\n')};
   });
   return {brandId:profile.id,brandName:profile.name,version:profile.version.id,label,options:o,slides,disclaimer:{defaultText:defaultDisclaimer,brandSpecificText:null,mode:'supplement'}};
 }
@@ -76,7 +77,7 @@ export function presentationScene(p:Presentation,index:number):Scene {
   const empty=()=>{if(!slide.facts.length)text(.7,2.2,7,1,'Approved brand information is not available for this section.',19,muted);};
 
   if(cover){
-    shape(8,0,5.3333,6.5,palette.secondaryColor);
+    shape(8,.95,.045,5.2,palette.secondaryColor);
     image('hero',8.25,.95,4.55,3.9);
     image('productService',8.25,5.02,2.18,1.12);image('location',10.6,5.02,2.2,1.12);
     image('brandLogo',.7,1.05,3.8,.9,true);
@@ -86,11 +87,11 @@ export function presentationScene(p:Presentation,index:number):Scene {
     text(.7,5.05,6.8,.3,summary?.qualification??'No approved description available',10,muted);
     shape(.7,5.6,1,.07,palette.accentColor);
     text(.7,5.88,6.8,.45,[b.name,b.company].filter(Boolean).join(' | '),13,muted);
-    text(.7,6.35,6.8,.22,b.title,10,muted);
+    text(.7,6.15,6.8,.22,b.title,10,muted);
   }else if(index===1){
     text(.7,1,11.9,.85,slide.title,30,ink,true);
     slide.facts.slice(0,4).forEach((f,i)=>card(f,.7+(i%2)*3.65,2.15+Math.floor(i/2)*1.97,3.45,1.77,i===0?'#EAF2F0':'#FFFFFF'));
-    shape(8.25,2.15,4.4,4,palette.secondaryColor);
+    shape(8.25,2.15,.045,4,palette.secondaryColor);
     image(o.assets.operations?'operations':'image2',8.4,2.3,4.1,2.12);
     image('location',8.4,4.57,1.96,1.43);image('productService',10.51,4.57,1.99,1.43);empty();
   }else if(index===2){
@@ -99,7 +100,7 @@ export function presentationScene(p:Presentation,index:number):Scene {
     slide.facts.slice(0,3).forEach((f,i)=>card(f,i===0?.7:7.15,i===0?2.15:2.15+(i-1)*1.58,i===0?6.15:5.5,i===0?3:1.42,'#FFFFFF',true));
     slide.facts.slice(3,6).forEach((f,i)=>{const x=.7+i*4.06;text(x,5.48,3.85,.23,f.label,11,muted,true);text(x,5.88,3.85,.48,shorten(f.value,80),17,ink);});empty();
   }else if(index===3){
-    shape(0,0,4.35,6.45,palette.secondaryColor);
+    shape(4.1,1.05,.045,4.97,palette.secondaryColor);
     image(o.assets.team?'team':'image3',.55,1.05,3.25,2.28);
     image('customerExperience',.55,3.5,3.25,1.25);image('marketing',.55,4.92,3.25,1.1);
     text(4.7,1,7.9,.95,slide.title,28,ink,true);
@@ -110,7 +111,7 @@ export function presentationScene(p:Presentation,index:number):Scene {
       text(4.95,y+.26,7.55,.39,shorten(f.value,150),14,ink);
     });empty();
   }else{
-    shape(8.6,0,4.7333,5.75,palette.secondaryColor);
+    shape(8.6,1,.045,4.2,palette.secondaryColor);
     text(.7,1,7.6,.85,slide.title,30,ink,true);
     slide.facts.slice(0,6).forEach((f,i)=>{
       const x=.7+(i%2)*3.87,y=2.08+Math.floor(i/2)*.99;
@@ -118,13 +119,14 @@ export function presentationScene(p:Presentation,index:number):Scene {
       text(x,y+.31,3.6,.55,shorten(f.value,110),14,ink);
     });
     image(o.assets.marketing?'marketing':'hero',8.85,1,3.93,2.4);
-    image('location',8.85,3.57,1.87,1.6);image('customerExperience',10.89,3.57,1.89,1.6);
+    image(o.assets.image2?'image2':'location',8.85,3.57,1.87,1.6);image('customerExperience',10.89,3.57,1.89,1.6);
     shape(.7,5.25,7.5,.035,palette.accentColor);
     image('companyLogo',.7,5.48,1.1,.4,true);
     text(o.assets.companyLogo?2: .7,5.45,o.assets.companyLogo?6.1:7.4,.3,[b.name,b.company].filter(Boolean).join(' | '),12,ink,true);
     text(o.assets.companyLogo?2: .7,5.77,o.assets.companyLogo?6.1:7.4,.22,b.title,10,muted);
     text(.7,6.02,11.95,.2,[b.email,b.phone,b.website].filter(Boolean).join(' | '),10,muted);empty();
   }
+  if(demoPhotographySources(o).length)text(.7,6.45,11.95,.16,demoPhotographyNotice,8,muted);
   shape(0,0,13.3333,.85,palette.primaryColor);
   shape(.45,.3,.09,.28,palette.accentColor);text(.7,.3,10,.24,p.label,10,'#E2E8F0',true);
   text(11.6,.3,1,.25,(index+1)+' / 5',11,'#E2E8F0');

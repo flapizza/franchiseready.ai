@@ -6,6 +6,7 @@ const nextConfig: NextConfig = {
   // Sharp loads its platform binary and libvips dynamically. Keep both in the
   // media function bundle, including when Next uses a different Sharp version.
   outputFileTracingIncludes: {
+    "/crm/brands/*/presentation{,/**}": ["./feature/brand-presentation/demo-assets/*.png"],
     "/api/marketing/media": ["./node_modules/@img/sharp-*/**/*"],
   },
 };

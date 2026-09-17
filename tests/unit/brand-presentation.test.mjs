@@ -22,10 +22,10 @@ test('demo media imports and loads with Sharp unavailable',()=>{
   for(const asset of assets){const png=Buffer.from(asset.deliveryUrl.split(',')[1],'base64');if(png.toString('hex',0,8)!=='89504e470d0a1a0a'||png.readUInt32BE(16)!==asset.width||png.readUInt32BE(20)!==asset.height)throw Error('Invalid static PNG');}
   console.log(assets.length);
  `],{encoding:'utf8',windowsHide:true});
- assert.equal(output.trim(),'10');
+ assert.equal(output.trim(),'8');
 });
 test('demo media is deterministic, export allowlisted and does not call workspace media',async()=>{
- const demoAssets=await demoPresentationMedia(),again=await demoPresentationMedia();assert.deepEqual(demoAssets,again);assert.equal(Object.keys(demoAssets).length,10);
+ const demoAssets=await demoPresentationMedia(),again=await demoPresentationMedia();assert.deepEqual(demoAssets,again);assert.equal(Object.keys(demoAssets).length,8);
  const o=options();[o.assets.brandLogo,o.assets.hero,o.assets.image2,o.assets.image3]=Object.keys(demoAssets);
  const dependencies={load:async()=>({profile,mediaAvailable:true,demoAssets}),media:async()=>{throw Error('Real library must not be called')}};
  const result=await preparePresentationExport(profile.id,o,dependencies);assert.equal(Object.keys(result.assets).length,4);
@@ -80,7 +80,7 @@ test('brand-only narrative, purpose imagery and varied shared compositions',asyn
  const edited=structuredClone(profile);edited.discoveryQuestions.value=['DISCOVERY MUST NOT APPEAR'];
  const o=defaultOptions(edited,branding),assets=await demoPresentationMedia();
  const slots=['brandLogo','hero','image2','image3','location','productService','operations','customerExperience','team','marketing'];
- slots.forEach((slot,i)=>o.assets[slot]=Object.keys(assets)[i]);
+ slots.forEach((slot,i)=>o.assets[slot]=Object.keys(assets)[i%8]);
  const p=buildPresentation(edited,o);
  assert.deepEqual(p.slides.map(s=>s.title),['Brand Overview','The Business & Ownership Model','Investment & Financial Structure','Training, Support & Brand Advantages','The Franchise Opportunity']);
  assert.ok(!JSON.stringify(p).includes('DISCOVERY MUST NOT APPEAR'));
@@ -95,3 +95,32 @@ test('brand-only narrative, purpose imagery and varied shared compositions',asyn
  for(let i=0;i<5;i++){const xml=await zip.file('ppt/slides/slide'+(i+1)+'.xml').async('string');assert.equal((xml.match(/<p:pic>/g)||[]).length,scenes[i].elements.filter(e=>e.kind==='image').length);assert.match(xml,/<a:t>/);}
  assert.throws(()=>buildPresentation(profile,{...o,visualIdentity:{...o.visualIdentity,secondaryColor:'red'}}));
 });
+
+ test('ERA defaults embed all eight supplied PNGs and preserve presentation governance',async()=>{
+ const {applyEraDemoPhotography}=await import('../../feature/brand-presentation/eraDemoPhotography.ts');
+ const {readFile,writeFile}=await import('node:fs/promises');
+ const {default:fixtures}=await import('../../feature/brand-presentation/demoMediaData.json',{with:{type:'json'}});
+ const era=profiles.find(p=>p.id==='era-group');assert.ok(era);
+ const o=defaultOptions(era,{...branding,name:'Jim Wood',company:'FranGroove AI',title:'Senior Franchise Consultant',email:'jim@frangroove.ai'});
+ const original=buildPresentation(era,o);applyEraDemoPhotography(era.id,o);
+ const other=options(),before=structuredClone(other);applyEraDemoPhotography('other-brand',other);assert.deepEqual(other,before);
+ const assets=await demoPresentationMedia(),p=buildPresentation(era,o);
+ assert.deepEqual(p.slides.map(s=>s.facts),original.slides.map(s=>s.facts));assert.equal(o.imageFit,'contain');assert.equal(o.assets.brandLogo,null);
+ const scenes=p.slides.map((_,i)=>presentationScene(p,i));
+ assert.deepEqual(scenes.map(s=>s.elements.filter(e=>e.kind==='image').length),[3,3,0,3,3]);
+ assert.equal(new Set(scenes.flatMap(s=>s.elements.filter(e=>e.kind==='image').map(e=>e.assetId))).size,8);
+ for(const scene of scenes)assert.ok(!scene.elements.some(e=>e.kind==='shape'&&e.color===o.visualIdentity.secondaryColor&&e.w*e.h>1));
+ const cleared=structuredClone(o);for(const slot of Object.keys(cleared.assets))cleared.assets[slot]=null;
+ for(let i=0;i<5;i++)assert.ok(!presentationScene(buildPresentation(era,cleared),i).elements.some(e=>e.kind==='shape'&&e.color===o.visualIdentity.secondaryColor&&e.w*e.h>1));
+ const bytes=await renderPptx(p,assets),zip=await JSZip.loadAsync(bytes);
+ assert.equal(zip.file(/^ppt\/slides\/slide\d+\.xml$/).length,5);
+ const embedded=await Promise.all(zip.file(/^ppt\/media\//).filter(f=>!f.dir).map(f=>f.async('nodebuffer')));
+ for(const f of fixtures){const supplied=await readFile(new URL('../../feature/brand-presentation/demo-assets/'+f.file,import.meta.url));assert.ok(embedded.some(b=>b.equals(supplied)),f.file);}
+ for(let i=1;i<=5;i++){
+ const xml=await zip.file(`ppt/slides/slide${i}.xml`).async('string');assert.match(xml,/<a:t>/);assert.match(xml,/Jim Wood/);
+ const notes=await zip.file(`ppt/notesSlides/notesSlide${i}.xml`).async('string');assert.ok(notes.includes(era.version.id));assert.match(notes,/OpenAI image generation/);assert.match(notes,/Not governed ERA media/);
+ const rels=await zip.file(`ppt/slides/_rels/slide${i}.xml.rels`).async('string');assert.doesNotMatch(rels,/TargetMode="External"/);
+ }
+ const closing=await zip.file('ppt/slides/slide5.xml').async('string');assert.match(closing,/not an offer to sell a franchise/);assert.match(closing,/Senior Franchise Consultant/);assert.match(closing,/jim@frangroove.ai/);
+ if(process.env.ERA_SAMPLE_PPTX)await writeFile(process.env.ERA_SAMPLE_PPTX,bytes);
+ });
