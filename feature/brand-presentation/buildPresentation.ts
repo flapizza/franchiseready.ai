@@ -7,7 +7,8 @@ export async function prepareExport(brandId:string,input:unknown,dependencies:{l
   const options=optionsSchema.parse(input),workspace=await dependencies.load(brandId);
   const presentation=buildPresentation(workspace.profile,options),ids=selectedAssetIds(options);
   if(!workspace.mediaAvailable&&ids.length)throw new PresentationError('Workspace media is unavailable in conference demo mode.');
-  const assets=workspace.demoAssets?Object.fromEntries(ids.filter(id=>workspace.demoAssets![id]).map(id=>[id,workspace.demoAssets![id]])):ids.length?await dependencies.media(ids):{};
+  const persistedIds=ids.filter(id=>!workspace.demoAssets?.[id]);
+  const assets={...(persistedIds.length?await dependencies.media(persistedIds):{}),...Object.fromEntries(ids.filter(id=>workspace.demoAssets?.[id]).map(id=>[id,workspace.demoAssets![id]]))};
   if(ids.some(id=>!assets[id]))throw new PresentationError('A selected workspace image is no longer available.',409);
   return {presentation,assets};
 }

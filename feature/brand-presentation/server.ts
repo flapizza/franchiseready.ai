@@ -17,9 +17,10 @@ export async function loadPresentationWorkspace(brandId:string) {
   if(!profile)throw new PresentationError('Brand profile unavailable.',404);
   const branding:BrandingSnapshot=demo?{version:1,company:demoConsultant.companyName??'',name:demoConsultant.displayName,title:demoConsultant.title,email:demoConsultant.email??'',phone:'',website:'',postalAddress:'',linkedIn:'',scheduling:'',primaryColor:'#172033',accentColor:'#2563EB',font:'arial',logo:null,headshot:null}:await resolveBranding();
   const options=defaultOptions(profile,branding);
-  const demoAssets=demo?await demoPresentationMedia():undefined;
+  const demoAssets=demo||profile.id==='era-group'?await demoPresentationMedia():undefined;
   if(demoAssets)applyEraDemoPhotography(profile.id,options);
-  const assets=demoAssets?Object.fromEntries(selectedAssetIds(options).map(id=>[id,demoAssets[id]])):await resolveMediaAssets(selectedAssetIds(options));
+  const ids=selectedAssetIds(options);
+  const assets={...await resolveMediaAssets(ids.filter(id=>!demoAssets?.[id])),...Object.fromEntries(ids.filter(id=>demoAssets?.[id]).map(id=>[id,demoAssets![id]]))};
   return {profile,options,assets,mediaAvailable:true,...(demoAssets?{demoAssets}:{})};
 }
 // Injection seam permits focused authorization/version/media tests without a database.

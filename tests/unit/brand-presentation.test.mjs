@@ -13,6 +13,42 @@ const branding={version:1,name:'Synthetic Consultant',company:'Example Advisory'
 const profiles=await new BrandIntelligenceRuntime().getAll();
 const profile=profiles.sort((a,b)=>b.completeness.knownFields-a.completeness.knownFields)[0];
 const options=()=>defaultOptions(profile,branding);
+test('persisted ERA preview and shared export receive photos while retaining authorized branding',()=>{
+ const output=execFileSync(process.execPath,['--import','./tests/fixtures/register-typescript.mjs','--input-type=module','-e',`
+  import assert from 'node:assert/strict';
+  import {registerHooks} from 'node:module';
+  const profile=JSON.parse(process.env.ERA_PROFILE),branding=JSON.parse(process.env.ERA_BRANDING);
+  const logo={public_id:branding.logo,deliveryUrl:'authorized-logo',width:100,height:100};
+  globalThis.eraComposition={status:'resolved',composition:{dependencies:{brandIntelligence:{getById:async id=>({...profile,id})}}}};
+  globalThis.eraBranding=branding;
+  globalThis.eraMedia=async ids=>{assert.ok(ids.every(id=>id===branding.logo),'foreign media rejected');return Object.fromEntries(ids.map(id=>[id,logo]));};
+  registerHooks({resolve(specifier,context,next){
+   if(context.parentURL?.endsWith('/brand-presentation/server.ts')){
+    const source=specifier==='../platform/composition/resolveWorkspaceComposition'?'export const resolveWorkspaceComposition=async()=>globalThis.eraComposition':specifier==='../marketing/media/server'?'export const resolveBranding=async()=>globalThis.eraBranding;export const resolveMediaAssets=globalThis.eraMedia':null;
+    if(source)return {url:'data:text/javascript,'+encodeURIComponent(source),shortCircuit:true};
+   }
+   return next(specifier,context);
+  }});
+  const {loadPresentationWorkspace,preparePresentationExport}=await import('./feature/brand-presentation/server.ts');
+  const {defaultOptions}=await import('./feature/brand-presentation/buildPresentation.ts');
+  for(const id of ['era-group','other-brand']){
+   const preview=await loadPresentationWorkspace(id),exported=await preparePresentationExport(id,preview.options);
+   assert.deepEqual(preview.options.branding,defaultOptions(preview.profile,branding).branding);
+   assert.deepEqual(preview.options.visualIdentity,defaultOptions(preview.profile,branding).visualIdentity);
+   assert.equal(preview.options.assets.companyLogo,branding.logo);
+   assert.deepEqual(preview.assets[branding.logo],logo);
+   assert.deepEqual(exported.assets,preview.assets);
+   assert.deepEqual(exported.presentation.options,preview.options);
+   if(id==='era-group'){
+    assert.equal(Object.keys(preview.demoAssets).length,8);assert.ok(preview.options.assets.hero);
+    assert.equal(Object.keys(preview.assets).length,9);
+    await assert.rejects(preparePresentationExport(id,{...preview.options,assets:{...preview.options.assets,hero:'asset_'+'f'.repeat(32)}}),/foreign media rejected/);
+   }else{assert.equal(preview.demoAssets,undefined);assert.equal(preview.options.assets.hero,null);}
+  }
+  console.log('passed');
+ `],{encoding:'utf8',windowsHide:true,env:{...process.env,ERA_PROFILE:JSON.stringify(profiles.find(p=>p.id==='era-group')),ERA_BRANDING:JSON.stringify({...branding,name:'Alex Morgan',company:'FranGroove Demo',logo:'asset_'+'c'.repeat(32)})}});
+ assert.equal(output.trim(),'passed');
+});
 test('demo media imports and loads with Sharp unavailable',()=>{
  const output=execFileSync(process.execPath,['--import','./tests/fixtures/register-typescript.mjs','--input-type=module','-e',`
   import {registerHooks} from 'node:module';
@@ -32,7 +68,7 @@ test('demo media is deterministic, export allowlisted and does not call workspac
  const bytes=await renderPptx(result.presentation,result.assets);const zip=await JSZip.loadAsync(bytes);
  assert.match(await zip.file('ppt/slides/slide5.xml').async('string'),/not an offer to sell a franchise/);
  assert.match(await zip.file('ppt/notesSlides/notesSlide5.xml').async('string'),/Franchise Disclosure Document/);
- await assert.rejects(preparePresentationExport(profile.id,{...o,assets:{...o.assets,hero:'asset_'+'f'.repeat(32)}},dependencies),/no longer available/);
+ await assert.rejects(preparePresentationExport(profile.id,{...o,assets:{...o.assets,hero:'asset_'+'f'.repeat(32)}},dependencies),/Real library must not be called/);
 });
 test('disclaimer is presentation metadata with replacement and supplement semantics',()=>{
  const p=buildPresentation(profile,options());assert.equal(disclaimerText(p.disclaimer),defaultDisclaimer);
