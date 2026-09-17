@@ -31,7 +31,12 @@ test('persisted ERA preview and shared export receive photos while retaining aut
   }});
   const {loadPresentationWorkspace,preparePresentationExport}=await import('./feature/brand-presentation/server.ts');
   const {defaultOptions}=await import('./feature/brand-presentation/buildPresentation.ts');
-  for(const id of ['era-group','other-brand']){
+  const {isEraDemoPhotographyEligible}=await import('./feature/brand-presentation/eraDemoPhotography.ts');
+  const hostedId='brand_9302298fcb084a94a6ab3e9e4cdef17d',otherId='brand_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+  assert.equal(isEraDemoPhotographyEligible('era-group'),true);
+  assert.equal(isEraDemoPhotographyEligible(hostedId),true);
+  assert.equal(isEraDemoPhotographyEligible(otherId),false);
+  for(const id of ['era-group',hostedId,otherId]){
    const preview=await loadPresentationWorkspace(id),exported=await preparePresentationExport(id,preview.options);
    assert.deepEqual(preview.options.branding,defaultOptions(preview.profile,branding).branding);
    assert.deepEqual(preview.options.visualIdentity,defaultOptions(preview.profile,branding).visualIdentity);
@@ -39,12 +44,19 @@ test('persisted ERA preview and shared export receive photos while retaining aut
    assert.deepEqual(preview.assets[branding.logo],logo);
    assert.deepEqual(exported.assets,preview.assets);
    assert.deepEqual(exported.presentation.options,preview.options);
-   if(id==='era-group'){
+   if(id!==otherId){
     assert.equal(Object.keys(preview.demoAssets).length,8);assert.ok(preview.options.assets.hero);
+    for(const slot of ['hero','productService','operations','team','customerExperience','location','marketing','image2'])assert.ok(preview.options.assets[slot]);
     assert.equal(Object.keys(preview.assets).length,9);
     await assert.rejects(preparePresentationExport(id,{...preview.options,assets:{...preview.options.assets,hero:'asset_'+'f'.repeat(32)}}),/foreign media rejected/);
    }else{assert.equal(preview.demoAssets,undefined);assert.equal(preview.options.assets.hero,null);}
   }
+  // The public ERA route resolves by slug; eligibility must use the loaded public ID.
+  globalThis.eraComposition.composition.dependencies.brandIntelligence.getById=async()=>({...profile,id:hostedId,slug:'era-group'});
+  const routed=await loadPresentationWorkspace('era-group');
+  assert.equal(routed.profile.id,hostedId);assert.ok(routed.options.assets.hero);
+  const routedExport=await preparePresentationExport(hostedId,routed.options);
+  assert.deepEqual(routedExport.assets,routed.assets);
   console.log('passed');
  `],{encoding:'utf8',windowsHide:true,env:{...process.env,ERA_PROFILE:JSON.stringify(profiles.find(p=>p.id==='era-group')),ERA_BRANDING:JSON.stringify({...branding,name:'Alex Morgan',company:'FranGroove Demo',logo:'asset_'+'c'.repeat(32)})}});
  assert.equal(output.trim(),'passed');

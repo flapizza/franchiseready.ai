@@ -6,7 +6,7 @@ import { demoConsultant } from '../demo/data/demoConsultant';
 import { defaultOptions, prepareExport } from './buildPresentation';
 import { selectedAssetIds, PresentationError } from './model';
 import { demoPresentationMedia } from './demoMedia';
-import { applyEraDemoPhotography } from './eraDemoPhotography';
+import { applyEraDemoPhotography, isEraDemoPhotographyEligible } from './eraDemoPhotography';
 
 export async function loadPresentationWorkspace(brandId:string) {
   const r=await resolveWorkspaceComposition();
@@ -17,7 +17,7 @@ export async function loadPresentationWorkspace(brandId:string) {
   if(!profile)throw new PresentationError('Brand profile unavailable.',404);
   const branding:BrandingSnapshot=demo?{version:1,company:demoConsultant.companyName??'',name:demoConsultant.displayName,title:demoConsultant.title,email:demoConsultant.email??'',phone:'',website:'',postalAddress:'',linkedIn:'',scheduling:'',primaryColor:'#172033',accentColor:'#2563EB',font:'arial',logo:null,headshot:null}:await resolveBranding();
   const options=defaultOptions(profile,branding);
-  const demoAssets=demo||profile.id==='era-group'?await demoPresentationMedia():undefined;
+  const demoAssets=demo||isEraDemoPhotographyEligible(profile.id)?await demoPresentationMedia():undefined;
   if(demoAssets)applyEraDemoPhotography(profile.id,options);
   const ids=selectedAssetIds(options);
   const assets={...await resolveMediaAssets(ids.filter(id=>!demoAssets?.[id])),...Object.fromEntries(ids.filter(id=>demoAssets?.[id]).map(id=>[id,demoAssets![id]]))};
