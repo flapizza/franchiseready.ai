@@ -2,6 +2,7 @@ import "server-only";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import type { ProductionWorkspaceComposition } from "@/feature/platform/composition/ProductionWorkspaceComposition";
 import type { HistoricalAssessment } from "./HistoricalAssessmentDocuments";
+import { demoAssessmentPresentation } from "./demoAssessmentPresentation";
 
 /** Signed-in client + candidate authorization + RLS. No tokens, current Discovery, or writes. */
 export async function loadHistoricalAssessments(composition: ProductionWorkspaceComposition, candidateId: string): Promise<HistoricalAssessment[]> {
@@ -26,5 +27,6 @@ export async function loadHistoricalAssessments(composition: ProductionWorkspace
       }
     }
   }
-  return result.sort((a,b) => b.completedAt.localeCompare(a.completedAt) || a.generatedAt.localeCompare(b.generatedAt) || a.id.localeCompare(b.id));
+  return result.map(record => demoAssessmentPresentation(org, candidateId, record))
+    .sort((a,b) => b.completedAt.localeCompare(a.completedAt) || a.generatedAt.localeCompare(b.generatedAt) || a.id.localeCompare(b.id));
 }
