@@ -11,7 +11,7 @@ export function isEraDemoPhotographyEligible(brandId:string):boolean {
 export function applyEraDemoPhotography(brandId:string,options:PresentationOptions) {
   if(!isEraDemoPhotographyEligible(brandId))return;
   const id=(index:number)=>fixtures[index-1].id;
-  Object.assign(options.assets,{hero:id(1),productService:id(2),operations:id(3),team:id(4),customerExperience:id(5),location:id(6),marketing:id(7),image2:id(8)});
+  Object.assign(options.assets,{hero:id(1),productService:id(2),operations:id(3),team:id(7),customerExperience:id(5),location:id(6),marketing:id(7),image2:id(8),image3:id(4)});
   // Supplied panoramas retain the whole interaction rather than cropping out participants.
   options.imageFit='contain';
 }

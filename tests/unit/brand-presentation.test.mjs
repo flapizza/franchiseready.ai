@@ -4,7 +4,7 @@ import {execFileSync} from 'node:child_process';
 import JSZip from 'jszip';
 import sharp from 'sharp';
 import {BrandIntelligenceRuntime} from '../../feature/brand-library/runtime/BrandIntelligenceRuntime.ts';
-import {buildPresentation,defaultOptions,presentationScene} from '../../feature/brand-presentation/buildPresentation.ts';
+import {buildPresentation,defaultOptions,presentationScene,mediaPlacements,placementSlot} from '../../feature/brand-presentation/buildPresentation.ts';
 import {renderPptx} from '../../feature/brand-presentation/renderPptx.ts';
 import {prepareExport as preparePresentationExport} from '../../feature/brand-presentation/buildPresentation.ts';
 import {demoPresentationMedia} from '../../feature/brand-presentation/demoMedia.ts';
@@ -136,7 +136,7 @@ test('brand-only narrative, purpose imagery and varied shared compositions',asyn
  edited.website.approval='internal-only';edited.characteristics.territoryModel.verification='unknown';
  assert.ok(!buildPresentation(edited,o).slides[4].facts.some(f=>['Website','Territory model'].includes(f.label)));
  const scenes=p.slides.map((_,i)=>presentationScene(p,i));
- assert.deepEqual(scenes.map(s=>s.elements.filter(e=>e.kind==='image').length),[4,3,0,3,3]);
+ assert.deepEqual(scenes.map(s=>s.elements.filter(e=>e.kind==='image').length),[2,2,0,1,1]);
  assert.equal(new Set(scenes.map(s=>s.background)).size,3);
  for(const scene of scenes)for(const e of scene.elements)assert.ok(e.x>=0&&e.y>=0&&e.x+e.w<=13.334&&e.y+e.h<=7.5);
  const zip=await JSZip.loadAsync(await renderPptx(p,assets));
@@ -144,7 +144,7 @@ test('brand-only narrative, purpose imagery and varied shared compositions',asyn
  assert.throws(()=>buildPresentation(profile,{...o,visualIdentity:{...o.visualIdentity,secondaryColor:'red'}}));
 });
 
- test('ERA defaults embed all eight supplied PNGs and preserve presentation governance',async()=>{
+ test('ERA defaults use five panoramas, keep all eight selectable and preserve presentation governance',async()=>{
  const {applyEraDemoPhotography}=await import('../../feature/brand-presentation/eraDemoPhotography.ts');
  const {readFile,writeFile}=await import('node:fs/promises');
  const {default:fixtures}=await import('../../feature/brand-presentation/demoMediaData.json',{with:{type:'json'}});
@@ -155,15 +155,17 @@ test('brand-only narrative, purpose imagery and varied shared compositions',asyn
  const assets=await demoPresentationMedia(),p=buildPresentation(era,o);
  assert.deepEqual(p.slides.map(s=>s.facts),original.slides.map(s=>s.facts));assert.equal(o.imageFit,'contain');assert.equal(o.assets.brandLogo,null);
  const scenes=p.slides.map((_,i)=>presentationScene(p,i));
- assert.deepEqual(scenes.map(s=>s.elements.filter(e=>e.kind==='image').length),[3,3,0,3,3]);
- assert.equal(new Set(scenes.flatMap(s=>s.elements.filter(e=>e.kind==='image').map(e=>e.assetId))).size,8);
+ assert.deepEqual(scenes.map(s=>s.elements.filter(e=>e.kind==='image').length),[1,2,0,1,1]);
+ assert.equal(new Set(scenes.flatMap(s=>s.elements.filter(e=>e.kind==='image').map(e=>e.assetId))).size,5);
  for(const scene of scenes)assert.ok(!scene.elements.some(e=>e.kind==='shape'&&e.color===o.visualIdentity.secondaryColor&&e.w*e.h>1));
  const cleared=structuredClone(o);for(const slot of Object.keys(cleared.assets))cleared.assets[slot]=null;
  for(let i=0;i<5;i++)assert.ok(!presentationScene(buildPresentation(era,cleared),i).elements.some(e=>e.kind==='shape'&&e.color===o.visualIdentity.secondaryColor&&e.w*e.h>1));
  const bytes=await renderPptx(p,assets),zip=await JSZip.loadAsync(bytes);
  assert.equal(zip.file(/^ppt\/slides\/slide\d+\.xml$/).length,5);
  const embedded=await Promise.all(zip.file(/^ppt\/media\//).filter(f=>!f.dir).map(f=>f.async('nodebuffer')));
- for(const f of fixtures){const supplied=await readFile(new URL('../../feature/brand-presentation/demo-assets/'+f.file,import.meta.url));assert.ok(embedded.some(b=>b.equals(supplied)),f.file);}
+ assert.equal(Object.keys(assets).length,8);
+ const usedIds=new Set(scenes.flatMap(scene=>scene.elements.filter(e=>e.kind==='image').map(e=>e.assetId)));
+ for(const f of fixtures.filter(f=>usedIds.has(f.id))){const supplied=await readFile(new URL('../../feature/brand-presentation/demo-assets/'+f.file,import.meta.url));assert.ok(embedded.some(b=>b.equals(supplied)),f.file);}
  for(let i=1;i<=5;i++){
  const xml=await zip.file(`ppt/slides/slide${i}.xml`).async('string');assert.match(xml,/<a:t>/);assert.match(xml,/Jim Wood/);
  const notes=await zip.file(`ppt/notesSlides/notesSlide${i}.xml`).async('string');assert.ok(notes.includes(era.version.id));assert.match(notes,/OpenAI image generation/);assert.match(notes,/Not governed ERA media/);
@@ -172,3 +174,72 @@ test('brand-only narrative, purpose imagery and varied shared compositions',asyn
  const closing=await zip.file('ppt/slides/slide5.xml').async('string');assert.match(closing,/not an offer to sell a franchise/);assert.match(closing,/Senior Franchise Consultant/);assert.match(closing,/jim@frangroove.ai/);
  if(process.env.ERA_SAMPLE_PPTX)await writeFile(process.env.ERA_SAMPLE_PPTX,bytes);
  });
+
+
+test('ERA placement rectangles, fact coverage and editable PPTX geometry agree',async()=>{
+ const {applyEraDemoPhotography}=await import('../../feature/brand-presentation/eraDemoPhotography.ts');
+ const era=profiles.find(p=>p.id==='era-group'),o=defaultOptions(era,branding);
+ applyEraDemoPhotography(era.id,o);
+ const p=buildPresentation(era,o),assets=await demoPresentationMedia();
+ const expected=[[[.7,2.8,11.95,3.28,'1']],[[6.43,2.15,6.2,1.7,'3'],[6.43,4.1,6.2,1.7,'2']],[],[[.7,1.95,9,2.47,'7']],[[.97,1.7,11.4,3.13,'8']]];
+ const zip=await JSZip.loadAsync(await renderPptx(p,assets));
+ for(let i=0;i<5;i++){
+  const scene=presentationScene(p,i),images=scene.elements.filter(e=>e.kind==='image'),texts=scene.elements.filter(e=>e.kind==='text');
+  assert.deepEqual(images.map(e=>[e.x,e.y,e.w,e.h,e.assetId.at(-1)]),expected[i]);
+  for(const e of scene.elements)assert.ok(e.x>=0&&e.y>=0&&e.x+e.w<=13.334&&e.y+e.h<=7.5);
+  for(const photo of images){
+   assert.equal(photo.fit,'contain');
+   const asset=assets[photo.assetId];assert.ok(Math.abs(photo.w/photo.h-asset.width/asset.height)<.02);
+   for(const t of texts)assert.ok(!(t.x<photo.x+photo.w&&t.x+t.w>photo.x&&t.y<photo.y+photo.h&&t.y+t.h>photo.y),`slide ${i+1}: text overlaps photo: ${t.text}`);
+  }
+  for(let a=0;a<texts.length;a++)for(let b=a+1;b<texts.length;b++){
+   const t=texts[a],u=texts[b];
+   assert.ok(!(t.x<u.x+u.w-.001&&t.x+t.w>u.x+.001&&t.y<u.y+u.h-.001&&t.y+t.h>u.y+.001),`slide ${i+1}: text boxes overlap: ${t.text} / ${u.text}`);
+  }
+  for(const f of p.slides[i].facts){
+   assert.ok(scene.notes.includes(`${f.label}: ${f.value}`));
+   if(i!==0)assert.ok(texts.some(t=>t.text===f.label),`lost visible fact: ${f.label}`);
+  }
+  const xml=await zip.file(`ppt/slides/slide${i+1}.xml`).async('string');
+  const pictures=[...xml.matchAll(/<p:pic>[\s\S]*?<\/p:pic>/g)].map(m=>m[0]);
+  assert.equal(pictures.length,images.length);
+  pictures.forEach((pic,j)=>{
+   assert.doesNotMatch(pic,/<a:srcRect[^>]*[lrtb]="[1-9]/);
+   const e=images[j],asset=assets[e.assetId],ratio=asset.width/asset.height;
+   const w=Math.min(e.w,e.h*ratio),h=w/ratio;
+   const off=pic.match(/<a:off x="(\d+)" y="(\d+)"/),ext=pic.match(/<a:ext cx="(\d+)" cy="(\d+)"/);
+   [e.x+(e.w-w)/2,e.y+(e.h-h)/2,w,h].forEach((n,k)=>assert.ok(Math.abs(Number([...off.slice(1),...ext.slice(1)][k])/914400-n)<.00001));
+  });
+  assert.match(xml,/<a:t>/);assert.ok(texts.some(t=>t.text.includes(branding.name)));
+ }
+ const closing=presentationScene(p,4);
+ assert.equal(closing.elements.filter(e=>e.kind==='text'&&e.text.includes(branding.name)).length,1);
+ assert.ok(closing.elements.some(e=>e.kind==='text'&&e.text===defaultDisclaimer));
+ for(const placement of mediaPlacements){
+  const removed=structuredClone(o);
+  for(const slot of [placement.slot,...placement.fallbacks])removed.assets[slot]=null;
+  assert.equal(removed.assets[placementSlot(placement,removed)],null);
+ }
+});
+
+
+test('closing layout retains all six opportunity facts and empty sections stay clear of photos',async()=>{
+ const {applyEraDemoPhotography}=await import('../../feature/brand-presentation/eraDemoPhotography.ts');
+ const era=structuredClone(profiles.find(p=>p.id==='era-group'));
+ for(const [key,value] of [['geography',['North America','Europe']],['unitMix','Single and multi-unit']]){
+  era.system[key]={...structuredClone(era.website),value};
+ }
+ const o=defaultOptions(era,branding);applyEraDemoPhotography(era.id,o);
+ const p=buildPresentation(era,o),closing=presentationScene(p,4);
+ assert.equal(p.slides[4].facts.length,6);
+ for(const f of p.slides[4].facts){
+  assert.ok(closing.elements.some(e=>e.kind==='text'&&e.text===f.label));
+  assert.ok(closing.notes.includes(`${f.label}: ${f.value}`));
+ }
+ for(let i=1;i<5;i++){
+  const empty=structuredClone(p);empty.slides[i].facts=[];
+  const scene=presentationScene(empty,i),message=scene.elements.find(e=>e.kind==='text'&&e.text.startsWith('Approved brand information'));
+  assert.ok(message);
+  for(const image of scene.elements.filter(e=>e.kind==='image'))assert.ok(!(message.x<image.x+image.w&&message.x+message.w>image.x&&message.y<image.y+image.h&&message.y+message.h>image.y));
+ }
+});

@@ -4,20 +4,27 @@ test('Brand Presentation Studio: entry, five slides, local edits, preview and ed
   page.on('pageerror',error=>errors.push(error.message));
   await page.route('**/*',route=>{const host=new URL(route.request().url()).hostname;return ['127.0.0.1','localhost'].includes(host)?route.continue():route.abort();});
   await page.goto('/login');await page.getByRole('button',{name:/Enter Conference Demo as/i}).click();await expect(page).toHaveURL(/\/crm$/);
-  await page.goto('/crm/brands/actioncoach');await page.getByRole('link',{name:'Create Presentation',exact:true}).click();
+  await page.goto('/crm/brands/era-group');await page.getByRole('link',{name:'Create Presentation',exact:true}).click();
   await expect(page.getByRole('main',{name:'Brand Presentation Studio'})).toBeVisible();
   await expect(page.locator('[data-studio-ready]'),JSON.stringify(errors)).toHaveAttribute('data-studio-ready','true',{timeout:30000});
-  await page.getByLabel('Cover title',{exact:true}).fill('Explore ActionCOACH');
-  await expect(page.locator('[data-slide-preview]')).toContainText('Explore ActionCOACH');
+  await page.getByLabel('Cover title',{exact:true}).fill('Explore ERA Group');
+  await expect(page.locator('[data-slide-preview]')).toContainText('Explore ERA Group');
   await page.getByLabel('Secondary color',{exact:true}).selectOption('#7C3AED');
   await page.getByLabel('Include fees',{exact:true}).uncheck();
-  for(const [slot,asset] of [['Brand logo','DEMO LOGO'],['Hero image','DEMO HERO'],['Business model image','DEMO IMAGE TWO'],['Additional brand image','DEMO IMAGE THREE'],['Location image','DEMO LOCATION'],['Product/service image','DEMO PRODUCT / SERVICE'],['Operations image','DEMO OPERATIONS'],['Customer experience image','DEMO CUSTOMER EXPERIENCE'],['Team image','DEMO TEAM'],['Marketing/general image','DEMO MARKETING / GENERAL']]){
-    await page.getByRole('button',{name:'Choose '+slot,exact:true}).click();
-    await page.getByRole('dialog',{name:'Demo presentation imagery'}).getByRole('button',{name:new RegExp('^'+asset+' .*synthetic, not actual brand imagery$')}).click();
-  }
-  await expect(page.locator('[data-slide-preview] img')).toHaveCount(4);
+  await expect(page.getByText('11.95 × 3.28 in', {exact:false})).toBeVisible();
+  await page.getByRole('button',{name:'Change Overview panorama',exact:true}).click();
+  const library=page.getByRole('dialog',{name:'Demo presentation imagery'});
+  await expect(library.locator('button').filter({has:page.locator('img')})).toHaveCount(8);
+  await library.getByRole('button',{name:/^team collaboration/}).click();
+  await expect(page.locator('[data-slide-preview] img')).toHaveCount(1);
+  await page.getByRole('button',{name:'Remove Overview panorama',exact:true}).click();
+  await expect(page.locator('[data-slide-preview] img')).toHaveCount(0);
+  await page.getByRole('button',{name:'Choose Overview panorama',exact:true}).click();
+  await library.getByRole('button',{name:/^executive team meeting/}).click();
+  const expectedPhotos=[1,2,0,1,1];
   for(let i=0;i<5;i++){
     await expect(page.getByText(`Slide ${i+1} of 5`,{exact:true})).toBeVisible();
+    await expect(page.locator('[data-slide-preview] img')).toHaveCount(expectedPhotos[i]);
     expect(await page.locator('[data-slide-preview]').evaluate(el=>{const r=el.getBoundingClientRect();return Math.abs(r.width/r.height-16/9)<.02})).toBe(true);
     expect(await page.locator('[data-slide-text]').evaluateAll(nodes=>nodes.filter(n=>n.scrollHeight>n.clientHeight+3||n.scrollWidth>n.clientWidth+3).map(n=>n.textContent))).toEqual([]);
     await page.locator('[data-slide-preview]').screenshot({path:info.outputPath(`slide-${i+1}.png`)});

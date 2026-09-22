@@ -6,6 +6,11 @@ export const slideTitles = ['Brand Overview','The Business & Ownership Model','I
 // Presentation-local purpose slots; future governed profile assets can populate these directly.
 export const mediaSlots = ['brandLogo','hero','image2','image3','location','productService','operations','customerExperience','team','marketing','companyLogo'] as const;
 export type MediaSlot = typeof mediaSlots[number];
+/** Presentation-local placement; inches are authoritative in both renderers. */
+export interface MediaPlacement {
+  slide:number; label:string; slot:MediaSlot; fallbacks:readonly MediaSlot[];
+  x:number; y:number; w:number; h:number;
+}
 const text = (max:number) => z.string().trim().max(max).refine(s=>!/[\u0000-\u001f]/.test(s),'Use a single line of text.');
 export const optionsSchema = z.object({
   expectedVersion:text(200).min(1), title:text(70), subtitle:text(140),
