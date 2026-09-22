@@ -22,7 +22,7 @@ export const optionsSchema = z.object({
 }).strict();
 export type PresentationOptions = z.infer<typeof optionsSchema>;
 export type AssetMap = Record<string,MediaAsset>;
-export interface SlideFact { label:string; value:string; qualification:string; provenance:string }
+export interface SlideFact { label:string; value:string; qualification:string; provenance:string; display?:{label:string;value:string} }
 export interface PresentationSlide { title:string; facts:SlideFact[]; notes:string }
 export const defaultDisclaimer='For informational discussion only; this presentation is not an offer to sell a franchise. Refer to the applicable Franchise Disclosure Document for formal franchise offering and disclosure information. Information may change and should be independently verified as appropriate.';
 export interface PresentationDisclaimer { defaultText:string; brandSpecificText:string|null; mode:'supplement'|'replace' }

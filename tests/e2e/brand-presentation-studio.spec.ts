@@ -25,6 +25,9 @@ test('Brand Presentation Studio: entry, five slides, local edits, preview and ed
   for(let i=0;i<5;i++){
     await expect(page.getByText(`Slide ${i+1} of 5`,{exact:true})).toBeVisible();
     await expect(page.locator('[data-slide-preview] img')).toHaveCount(expectedPhotos[i]);
+    await expect(page.locator('[data-slide-preview]')).toContainText('Franchise education overview');
+    await expect(page.locator('[data-slide-preview]')).toContainText('Illustrative overview; confirm details with ERA Group.');
+    await expect(page.locator('[data-slide-preview]')).not.toContainText(/Curated demo profile:|NOT VERIFIED|Sources:|AI-generated demo imagery/);
     expect(await page.locator('[data-slide-preview]').evaluate(el=>{const r=el.getBoundingClientRect();return Math.abs(r.width/r.height-16/9)<.02})).toBe(true);
     expect(await page.locator('[data-slide-text]').evaluateAll(nodes=>nodes.filter(n=>n.scrollHeight>n.clientHeight+3||n.scrollWidth>n.clientWidth+3).map(n=>n.textContent))).toEqual([]);
     await page.locator('[data-slide-preview]').screenshot({path:info.outputPath(`slide-${i+1}.png`)});

@@ -1,4 +1,4 @@
-import { demoPhotographyNotice, demoPhotographySources } from './eraDemoPhotography';
+import { demoPhotographySources } from './eraDemoPhotography';
 import type { BrandFact, BrandIntelligenceProfile } from '../brand-library/models/BrandIntelligenceProfile';
 import type { BrandingSnapshot } from '../marketing/media/model';
 import { defaultDisclaimer, disclaimerText, optionsSchema, selectedAssetIds, slideTitles, type MediaPlacement, type AssetMap, type Presentation, type PresentationOptions, type SlideFact, type Scene, type Element, PresentationError } from './model';
@@ -24,6 +24,29 @@ function format(value:unknown):string {
   if(typeof value==='object'&&value!==null&&'minimum' in value&&'maximum' in value)return `${money(value.minimum)} – ${money(value.maximum)}`;
   return String(value).replace(/\b([a-z]+)-([a-z]+)\b/g,'$1 $2');
 }
+/** Exact field/value mappings only; original facts and notes remain untouched. */
+function presentationCopy(path:string,value:string):{label:string;value:string}|undefined {
+  const replacements:Record<string,readonly [string,string,string]>={
+    'characteristics.customerModel':['B2B','Customers','Businesses'],
+    'characteristics.businessType':['professional','Operating model','Professional services'],
+    'characteristics.operatingLocations':['home based','Operating location','Home-based'],
+    'characteristics.ownerOperatorSuitability':['not suited','Owner-operator suitability','Not indicated as suitable'],
+    'characteristics.customerAcquisitionModel':['C-suite and senior business leaders','Primary customers','C-suite and senior business leaders'],
+    'support.initialTraining':['Curated demo profile: consulting methodology and business launch preparation','Initial training','Consulting methodology and business launch preparation.'],
+    'support.ongoingSupport':['Curated demo profile: peer collaboration and operating method support','Ongoing support','Peer collaboration and support with operating methods.'],
+    'support.marketingSupport':['Curated demo profile: market planning and early pipeline coaching','Marketing support','Market planning and early pipeline coaching.'],
+    'support.technologySupport':['Curated demo profile: analysis and client engagement workflow tools','Technology support','Tools for analysis and client engagement workflows.'],
+    'characteristics.executiveSuitability':['well suited','Executive ownership','Identified as suitable'],
+    'considerations':['Comfort with networking \u2022 Long sales cycle','Considerations','Comfort with networking \u2022 Longer sales cycles'],
+  };
+  const replacement=replacements[path];
+  if(replacement&&value===replacement[0])return {label:replacement[1],value:replacement[2]};
+  if(path==='economics.minimumLiquidCapital')return {label:'Minimum liquid capital',value};
+  if(path==='differentiators')return {label:'Business strengths',value};
+  return undefined;
+}
+const faceLabel=(fact:SlideFact)=>fact.display?.label??fact.label;
+const faceValue=(fact:SlideFact)=>fact.display?.value??fact.value;
 export function defaultOptions(profile:BrandIntelligenceProfile,b:BrandingSnapshot):PresentationOptions {
   return optionsSchema.parse({expectedVersion:profile.version.id,title:'',subtitle:'',showSupport:true,showFees:true,showConsiderations:true,imageFit:'cover',assets:{brandLogo:null,hero:null,image2:null,image3:null,location:null,productService:null,operations:null,customerExperience:null,team:null,marketing:null,companyLogo:b.logo},visualIdentity:{primaryColor:'#172033',secondaryColor:'#2563EB',accentColor:'#047857'},branding:{name:b.name.slice(0,70),company:b.company.slice(0,80),title:b.title.slice(0,90),email:b.email.slice(0,100),phone:b.phone.slice(0,40),website:b.website.slice(0,140),primaryColor:b.primaryColor,accentColor:b.accentColor,font:b.font}});
 }
@@ -36,7 +59,8 @@ export function buildPresentation(profile:BrandIntelligenceProfile,input:unknown
     const value=format(f.value);if(!value.trim())return [];
     const inferred=f.evidence.some(e=>e.sourceType==='inferred');
     const qualification=`${f.verification==='verified'?'Verified':f.verification==='reviewed'?'Reviewed; not independently verified':'Unverified'}${inferred?' · inferred':''}`;
-    return [{label,value,qualification,provenance:[path,qualification,f.notes,...f.evidence.map(e=>[e.title,e.sourceType,e.verification,e.sourceDate,e.sourceUrl,e.documentReference,e.fddReference?`FDD ${e.fddReference.item??''} p. ${e.fddReference.page??''}`:'',e.notes].filter(Boolean).join(' | '))].filter(Boolean).join('\n')}];
+    const display=presentationCopy(path,value);
+    return [{label,value,...(display?{display}:{}),qualification,provenance:[path,qualification,f.notes,...f.evidence.map(e=>[e.title,e.sourceType,e.verification,e.sourceDate,e.sourceUrl,e.documentReference,e.fddReference?`FDD ${e.fddReference.item??''} p. ${e.fddReference.page??''}`:'',e.notes].filter(Boolean).join(' | '))].filter(Boolean).join('\n')}];
   });
   const content:[string,string][][]=[
     [['About the brand','description'],['Category','category'],['Industry','industry'],['Website','website']],
@@ -68,6 +92,8 @@ const shorten=(s:string,n:number)=>s.length>n?s.slice(0,n-1).trimEnd()+'…':s;
 export function presentationScene(p:Presentation,index:number):Scene {
   const slide=p.slides[index],o=p.options,b=o.branding,cover=index===0,closing=index===4,dark=cover||closing||index===2;
   const palette=o.visualIdentity;
+  const needsConfirmation=p.label!=='BRAND INTELLIGENCE'||p.slides.some(s=>s.facts.some(f=>f.qualification!=='Verified'));
+  const qualification=needsConfirmation?`Illustrative overview; confirm details with ${p.brandName}.`:'Confirm current information with the franchisor.';
   const background=dark?palette.primaryColor:index===3?'#EAF2F0':'#F5F6F8',ink=dark?'#FFFFFF':'#172033',muted=dark?'#E2E8F0':'#475569';
   const elements:Element[]=[];
   const shape=(x:number,y:number,w:number,h:number,color:string)=>elements.push({kind:'shape',x,y,w,h,color});
@@ -82,11 +108,11 @@ export function presentationScene(p:Presentation,index:number):Scene {
 
   const card=(f:SlideFact,x:number,y:number,w:number,h:number,color='#FFFFFF',large=false)=>{
     shape(x,y,w,h,color);shape(x,y,.055,h,palette.accentColor);
-    text(x+.18,y+.13,w-.36,.3,f.label,11,'#475569',true);
-    text(x+.18,y+.53,w-.36,h-.89,shorten(f.value,large?80:180),large?27:16,'#172033',large);
-    text(x+.18,y+h-.23,w-.36,.16,f.qualification,8,'#475569');
+    text(x+.18,y+.13,w-.36,.3,faceLabel(f),11,'#475569',true);
+    text(x+.18,y+.53,w-.36,h-.89,shorten(faceValue(f),large?80:180),large?27:16,'#172033',large);
+
   };
-  const empty=()=>{if(!slide.facts.length)text(.7,2.2,7,1,'Approved brand information is not available for this section.',19,muted);};
+  const empty=()=>{if(!slide.facts.length)text(.7,2.2,7,1,'Discuss this topic with your consultant and the franchisor.',19,muted);};
 
   for(const placement of mediaPlacements.filter(item=>item.slide===index)){
     image(placementSlot(placement,o),placement.x,placement.y,placement.w,placement.h);
@@ -96,7 +122,7 @@ export function presentationScene(p:Presentation,index:number):Scene {
     text(.7,1.02,o.assets.brandLogo?9.0:11.95,.65,shorten(o.title||p.brandName,70),34,ink,true);
     const summary=slide.facts.find(f=>f.label==='About the brand');
     text(.7,1.80,11.95,.64,shorten(o.subtitle||summary?.value||'Brand overview',190),19,muted);
-    text(.7,2.51,11.95,.18,summary?.qualification??'No approved description available',10,muted);
+    text(.7,2.51,11.95,.18,summary?'':'Ask your consultant for a brand overview.',10,muted);
     shape(.7,2.72,11.95,.025,palette.secondaryColor);
     text(.7,6.16,11.95,.23,[b.name,b.company,b.title].filter(Boolean).join(' | '),12,muted);
   }else if(index===1){
@@ -104,48 +130,47 @@ export function presentationScene(p:Presentation,index:number):Scene {
     slide.facts.forEach((f,i)=>{
       const y=2.15+i*.82;
       shape(.7,y,.055,.70,palette.accentColor);
-      text(.88,y,5.13,.20,f.label,11,muted,true);
-      text(.88,y+.25,5.13,.44,shorten(f.value,180),15,ink);
+      text(.88,y,5.13,.20,faceLabel(f),11,muted,true);
+      text(.88,y+.25,5.13,.44,shorten(faceValue(f),180),15,ink);
     });
-    if(!slide.facts.length)text(.7,2.2,5.3,1,'Approved brand information is not available for this section.',19,muted);
+    if(!slide.facts.length)text(.7,2.2,5.3,1,'Discuss this topic with your consultant and the franchisor.',19,muted);
   }else if(index===2){
     shape(0,0,.22,7.5,palette.accentColor);
     text(.7,1,11.9,.85,slide.title,30,ink,true);
     slide.facts.slice(0,3).forEach((f,i)=>card(f,i===0?.7:7.15,i===0?2.15:2.15+(i-1)*1.58,i===0?6.15:5.5,i===0?3:1.42,'#FFFFFF',true));
-    slide.facts.slice(3,6).forEach((f,i)=>{const x=.7+i*4.06;text(x,5.48,3.85,.23,f.label,11,muted,true);text(x,5.88,3.85,.48,shorten(f.value,80),17,ink);});empty();
+    slide.facts.slice(3,6).forEach((f,i)=>{const x=.7+i*4.06;text(x,5.48,3.85,.23,faceLabel(f),11,muted,true);text(x,5.88,3.85,.48,shorten(faceValue(f),80),17,ink);});empty();
   }else if(index===3){
     text(.7,1,11.95,.75,slide.title,28,ink,true);
     const differentiators=slide.facts.find(f=>f.label==='Differentiators');
     if(differentiators){
-      text(9.95,1.95,2.7,.24,differentiators.label,11,muted,true);
-      text(9.95,2.30,2.7,2.12,shorten(differentiators.value,300),16,ink);
+      text(9.95,1.95,2.7,.24,faceLabel(differentiators),11,muted,true);
+      text(9.95,2.30,2.7,2.12,shorten(faceValue(differentiators),300),16,ink);
     }
     slide.facts.filter(f=>f!==differentiators).forEach((f,i)=>{
       const x=.7+(i%2)*6.1,y=4.62+Math.floor(i/2)*.86;
       shape(x,y,.055,.72,palette.accentColor);
-      text(x+.18,y,5.65,.20,f.label,11,muted,true);
-      text(x+.18,y+.25,5.65,.47,shorten(f.value,150),14,ink);
+      text(x+.18,y,5.65,.20,faceLabel(f),11,muted,true);
+      text(x+.18,y+.25,5.65,.47,shorten(faceValue(f),150),14,ink);
     });
-    if(!slide.facts.length)text(.7,4.65,11.95,.7,'Approved brand information is not available for this section.',19,muted);
+    if(!slide.facts.length)text(.7,4.65,11.95,.7,'Discuss this topic with your consultant and the franchisor.',19,muted);
   }else{
     text(.7,.98,11.95,.60,slide.title,30,ink,true);
     slide.facts.forEach((f,i)=>{
       const x=.7+(i%3)*4.06,y=4.94+Math.floor(i/3)*.61;
-      text(x,y,3.85,.17,f.label,10,muted,true);
-      text(x,y+.20,3.85,.36,shorten(f.value,110),12,ink);
+      text(x,y,3.85,.17,faceLabel(f),10,muted,true);
+      text(x,y+.20,3.85,.36,shorten(faceValue(f),110),12,ink);
     });
     image('companyLogo',.7,6.18,1.1,.40,true);
     const identityX=o.assets.companyLogo?2:.7,identityW=o.assets.companyLogo?10.65:11.95;
     text(identityX,6.13,identityW,.27,[b.name,b.company,b.title].filter(Boolean).join(' | '),10,ink,true);
     text(identityX,6.42,identityW,.27,[b.email,b.phone,b.website].filter(Boolean).join(' | '),10,muted);
-    if(!slide.facts.length)text(.7,4.94,11.95,.75,'Approved brand information is not available for this section.',19,muted);
+    if(!slide.facts.length)text(.7,4.94,11.95,.75,'Discuss this topic with your consultant and the franchisor.',19,muted);
   }
-  if(demoPhotographySources(o).length)text(.7,closing?7.0:6.45,11.95,closing?.14:.16,demoPhotographyNotice,8,muted);
   shape(0,0,13.3333,.85,palette.primaryColor);
-  shape(.45,.3,.09,.28,palette.accentColor);text(.7,.3,10,.24,p.label,10,'#E2E8F0',true);
+  shape(.45,.3,.09,.28,palette.accentColor);text(.7,.3,10,.24,'Franchise education overview',10,'#E2E8F0',true);
   text(11.6,.3,1,.25,(index+1)+' / 5',11,'#E2E8F0');
-  text(.7,closing?6.72:6.65,11.95,closing?.27:.32,slide.facts.length?`Sources: ${[...new Set(slide.facts.map(f=>f.qualification))].join(' / ')}. Full facts and source references in slide notes.`:'Unknown or non-approved facts omitted. Confirm current information with the franchisor.',9,muted);
+  text(.7,closing?6.72:6.65,11.95,closing?.27:.32,slide.facts.length?qualification:'Confirm current information with the franchisor.',9,muted);
   if(closing)text(.7,7.16,11.95,.32,disclaimerText(p.disclaimer),10,muted);
-  if(!closing)text(.7,7.04,11.95,.2,shorten([b.name,b.company,cover||closing?'Discussion material · No performance or fit guarantee':'Consultant discussion material'].filter(Boolean).join('  |  '),170),9,muted);
+  if(!closing)text(.7,7.04,11.95,.2,shorten([b.name,b.company,cover?'For educational purposes; no assurance of results or suitability.':'Franchise education.'].filter(Boolean).join('  |  '),170),9,muted);
   return {background,elements,notes:slide.notes+'\n\nPresentation disclaimer (not a brand fact):\n'+disclaimerText(p.disclaimer)};
 }

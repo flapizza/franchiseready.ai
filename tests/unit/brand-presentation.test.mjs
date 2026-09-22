@@ -198,7 +198,7 @@ test('ERA placement rectangles, fact coverage and editable PPTX geometry agree',
   }
   for(const f of p.slides[i].facts){
    assert.ok(scene.notes.includes(`${f.label}: ${f.value}`));
-   if(i!==0)assert.ok(texts.some(t=>t.text===f.label),`lost visible fact: ${f.label}`);
+   if(i!==0)assert.ok(texts.some(t=>t.text===(f.display?.label??f.label)),`lost visible fact: ${f.label}`);
   }
   const xml=await zip.file(`ppt/slides/slide${i+1}.xml`).async('string');
   const pictures=[...xml.matchAll(/<p:pic>[\s\S]*?<\/p:pic>/g)].map(m=>m[0]);
@@ -233,13 +233,64 @@ test('closing layout retains all six opportunity facts and empty sections stay c
  const p=buildPresentation(era,o),closing=presentationScene(p,4);
  assert.equal(p.slides[4].facts.length,6);
  for(const f of p.slides[4].facts){
-  assert.ok(closing.elements.some(e=>e.kind==='text'&&e.text===f.label));
+  assert.ok(closing.elements.some(e=>e.kind==='text'&&e.text===(f.display?.label??f.label)));
   assert.ok(closing.notes.includes(`${f.label}: ${f.value}`));
  }
  for(let i=1;i<5;i++){
   const empty=structuredClone(p);empty.slides[i].facts=[];
-  const scene=presentationScene(empty,i),message=scene.elements.find(e=>e.kind==='text'&&e.text.startsWith('Approved brand information'));
+  const scene=presentationScene(empty,i),message=scene.elements.find(e=>e.kind==='text'&&e.text.startsWith('Discuss this topic'));
   assert.ok(message);
   for(const image of scene.elements.filter(e=>e.kind==='image'))assert.ok(!(message.x<image.x+image.w&&message.x+message.w>image.x&&message.y<image.y+image.h&&message.y+message.h>image.y));
  }
+});
+
+
+test('candidate-facing ERA copy preserves original facts, notes and image provenance',async()=>{
+ const {applyEraDemoPhotography,demoPhotographyNotice}=await import('../../feature/brand-presentation/eraDemoPhotography.ts');
+ const era=structuredClone(profiles.find(p=>p.id==='era-group')),before=structuredClone(era);
+ const o=defaultOptions(era,{...branding,company:'FranGroove Demo'});applyEraDemoPhotography(era.id,o);
+ const p=buildPresentation(era,o),assets=await demoPresentationMedia(),zip=await JSZip.loadAsync(await renderPptx(p,assets));
+ const expected=[
+  ['Global business consulting franchise specializing in cost optimization and operational improvement.'],
+  ['Businesses','Professional services','Operating location','Home-based','Owner-operator suitability','Not indicated as suitable','Primary customers','C-suite and senior business leaders'],
+  ['Minimum liquid capital','$75,000','$85,000 \u2013 $175,000'],
+  ['Business strengths','Consulting methodology and business launch preparation.','Peer collaboration and support with operating methods.','Market planning and early pipeline coaching.','Tools for analysis and client engagement workflows.'],
+  ['Relationship-led business development within an assigned local market','Identified as suitable','Comfort with networking \u2022 Longer sales cycles','https://www.eragroup.com'],
+ ];
+ for(let i=0;i<5;i++){
+  const scene=presentationScene(p,i),visible=scene.elements.filter(e=>e.kind==='text').map(e=>e.text);
+  for(const text of expected[i])assert.ok(visible.includes(text),text);
+  assert.ok(visible.includes('Franchise education overview'));
+  assert.ok(visible.includes('Illustrative overview; confirm details with ERA Group.'));
+  assert.ok(visible.some(t=>t.includes('FranGroove Demo')),'branding is not globally sanitized');
+  assert.doesNotMatch(visible.join('\n'),/Curated demo profile:|NOT VERIFIED|LOCAL DEMO|DEMO MATERIAL|BRAND INTELLIGENCE|Sources:|Full facts and source references|Consultant discussion material|AI-generated demo imagery/);
+  const xml=await zip.file(`ppt/slides/slide${i+1}.xml`).async('string');
+  assert.ok(!xml.includes(demoPhotographyNotice));
+  assert.match(xml,/<a:t>/);
+  assert.ok(scene.notes.includes(demoPhotographyNotice));
+  assert.ok(scene.notes.includes('OpenAI image generation'));
+  assert.ok(scene.notes.includes('01_executive_team_meeting.png'));
+  const notes=await zip.file(`ppt/notesSlides/notesSlide${i+1}.xml`).async('string');assert.ok(notes.includes(demoPhotographyNotice));
+  for(const fact of p.slides[i].facts){assert.ok(scene.notes.includes(`${fact.label}: ${fact.value}`));assert.ok(scene.notes.includes(fact.provenance));}
+ }
+ assert.deepEqual(era,before);
+ assert.ok(p.slides[3].facts.find(f=>f.label==='Initial training').value.startsWith('Curated demo profile:'));
+ assert.ok(presentationScene(p,4).elements.some(e=>e.kind==='text'&&e.text===defaultDisclaimer));
+ assert.ok(presentationScene(p,0).elements.some(e=>e.kind==='text'&&e.text.includes('For educational purposes; no assurance of results or suitability.')));
+});
+
+test('copy transforms require exact field values and never promote ineligible facts',()=>{
+ const era=structuredClone(profiles.find(p=>p.id==='era-group'));
+ era.support.initialTraining.value='Curated demo profile: a different unverified training description';
+ era.description.value='Curated demo profile: analysis and client engagement workflow tools';
+ era.support.ongoingSupport.approval='internal-only';
+ const p=buildPresentation(era,defaultOptions(era,branding));
+ assert.equal(p.slides[3].facts.find(f=>f.label==='Initial training').display,undefined);
+ assert.equal(p.slides[0].facts.find(f=>f.label==='About the brand').display,undefined);
+ assert.ok(!p.slides[3].facts.some(f=>f.label==='Ongoing support'));
+ assert.ok(presentationScene(p,0).elements.some(e=>e.kind==='text'&&e.text===era.description.value));
+ era.version.origin='local-test-fixture';
+ const local=buildPresentation(era,defaultOptions(era,branding));
+ assert.match(local.slides[0].notes,/LOCAL DEMO/);
+ assert.ok(!presentationScene(local,0).elements.some(e=>e.kind==='text'&&e.text.includes('LOCAL DEMO')));
 });
